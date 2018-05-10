@@ -38,7 +38,7 @@
 			}
 		</style>
 		<dynamic-form id="dynamic-form" api="[[api]]" user="[[user]]" language="[[language]]" template="[[form.template.layout]]" data-provider="[[dataProvider]]"
-					  data-map="[[dataMap]]" title="[[form.template.name]]" read-only="[[_hasNoCurrentContact(currentContact)]]" show-title="true">
+                      data-map="[[dataMap]]" title="[[form.template.name]]" read-only="[[_isNotInCurrentContact(currentContact, contact)]]" show-title="true" health-elements="[[healthElements]]">
 			<div slot="titlebar">
 				<paper-icon-button class="form-title-bar-btn" icon="delete" on-tap="deleteForm"></paper-icon-button>
 				<paper-menu-button horizontal-align="right" dynamic-align="true">
@@ -114,8 +114,8 @@
 				this.flushSave()
 			},
 
-			_hasNoCurrentContact: function () {
-				return this.currentContact === null
+				_isNotInCurrentContact: function (currentContact, contact) {
+					return currentContact === null || contact !== currentContact
 			},
 
 			_prepareDataProvider: function () {
@@ -448,7 +448,7 @@
 						})
 
 						this.api.form().modifyForm(_.extend(form, {deletionDate: (+new Date()) * 1000})).then(f => {
-							this.dispatchEvent(new CustomEvent('form-deleted', {detail: form, composed: true}))
+								this.dispatchEvent(new CustomEvent('form-deleted', {detail: f, composed: true}))
 						})
 
 					}.bind(this),
@@ -510,10 +510,20 @@
 								}
 							})
 					},
-					filter: (data, text) => {
-						return Promise.resolve([])
-					}
-				}
+                    filter: (data, text) => {
+                        return data.codeTypes && data.codeTypes.length && text && text.length > 1 ? Promise.all(
+                            data.codeTypes.map(ct => {
+                                    const typeLng = this.api.code().languageForType(ct.type, this.language)
+                                    return this.api.code().findPaginatedCodesByLabel('be', ct.type, typeLng, text, null, 50)
+                                        .then(results => results.rows.map(code => ({
+                                            id: code.id, stringValue: code.label[typeLng],
+                                            codes: code.links && code.links.map(c => ({id: c, type: c.split('|')[0], code: c.split('|')[1], version: c.split('|')[2]})) || []
+                                        })))
+                                }
+                            )
+                        ).then(responses => _.flatMap(responses)) : Promise.resolve([])
+                    }
+                }
 				return self
 			},
 
@@ -605,8 +615,7 @@
 			},
 
 		  	promoteServiceToHealthElement: function (heSvc) {
-				this.api.helement().new(this.user, this.patient, heSvc)
-				  .then(he => this.api.helement().createHealthElement(he))
+				this.api.helement.serviceToHealthElement(this.user, this.patient, heSvc)
 				  .then(he=>{
 				  	this.dispatchEvent(new CustomEvent('health-elements-change', {detail:{hes:[he]}, bubbles: true}))
                     return he
