@@ -904,7 +904,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 			}
 
-            #therLinkDialog{
+            #therLinkDialog, #hubDialog{
                 width: 80%;
             }
 		</style>
@@ -930,7 +930,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 									<paper-fab id="insuranceStatus" mini icon="hardware:security"></paper-fab>
 									<paper-fab id="consentStatus" mini icon="icons:thumb-up" on-tap="_openConsentDialog"></paper-fab>
 									<paper-fab id="tlStatus" mini icon="vaadin:specialist" on-tap="_openTherLinkDialog"></paper-fab>
-									<paper-fab id="hubStatus" mini icon="hardware:device-hub"></paper-fab>
+									<paper-fab id="hubStatus" mini icon="hardware:device-hub" on-tap="_openHubDialog"></paper-fab>
 								</div>
 							</div>
 						</paper-item>
@@ -1237,12 +1237,57 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </template>
                 </vaadin-grid-column>
             </vaadin-grid>
+
 			<paper-input id="idCardNo" label="[[localize('eid_no','eID Card Number',language)]]" value="{{eidCardNumber}}"></paper-input>
 			<paper-input id="isiCardNo" label="[[localize('isi_no','ISI+ Card Number',language)]]" value="{{isiCardNumber}}"></paper-input>
 			<!--<paper-button on-tap="_getTherLinks">[[localize('get_TL','Get Therapeutic link',language)]]</paper-button>-->
 			<div class="buttons">
 				<paper-button on-tap="_revokeTherLink" dialog-confirm>[[localize('revoke_tl','Revoke Therapeutic Link',language)]]</paper-button>
 				<paper-button enabled="false" on-tap="_registerTherLink" dialog-confirm>[[localize('reg_tl','Register Therapeutic Link',language)]]</paper-button>
+				<paper-button class="modal-button--save" dialog-confirm autofocus >[[localize('can','Cancel',language)]]</paper-button>
+			</div>
+		</paper-dialog>
+
+		<paper-dialog id="hubDialog">
+			<h2 class="modal-title">[[localize('hub','Hubs',language)]]</h2>
+			<paper-input id="hcpHubConsent" label="[[localize('hub_cons','Hub consent',language)]]" value="{{hcpHubConsent}}"></paper-input>
+			<paper-input id="patientHubConsent" label="[[localize('hub_cons','Hub consent',language)]]" value="{{patientHubConsent}}"></paper-input>
+			<paper-input id="patientHubTherLink" label="[[localize('hub_tl','Hub therapeutic link',language)]]" value="{{patientHubTherLink}}"></paper-input>
+			<paper-input id="hubTransactionList" label="[[localize('hub_tra_lst','Transactions',language)]]" value="{{hubTransactionList}}"></paper-input>
+            <vaadin-grid id="transaction-list" class="material" overflow="bottom" items=[[hubTransactionList]] active-item="{{selectedTransaction}}">
+                <vaadin-grid-column width="120px">
+                    <template class="header">
+                        <vaadin-grid-sorter path="description">[[localize('trans_id','Id',language)]]</vaadin-grid-sorter>
+                    </template>
+                    <template>
+                        <div class="cell frozen">[[_transactionId(item)]]</div>
+                    </template>
+                </vaadin-grid-column>
+                <vaadin-grid-column width="120px">
+                    <template class="header">[[localize('trans_typ','Type',language)]]</template>
+                    <template>
+                        <div class="cell frozen">[[_transactionType(item)]]</div>
+                    </template>
+                </vaadin-grid-column>
+                <vaadin-grid-column width="80px">
+                    <template class="header">[[localize('trans_dat','Date',language)]]</template>
+                    <template>
+                        <div class="cell frozen">[[_transactionDate(item)]]</div>
+                    </template>
+                </vaadin-grid-column>
+                <vaadin-grid-column width="80px">
+                    <template class="header">[[localize('trans_aut','Author',language)]]</template>
+                    <template>
+                        <div class="cell frozen">[[_transactionAuthor(item)]]</div>
+                    </template>
+                </vaadin-grid-column>
+            </vaadin-grid>
+			<paper-input id="idCardNo" label="[[localize('eid_no','eID Card Number',language)]]" value="{{eidCardNumber}}"></paper-input>
+			<paper-input id="isiCardNo" label="[[localize('isi_no','ISI+ Card Number',language)]]" value="{{isiCardNumber}}"></paper-input>
+			<!--<paper-button on-tap="_getConsent">[[localize('get_cons','Get consent',language)]]</paper-button>-->
+			<div class="buttons">
+				<paper-button on-tap="_revokeConsent" dialog-confirm>[[localize('revoke_cons','Revoke consent',language)]]</paper-button>
+				<paper-button on-tap="_registerConsent" dialog-confirm>[[localize('register_cons','Register consent',language)]]</paper-button>
 				<paper-button class="modal-button--save" dialog-confirm autofocus >[[localize('can','Cancel',language)]]</paper-button>
 			</div>
 		</paper-dialog>
@@ -1295,6 +1340,32 @@ class HtPatDetail extends Polymer.TkLocalizerMixin(Polymer.Element) {
 			isiCardNumber:{
 			    type: String
 			},
+			hubEndPoint:{
+			    type: String,
+				value:'https://acchub.reseausantewallon.be/HubServices/IntraHub/V3/IntraHub.asmx'
+			},
+            hcpHubConsent:{
+			    type: Object
+			},
+            patientHubConsent:{
+                type: Object
+            },
+            patientHubTherLink:{
+                type: Object
+            },
+			hcpZip:{
+			    type:String,
+				value:'1000'
+			},
+            hubTransactionList:{
+			    type: Array,
+                value: function(){
+			        return [];
+                }
+            },
+            selectedTransaction:{
+			    type: Object
+            },
 			selectedAdminFile: {
 				type: Object,
 				observer: 'selectedAdminFileChanged',
@@ -1377,7 +1448,7 @@ class HtPatDetail extends Polymer.TkLocalizerMixin(Polymer.Element) {
 			},
             currentTherLinks: {
                 type: Array,
-                observer: "currentTherLinksChanged",
+                //observer: "currentTherLinksChanged",
                 value: function () {
                     return [];
                 }
@@ -1448,6 +1519,15 @@ class HtPatDetail extends Polymer.TkLocalizerMixin(Polymer.Element) {
         this.$.therLinkDialog.open();
 	}
 
+	_openHubDialog(e){
+	    e.stopPropagation();
+	    this._getHcpHubConsent();
+	    this._getPatientHubConsent();
+	    this._getHubTherapeuticLinks();
+	    this._getHubTransactionList();
+	    this.$.hubDialog.open();
+	}
+
     _hcpIdent(tl){
 	    return tl.therapeuticLink.hcParty.nihii || ''
     }
@@ -1471,6 +1551,159 @@ class HtPatDetail extends Polymer.TkLocalizerMixin(Polymer.Element) {
     _tlType(tl){
         return tl.therapeuticLink.type || ''
     }
+
+    _transactionId(tr){
+	    return "id";
+    }
+
+    _transactionType(tr){
+	    if(tr.cds[0].value) {
+            return tr.cds[0].value;
+        }
+        else {
+            return '/';
+        }
+
+    }
+
+    _transactionDate(tr){
+        var d = new Date(0);
+        d.setUTCMilliseconds(tr.date);
+        return d.toDateString();
+    }
+
+    _transactionAuthor(tr){
+	    if(tr.author.hcparties[1]){
+	        return tr.author.hcparties[1].familyname + ' ' + tr.author.hcparties[1].firstname;
+        }
+        else {
+            return "author";
+        }
+    }
+    _getHcpHubConsent(){
+	    //getHcpConsentUsingGET: function (endpoint, keystoreId, tokenId, passPhrase, hcpNihii, hcpSsin, hcpZip)
+        if (this.patient.ssin && this.api.tokenId) {
+            return this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId)
+                .then(hcp =>
+                    this.api.fhc().Hubcontroller().getHcpConsentUsingGET(this.hubEndPoint, this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword,
+                        hcp.nihii, hcp.ssin, this.hcpZip)
+                ).then(consentResp => {
+                        if (consentResp) {
+                            this.set('hcpHubConsent', consentResp)
+                            return consentResp;
+                        } else {
+                            return null;
+                        }
+                    }
+                )
+        } else {
+            return Promise.resolve(null)
+        }
+	}
+
+    _getPatientHubConsent(){
+	    //getPatientConsentUsingGET1: function (endpoint, keystoreId, tokenId, passPhrase, hcpNihii, hcpSsin, hcpZip, patientSsin)
+        if (this.patient.ssin && this.api.tokenId) {
+            return this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId)
+                .then(hcp =>
+                    this.api.fhc().Hubcontroller().getPatientConsentUsingGET1(this.hubEndPoint, this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword,
+                        hcp.nihii, hcp.ssin, this.hcpZip,
+                        this.patient.ssin)
+                ).then(consentResp => {
+                        if (consentResp) {
+                            this.set('patientHubConsent', consentResp);
+                            return consentResp;
+                        } else {
+                            return null;
+                        }
+                    }
+                )
+        } else {
+            return Promise.resolve(null)
+        }
+    }
+
+    _registerHubPatientConsent(){
+	    //registerPatientConsentUsingPOST1: function (endpoint, keystoreId, tokenId, passPhrase, hcpNihii, hcpSsin, hcpZip, patientSsin, patientEidCardNumber)
+
+	}
+
+    _getHubTherapeuticLinks(){
+	    //getTherapeuticLinksUsingGET: function (endpoint, keystoreId, tokenId, passPhrase, hcpNihii, hcpSsin, hcpZip, patientSsin, therLinkType, from, to)
+        if (this.patient.ssin && this.api.tokenId) {
+            return this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId)
+                .then(hcp =>
+                    this.api.fhc().Hubcontroller().getTherapeuticLinksUsingGET(this.hubEndPoint, this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword,
+                        hcp.nihii, hcp.ssin, this.hcpZip,
+                        this.patient.ssin, null, null, null)
+                ).then(consentResp => {
+                        if (consentResp) {
+                            this.set('patientHubTherLinks', consentResp);
+                            return consentResp;
+                        } else {
+                            return null;
+                        }
+                    }
+                )
+        } else {
+            return Promise.resolve(null)
+        }
+	}
+
+    _registerHubPatientTherapeuticLink(){
+	    //registerTherapeuticLinkUsingPOST: function (endpoint, keystoreId, tokenId, passPhrase, hcpNihii, hcpSsin, hcpZip, patientSsin, patientEidCardNumber)
+	}
+
+    _getHubTransactionList(){
+	    //getTransactionsListUsingGET: function (endpoint, keystoreId, tokenId, passPhrase, hcpNihii, hcpSsin, hcpZip, patientSsin, from, to, authorNihii, authorSsin, isGlobal)
+        if (this.patient.ssin && this.api.tokenId) {
+            return this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId)
+                .then(hcp =>
+                    this.api.fhc().Hubcontroller().getTransactionsListUsingGET(this.hubEndPoint, this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword,
+                        hcp.nihii, hcp.ssin, this.hcpZip,
+                        this.patient.ssin, null, null, null, null, null)
+                ).then(consentResp => {
+                        if (consentResp) {
+                            this.set('hubTransactionList', consentResp);
+                            return consentResp;
+                        } else {
+                            return null;
+                        }
+                    }
+                )
+        } else {
+            return Promise.resolve(null)
+        }
+	}
+
+    _getHubPatient(){
+        //getPatientUsingGET: function (endpoint, keystoreId, tokenId, passPhrase, hcpNihii, hcpSsin, hcpZip, patientSsin)
+    }
+
+    _putHubPatient(){
+		//putPatientUsingPOST: function (endpoint, keystoreId, tokenId, passPhrase, hcpNihii, hcpSsin, hcpZip, patientSsin, firstName, lastName, gender, dateOfBirth)
+	}
+
+    _getHubTransactionsList(){
+	    //getTransactionsListUsingGET: function (endpoint, keystoreId, tokenId, passPhrase, hcpNihii, hcpSsin, hcpZip, patientSsin, from, to, authorNihii, authorSsin, isGlobal)
+	}
+
+    _putTransaction(){
+	    //putTransactionUsingPOST: function (endpoint, keystoreId, tokenId, passPhrase, hcpNihii, hcpSsin, hcpZip, hubId, patientSsin, message, hubApplication)
+	}
+
+    _getHubTransaction(){
+	    //getTransactionUsingGET: function (endpoint, keystoreId, tokenId, passPhrase, hcpNihii, hcpSsin, hcpZip, ssin, sv, sl, value)
+	}
+
+    _getHubTransactionSet(){
+	    //getTransactionSetUsingGET: function (endpoint, keystoreId, tokenId, passPhrase, hcpNihii, hcpSsin, hcpZip, ssin, sv, sl, value)
+	}
+
+    _putHubTransactionSet(){
+        //putTransactionSetUsingPOST: function (endpoint, keystoreId, tokenId, passPhrase, hcpNihii, hcpSsin, hcpZip, hubId, patientSsin, message, hubApplication)
+    }
+
 
 
 	_getTherLinks(){
