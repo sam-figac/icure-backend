@@ -20,6 +20,7 @@ package org.taktik.icure.services.external.http.websocket;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class KmehrFileOperation extends BinaryOperation implements AsyncDecrypt 
 
 	@Override
 	public <K extends Serializable> Future<List<K>> decrypt(List<K> encrypted, Class<K> clazz) throws IOException {
-		Message message = new Message<>("decrypt", UUID.randomUUID().toString(), encrypted);
+		Message message = new Message<>("decrypt", clazz.getSimpleName(), UUID.randomUUID().toString(), encrypted);
 
 		CompletableFuture<List<K>> future = new CompletableFuture<>();
 		DecodingSession<K> decodingSession = new DecodingSession<>(future, clazz);

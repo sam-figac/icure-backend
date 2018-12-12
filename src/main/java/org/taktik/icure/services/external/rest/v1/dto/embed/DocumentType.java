@@ -54,6 +54,8 @@ public enum DocumentType {
     result,
     sumehr,
     telemonitoring,
+    template,
+    template_admin,
     treatmentsuspension,
-    vaccination
+    vaccination,
 }

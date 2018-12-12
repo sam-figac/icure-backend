@@ -18,11 +18,11 @@
 
 package org.taktik.icure.services.external.rest.v1.dto.embed;
 
+import org.taktik.icure.services.external.rest.v1.dto.CodeDto;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-
-import org.taktik.icure.services.external.rest.v1.dto.CodeDto;
 
 public class MedicationDto implements Serializable {
 	protected String compoundPrescription;
@@ -46,8 +46,10 @@ public class MedicationDto implements Serializable {
 	CodeDto frequency;
 
 	List<RegimenItemDto> regimen;
+	String posology;
 
 	Map<String, ContentDto> options;
+	Map<String, ParagraphAgreementDto> agreements;
 
 	public Map<String, ContentDto> getOptions() {
 		return options;
@@ -153,11 +155,23 @@ public class MedicationDto implements Serializable {
 		this.regimen = regimen;
 	}
 
+	public String getPosology() { return posology; }
+
+	public void setPosology(String posology) { this.posology = posology; }
+
 	public DurationDto getDuration() {
 		return duration;
 	}
 
 	public void setDuration(DurationDto duration) {
 		this.duration = duration;
+	}
+
+	public Map<String, ParagraphAgreementDto> getAgreements() {
+		return agreements;
+	}
+
+	public void setAgreements(Map<String, ParagraphAgreementDto> agreements) {
+		this.agreements = agreements;
 	}
 }

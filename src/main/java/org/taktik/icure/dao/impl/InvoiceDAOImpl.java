@@ -33,11 +33,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import org.taktik.icure.dao.InvoiceDAO;
 import org.taktik.icure.dao.impl.ektorp.CouchDbICureConnector;
+import org.taktik.icure.dao.impl.ektorp.CouchKeyValue;
 import org.taktik.icure.dao.impl.idgenerators.IDGenerator;
 import org.taktik.icure.db.PaginatedList;
 import org.taktik.icure.db.PaginationOffset;
 import org.taktik.icure.entities.Document;
 import org.taktik.icure.entities.Invoice;
+import org.taktik.icure.entities.embed.InvoiceType;
+import org.taktik.icure.entities.embed.MediumType;
 
 @Repository("invoiceDAO")
 @View(name = "all", map = "function(doc) { if (doc.java_type == 'org.taktik.icure.entities.Invoice' && !doc.deleted) emit( null, doc._id )}")
@@ -52,7 +55,7 @@ public class InvoiceDAOImpl extends GenericIcureDAOImpl<Invoice> implements Invo
 	@Override
 	@View(name = "by_hcparty_date", map = "classpath:js/invoice/By_hcparty_date_map.js")
 	public PaginatedList<Invoice> findByHcParty(String hcParty, Long fromDate, Long toDate, PaginationOffset<ComplexKey> paginationOffset) {
-		ComplexKey startKey = paginationOffset.getStartKey() == null ? ComplexKey.of(hcParty, fromDate) : paginationOffset.getStartKey();
+		ComplexKey startKey = paginationOffset == null || paginationOffset.getStartKey() == null ? ComplexKey.of(hcParty, fromDate) : paginationOffset.getStartKey();
 		ComplexKey endKey = ComplexKey.of(hcParty, toDate == null ? ComplexKey.emptyObject(): toDate);
 		return pagedQueryView("by_hcparty_date", startKey, endKey, paginationOffset, true);
 	}
@@ -86,6 +89,13 @@ public class InvoiceDAOImpl extends GenericIcureDAOImpl<Invoice> implements Invo
 	}
 
 	@Override
+	@View(name = "by_hcparty_groupid", map = "classpath:js/invoice/By_hcparty_groupid_map.js")
+	public List<Invoice> listByHcPartyGroupId(String hcParty, String groupId) {
+		ComplexKey startKey = ComplexKey.of(hcParty, groupId);
+		return queryResults(createQuery("by_hcparty_groupid").startKey(startKey).endKey(startKey).includeDocs(true));
+	}
+
+	@Override
 	@View(name = "by_hcparty_recipient", map = "classpath:js/invoice/By_hcparty_recipient_map.js")
 	public List<Invoice> listByHcPartyRecipientIds(String hcParty, Set<String> recipientIds) {
 		return queryResults(createQuery("by_hcparty_recipient").includeDocs(true).keys(recipientIds.stream().map(id->ComplexKey.of(hcParty,id)).collect(Collectors.toList())));
@@ -115,6 +125,104 @@ public class InvoiceDAOImpl extends GenericIcureDAOImpl<Invoice> implements Invo
 	}
 
 	@Override
+	@View(name = "by_hcparty_efact_unsent", map = "classpath:js/invoice/By_hcparty_efact_unsent.js")
+	public List<Invoice> listByHcPartyEfactUnsent(String hcParty, Long fromDate, Long toDate) {
+		ComplexKey startKey = ComplexKey.of(hcParty);
+		ComplexKey endKey = ComplexKey.of(hcParty, "{}");
+		if(fromDate != null){
+			startKey = ComplexKey.of(hcParty, fromDate);
+			if(toDate != null){
+				endKey = ComplexKey.of(hcParty, toDate);
+			}
+		}
+		return queryResults(createQuery("by_hcparty_efact_unsent").includeDocs(true).startKey(startKey).endKey(endKey));
+	}
+
+	@Override
+	@View(name = "by_hcparty_efact_pending", map = "classpath:js/invoice/By_hcparty_efact_pending_map.js")
+	public List<Invoice> listByHcPartyEfactPending(String hcParty, Long fromDate, Long toDate) {
+		ComplexKey startKey = ComplexKey.of(hcParty);
+		ComplexKey endKey = ComplexKey.of(hcParty, "{}");
+		if(fromDate != null){
+			startKey = ComplexKey.of(hcParty, fromDate);
+			if(toDate != null){
+				endKey = ComplexKey.of(hcParty, toDate);
+			}
+		}
+		return queryResults(createQuery("by_hcparty_efact_pending").includeDocs(true).startKey(startKey).endKey(endKey));
+	}
+
+	@Override
+	@View(name = "by_hcparty_efact_to_be_corrected", map = "classpath:js/invoice/By_hcparty_efact_to_be_corrected_map.js")
+	public List<Invoice> listByHcPartyEfactToBeCorrected(String hcParty, Long fromDate, Long toDate) {
+		ComplexKey startKey = ComplexKey.of(hcParty);
+		ComplexKey endKey = ComplexKey.of(hcParty, "{}");
+		if(fromDate != null){
+			startKey = ComplexKey.of(hcParty, fromDate);
+			if(toDate != null){
+				endKey = ComplexKey.of(hcParty, toDate);
+			}
+		}
+		return queryResults(createQuery("by_hcparty_efact_to_be_corrected").includeDocs(true).startKey(startKey).endKey(endKey));
+	}
+
+    @Override
+	@View(name = "by_hcparty_efact_treated", map = "classpath:js/invoice/By_hcparty_efact_treated_map.js")
+    public List<Invoice> listByHcPartyEfactTreated(String hcParty, Long fromDate, Long toDate) {
+		ComplexKey startKey = ComplexKey.of(hcParty);
+		ComplexKey endKey = ComplexKey.of(hcParty, "{}");
+		if(fromDate != null){
+			startKey = ComplexKey.of(hcParty, fromDate);
+			if(toDate != null){
+				endKey = ComplexKey.of(hcParty, toDate);
+			}
+		}
+		return queryResults(createQuery("by_hcparty_efact_treated").includeDocs(true).startKey(startKey).endKey(endKey));
+    }
+
+	@Override
+	@View(name = "by_hcparty_efact_archived", map = "classpath:js/invoice/By_hcparty_efact_archived_map.js")
+	public List<Invoice> listByHcPartyEfactArchived(String hcParty, Long fromDate, Long toDate) {
+		ComplexKey startKey = ComplexKey.of(hcParty);
+		ComplexKey endKey = ComplexKey.of(hcParty, "{}");
+		if(fromDate != null){
+			startKey = ComplexKey.of(hcParty, fromDate);
+			if(toDate != null){
+				endKey = ComplexKey.of(hcParty, toDate);
+			}
+		}
+		return queryResults(createQuery("by_hcparty_efact_archived").includeDocs(true).startKey(startKey).endKey(endKey));
+	}
+
+    @Override
+	@View(name = "by_hcparty_sentmediumtype_invoicetype_sent_date", map = "classpath:js/invoice/By_hcparty_sentmediumtype_invoicetype_sent_date.js")
+    public List<Invoice> listByHcPartySentMediumTypeInvoiceTypeSentDate(String hcParty, MediumType sentMediumType, InvoiceType invoiceType, boolean sent, Long fromDate, Long toDate) {
+		ComplexKey startKey = ComplexKey.of(hcParty, sentMediumType, invoiceType, sent);
+		ComplexKey endKey = ComplexKey.of(hcParty, sentMediumType, invoiceType, sent, "{}");
+		if(fromDate != null){
+			startKey = ComplexKey.of(hcParty, sentMediumType, invoiceType, sent, fromDate);
+			if(toDate != null){
+				endKey = ComplexKey.of(hcParty, sentMediumType, invoiceType, sent, toDate);
+			}
+		}
+		return queryResults(createQuery("by_hcparty_sentmediumtype_invoicetype_sent_date").includeDocs(true).startKey(startKey).endKey(endKey));
+    }
+
+    @Override
+	@View(name = "by_hcparty_efact_status", map = "classpath:js/invoice/By_hcparty_efact_status_map.js")
+	public List<Invoice> listByHcPartyEfactStatus(String hcParty, Boolean pending, Boolean canceled, Boolean accepted, Boolean resent, Boolean archived, Long fromDate, Long toDate) {
+        ComplexKey startKey = ComplexKey.of(hcParty, pending, canceled, accepted, resent, archived);
+		ComplexKey endKey = ComplexKey.of(hcParty, pending, canceled, accepted, resent, archived, "{}");
+		if(fromDate != null){
+			startKey = ComplexKey.of(hcParty, pending, canceled, accepted, resent, archived, fromDate);
+			if(toDate != null){
+				endKey = ComplexKey.of(hcParty, pending, canceled, accepted, resent, archived, toDate);
+			}
+		}
+		return queryResults(createQuery("by_hcparty_efact_status").includeDocs(true).startKey(startKey).endKey(endKey));
+    }
+
+    @Override
 	@View(name = "by_serviceid", map = "classpath:js/invoice/By_serviceid_map.js")
 	public List<Invoice> listByServiceIds(Set<String> serviceIds) {
 		return queryResults(createQuery("by_serviceid").includeDocs(true).keys(serviceIds));
@@ -138,4 +246,44 @@ public class InvoiceDAOImpl extends GenericIcureDAOImpl<Invoice> implements Invo
 		return queryView("conflicts");
 	}
 
+
+	@Override
+	@View(name = "tarification_by_hcparty_code", map = "classpath:js/invoice/Tarification_by_hcparty_code.js", reduce = "_count")
+	public List<String> findTarificationsByCode(String hcPartyId, String codeCode, Long startValueDate, Long endValueDate) {
+		if (startValueDate != null && startValueDate<99999999) { startValueDate = startValueDate * 1000000 ; }
+		if (endValueDate != null && endValueDate<99999999) { endValueDate = endValueDate * 1000000 ; }
+		ComplexKey from = ComplexKey.of(
+				hcPartyId,
+				codeCode,
+				startValueDate
+		);
+		ComplexKey to = ComplexKey.of(
+				hcPartyId,
+				codeCode == null ? ComplexKey.emptyObject() : codeCode,
+				endValueDate  == null ? ComplexKey.emptyObject() : endValueDate
+		);
+
+		ViewQuery viewQuery = createQuery("service_by_hcparty_code")
+				.startKey(from)
+				.endKey(to)
+				.reduce(false)
+				.includeDocs(false);
+
+		List<String> ids = db.queryView(viewQuery, String.class);
+		return ids;
+	}
+
+	@Override
+	public List<CouchKeyValue<Long>> listTarificationsFrequencies(String hcPartyId) {
+		ComplexKey from = ComplexKey.of(
+				hcPartyId,
+				null
+		);
+		ComplexKey to = ComplexKey.of(
+				hcPartyId,
+				ComplexKey.emptyObject()
+		);
+
+		return ((CouchDbICureConnector) db).queryViewWithKeys(createQuery("tarification_by_hcparty_code").startKey(from).endKey(to).includeDocs(false).reduce(true).group(true).groupLevel(2), Long.class);
+	}
 }

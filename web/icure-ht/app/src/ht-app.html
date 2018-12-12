@@ -57,7 +57,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="elements/ht-tools/ht-export-key.html">
 <link rel="import" href="elements/ht-tools/ht-import-keychain.html">
+<link rel="import" href="elements/ht-tools/ht-access-log.html">
 <link rel="import" href="elements/ht-tools/ht-my-profile.html">
+<link rel="import" href="elements/ht-app/ht-app-welcome.html">
 <link rel="import" href="elements/ht-app/ht-app-login-dialog.html">
 <link rel="import" href="elements/ht-app/ht-app-first-login-dialog.html">
 <link rel="import" href="elements/ht-app/ht-app-register-keypair-dialog.html">
@@ -115,17 +117,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             .icure-logo {
-                float: left;
                 height: 64px;
-                margin-right: 8px;
+                margin-right: 24px;
             }
 
+
+
             paper-menu-button {
-                position: relative;
-                top: 50%;
-                transform: translateY(-50%);
                 --paper-menu-button-content: {
-                    width: 480px;
+                    width: 380px;
                 };
                 --paper-menu-button-dropdown: {
                     padding: 0;
@@ -232,6 +232,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 display: none;
             }
 
+            .ehbox-notification-panel {
+                position: fixed;
+                top: 50%;
+                right: 0;
+                z-index: 1000;
+                color: white;
+                font-size: 13px;
+                background: rgb(14, 255, 107);
+                height: 48px;
+                padding: 0 8px 0 12px;
+                border-radius: 3px 0 0 3px;
+                width: 0;
+                opacity: 0;
+            }
+
             .notification-panel {
                 position: fixed;
                 top: 50%;
@@ -251,6 +266,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 animation: notificationAnim 7.5s ease-in;
             }
 
+            .notificationEhbox {
+                animation: notificationEhboxAnim 7.5s ease-in;
+            }
+
             .log-info {
                 align-self: center;
             }
@@ -260,6 +279,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 font-family: 'Roboto', Arial, Helvetica, sans-serif;
                 font-size: 12px;
                 color: var(--app-text-color-light);
+                margin: 0;
             }
 
             .log-info p .ehealth-connection-status {
@@ -319,6 +339,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
             }
 
+            @keyframes notificationEhboxAnim {
+                0% {
+                    width: 0;
+                    opacity: 0;
+                }
+                10% {
+                    width: 160px;
+                    opacity: 1;
+                }
+                12% {
+                    width: 280px;
+                    opacity: 1;
+                }
+                88% {
+                    width: 280px;
+                    opacity: 1;
+                }
+                100% {
+                    width: 0;
+                    opacity: 0;
+                }
+            }
+
             @media (max-width: 768px) {
                 paper-button {
                     margin-right: 10px;
@@ -337,17 +380,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
             }
 
+            paper-dialog#ht-invite-hcp{
+                width: 50vw;
+                left: 0;
+                transform: translateX(50%);
+                margin: 0;
+            }
+            paper-dialog#ht-invite-hcp-user-already-exists{
+                width: 60%;
+                left: 0;
+                transform: translateX(50%);
+                margin: 0;
+            }
+
             .inviteHcpInput {
-                width: 400px;
+                width: 100%;
             }
 
             .formNewHcp {
                 height: 350px;
-                width: 450px;
-            }
-
-            .buttons {
-                height: 30px;
+                width: 100%;
+                box-sizing: border-box;
             }
 
             .top-gradient {
@@ -367,39 +420,82 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             .timer {
                 font-size: 10px;
                 width: auto;
-                position: absolute;
-                margin-top: -10px;
+                text-align: center;
+            }
+
+            .taktik-logo{
+                transform: translateY(-2px);
+            }
+
+            .modal-button{
+                --paper-button-ink-color: var(--app-secondary-color);
+                background-color: var(--app-secondary-color);
+                color: var(--app-text-color);
+                font-weight: 700;
+                font-size: 14px;
+                height: 40px;
+                min-width: 100px;
+                padding: 10px 1.2em;
+                text-transform: capitalize;
+            }
+
+            .modal-button--close,
+            .modal-button--cancel{
+                background: transparent;
+                color: var(--app-primary-color-dark);
+                font-weight: 400;
+            }
+
+            .modal-button--save{
+                box-shadow: var(--shadow-elevation-2dp_-_box-shadow);
+                background: var(--app-secondary-color);
+                color: var(--app-primary-color-dark);
+                font-weight: 700;
 
             }
 
+            ht-app-welcome{
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 2000;
+                background: white;
+            }
+
+
         </style>
 
-		<icc-api id="api" host="/rest/v1" fhc-host="https://fhc.icure.cloud" headers="[[headers]]" credentials="[[credentials]]"></icc-api>
+        <icc-api id="api" host="[[icureUrl]]" fhc-host="[[fhcUrl]]" headers="[[headers]]" credentials="[[credentials]]"></icc-api>
 
-        <paper-item id="noehealth" class="notification-panel noehealth">[[localize('no_ehe_con','No Ehealth connection',language)]]
-            <iron-icon icon="icons:warning"></iron-icon>
-        </paper-item>
+         <paper-item id="noehealth" class="notification-panel noehealth">[[localize('no_ehe_con','No Ehealth connection',language)]]
+             <iron-icon icon="icons:warning"></iron-icon>
+         </paper-item>
 
-        <ht-app-login-dialog id="loginDialog" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" credentials="[[credentials]]"
-                             on-login="login"></ht-app-login-dialog>
-        <ht-app-first-login-dialog id="firstConnectionDialog" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" credentials="[[credentials]]" api="[[api]]"
-                                   route="{{route}}" user="[[user]]"></ht-app-first-login-dialog>
-        <ht-app-register-keypair-dialog id="registerKeyPairDialog" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" api="[[api]]" user="[[user]]"
-                                        message="[[registerKeyPairDialogMessage]]" on-file-selected="importPrivateKey"
-                                        on-key-scanned="importScannedPrivateKey"></ht-app-register-keypair-dialog>
-        <ht-export-key id="export-key" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" api="[[api]]" user="[[user]]"></ht-export-key>
-        <ht-import-keychain id="ht-import-keychain" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" api="[[api]]" user="[[user]]"></ht-import-keychain>
-        <ht-my-profile id="ht-my-profile" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" api="[[api]]" user="[[user]]"
-                       on-user-saved="_userSaved"></ht-my-profile>
+         <ht-app-welcome id="welcome" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" credentials="[[credentials]]"></ht-app-welcome>
 
-
-        <app-location route="{{route}}" query-param="{{queryParams}}" use-hash-as-path="true"></app-location>
-        <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
-        <app-route route="{{subroute}}" pattern="/:page" data="{{subrouteData}}"></app-route>
+         <ht-app-login-dialog id="loginDialog" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" credentials="[[credentials]]"
+                              on-login="login"></ht-app-login-dialog>
+         <ht-app-first-login-dialog id="firstConnectionDialog" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" credentials="[[credentials]]" api="[[api]]"
+                                    route="{{route}}" user="[[user]]"></ht-app-first-login-dialog>
+         <ht-app-register-keypair-dialog id="registerKeyPairDialog" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" api="[[api]]" user="[[user]]"
+                                         message="[[registerKeyPairDialogMessage]]" on-file-selected="importPrivateKey"
+                                         on-key-scanned="importScannedPrivateKey"></ht-app-register-keypair-dialog>
+         <ht-export-key id="export-key" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" api="[[api]]" user="[[user]]"></ht-export-key>
+         <ht-import-keychain id="ht-import-keychain" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" api="[[api]]" user="[[user]]"></ht-import-keychain>
+         <ht-access-log id="ht-access-log" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" api="[[api]]" user="[[user]]"></ht-access-log>
+         <ht-my-profile id="ht-my-profile" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" api="[[api]]" user="[[user]]"
+                        on-user-saved="_userSaved"></ht-my-profile>
 
 
-        <app-drawer-layout fullbleed>
-            <!-- Main content -->
+         <app-location route="{{route}}" query-param="{{queryParams}}" use-hash-as-path="true"></app-location>
+         <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+         <app-route route="{{subroute}}" pattern="/:page" data="{{subrouteData}}"></app-route>
+
+
+         <app-drawer-layout fullbleed>
+             <!-- Main content -->
             <app-header-layout fullbleed>
                 <app-header slot="header" fixed condenses effects="waterfall">
                     <app-toolbar id="mainToolbar" class="" sticky>
@@ -431,32 +527,74 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             </paper-listbox>
                         </div>
                         </div>
-                        <!-- Regular Tabs Menu -->
-                        <paper-tabs selected="[[routeData.page]]" attr-for-selected="name" role="navigation">
-                            <paper-tab name="main" on-tap="doRoute">
-                                <iron-icon class="iron-icon" icon="home"></iron-icon>
-                                [[localize('sum')]]
-                            </paper-tab>
-                            <paper-tab name="pat" on-tap="doRoute">
-                                <iron-icon class="smaller" icon="vaadin:user-heart"></iron-icon>
-                                [[localize('pat')]]
-                            </paper-tab>
-                            <paper-tab name="hcp" on-tap="doRoute">
-                                <iron-icon class="smaller" icon="vaadin:hospital"></iron-icon>
-                                [[localize('hc_par')]]
-                            </paper-tab>
-                            <paper-tab name="msg" on-tap="doRoute">
-                                <iron-icon class="smaller" icon="communication:email"></iron-icon>
-                                [[localize('msg')]]
-                            </paper-tab>
-                            <paper-tab name="logout" on-tap="doRoute">
-                                <iron-icon icon="power-settings-new"></iron-icon>
-                                [[localize('log_out')]]
-                            </paper-tab>
-                        </paper-tabs>
+                        <div style="display: flex; align-items: center;">
+                            <div name="main" on-tap="doRoute" style="cursor:pointer">
+                                <svg version="1.1"
+                                    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:a="http://ns.adobe.com/AdobeSVGViewerExtensions/3.0/"
+                                    x="0px" y="0px" width="92px" height="64px" viewBox="0 0 92 64" style="enable-background:new 0 0 92 64;" xml:space="preserve" class="icure-logo">
+                                    <style type="text/css">
+                                    .st1 {
+                                        fill: #FFFFFF;
+                                    }
+
+                                    .st2 {
+                                        fill: #66DEA1;
+                                    }
+                                    </style>
+                                    <defs>
+                                    </defs>
+                                    <g>
+                                        <g>
+                                            <rect x="44.3" y="32.2" class="st1" width="1.3" height="12.6"/>
+                                            <path class="st1" d="M45,27.6c-0.6,0-1,0.5-1,1.2c0,0.6,0.4,1.2,1,1.2h0c0.6,0,1-0.5,1-1.2C46,28.1,45.6,27.6,45,27.6z"/>
+                                            <path class="st1" d="M60.2,43c-1,0.5-2.3,0.8-3.7,0.8c-4.3,0-6.9-2.9-6.9-7.7c0-5,2.6-8,7-8c1.3,0,2.5,0.3,3.4,0.7l0.1,0l0.4-1.2
+                                                l-0.1,0c-0.4-0.2-1.7-0.8-3.8-0.8c-5,0-8.4,3.7-8.4,9.2c0,6.6,4.2,9,7.9,9c2.1,0,3.7-0.5,4.5-0.9l0.1,0L60.2,43L60.2,43z"/>
+                                            <path class="st1" d="M72.3,41.7v-9.5H71V40c0,0.4-0.1,0.9-0.2,1.3c-0.5,1.1-1.6,2.4-3.4,2.4c-2,0-3-1.5-3-4.5v-7.1H63v7.3
+                                                c0,5,2.9,5.6,4.1,5.6c1.9,0,3.3-1.2,4-2.3l0.1,2.1h1.3l0-0.1C72.3,43.8,72.3,42.9,72.3,41.7z"/>
+                                            <path class="st1" d="M80.5,31.9c-1.4,0-2.7,1-3.3,2.6l0-2.3h-1.3l0,0.1C76,33.4,76,34.6,76,36v8.8h1.3v-6.9c0-0.5,0-0.9,0.1-1.2
+                                                c0.3-2.1,1.5-3.4,3-3.4c0.2,0,0.4,0,0.5,0l0.1,0V32L81,32C80.9,31.9,80.7,31.9,80.5,31.9z"/>
+                                            <path class="st1" d="M91.1,34.1c-0.8-1.4-2.1-2.2-3.8-2.2c-3.2,0-5.4,2.7-5.4,6.8c0,3.8,2.2,6.3,5.5,6.3c2.1,0,3.3-0.6,3.7-0.8
+                                                l0.1,0L91,43.1l-0.1,0c-0.7,0.4-1.6,0.7-3.2,0.7c-1.3,0-4.3-0.5-4.4-5.3h8.6l0-0.1C92,38.1,92,38,92,37.6
+                                                C92,37.1,91.9,35.5,91.1,34.1z M83.4,37.3c0.3-1.9,1.4-4.1,3.8-4.1c1,0,1.8,0.3,2.3,0.9c0.9,1,1.1,2.5,1.1,3.2H83.4z"/>
+                                        </g>
+                                        <path class="st2" d="M36.2,38.4c-0.4-4.3-2.9-6.6-7.4-6.6l-5.5,0c-0.2,0-0.4,0.1-0.5,0.3l-0.6,1.5l-1.9-8.4c0-0.3-0.3-0.5-0.6-0.5
+                                        c-0.3,0-0.5,0.2-0.6,0.5l-2.3,10.4L15.4,29c0-0.3-0.3-0.5-0.6-0.5c-0.3,0-0.5,0.2-0.6,0.4L13,31.8H8.3V33h5.2
+                                        c0.3,0,0.5-0.2,0.6-0.4l0.6-1.5l1.6,7.2c0.1,0.3,0.3,0.5,0.6,0.5c0.3,0,0.5-0.2,0.6-0.5l2.2-10.3l1.7,7.5c0,0.3,0.2,0.5,0.5,0.5
+                                        c0.2,0.1,0.5-0.1,0.6-0.3l1.2-2.7l5.1,0c3.8,0,5.8,1.5,6.3,4.7c0.3,2-0.2,3.8-1.3,5.1c-1.2,1.4-3,2-5,1.9H8.8
+                                        c-4.1,0-7.5-3.4-7.6-7.6C1,32.8,4,29.1,8,28.8c0.3,0,0.5-0.3,0.5-0.5c0.3-2.3,1.2-4.4,2.7-6c1.8-1.9,4.2-3,6.8-3c2.6,0,5,1.1,6.8,3
+                                        c1.2,1.3,2.3,3.7,2.7,6.4l0,0.2l0.2,0c0.2,0,0.7-0.1,0.8-0.1l0.2,0l0-0.2c-0.5-3-1.6-5.6-3-7.1c-2-2.1-4.7-3.3-7.6-3.3
+                                        c-2.9,0-5.6,1.2-7.6,3.3c-1.6,1.7-2.6,3.9-3,6.3C3.1,28.3-0.1,32.3,0,37c0.1,2.4,1,4.6,2.7,6.4C4.4,45.1,6.6,46,8.8,46l19.7,0
+                                        c0.1,0,0.2,0,0.4,0c2.2,0,4.2-0.9,5.6-2.4C35.7,42.2,36.3,40.4,36.2,38.4z"/>
+                                    </g>
+                                </svg>
+                            </div>
+                            <!-- Regular Tabs Menu -->
+                            <paper-tabs selected="[[routeData.page]]" attr-for-selected="name" role="navigation">
+                                <paper-tab name="main" on-tap="doRoute">
+                                    <iron-icon class="iron-icon" icon="home"></iron-icon>
+                                    [[localize('sum')]]
+                                </paper-tab>
+                                <paper-tab name="pat" on-tap="doRoute">
+                                    <iron-icon class="smaller" icon="vaadin:user-heart"></iron-icon>
+                                    [[localize('pat')]]
+                                </paper-tab>
+                                <paper-tab name="hcp" on-tap="doRoute">
+                                    <iron-icon class="smaller" icon="vaadin:hospital"></iron-icon>
+                                    [[localize('hc_par')]]
+                                </paper-tab>
+                                <paper-tab name="msg" on-tap="doRoute">
+                                    <iron-icon class="smaller" icon="communication:email"></iron-icon>
+                                    [[localize('msg')]]
+                                </paper-tab>
+                                <paper-tab name="logout" on-tap="doRoute">
+                                    <iron-icon icon="power-settings-new"></iron-icon>
+                                    [[localize('log_out')]]
+                                </paper-tab>
+                            </paper-tabs>
+                        </div>
                         <div class="log-info">
-                            <p>[[user.login]] – <span id="ehealth">[[localize('ehe','eHealth',language)]]</span> <span id="eHealthStatus"
-                                                                                                                       class="ehealth-connection-status pending"></span></p>
+                            <p>[[user.login]] – <span id="ehealth">[[localize('ehe','eHealth',language)]]</span> <span id="eHealthStatus" class="ehealth-connection-status pending"></span></p>
+                            <div class="timer" id="timer">[[localize('time_lft','Time left:',language)]] {{disconnectionTimer}} m.</div>
                             <paper-tooltip for="ehealth">
                                 <template is="dom-if" if="[[api.tokenId]]">
                                     [[localize('ehe_is_con','eHealth is connected',language)]]
@@ -466,250 +604,328 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 </template>
                             </paper-tooltip>
                         </div>
-                        <div>
+
+
+                        <div style="display:flex; align-items: center; width: 120px;">
+                            <!-- Generator: Adobe Illustrator 22.1.0, SVG Export Plug-In  -->
                             <svg version="1.1"
-							xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:a="http://ns.adobe.com/AdobeSVGViewerExtensions/3.0/"
-							x="0px" y="0px" width="92px" height="64px" viewBox="0 0 92 64" style="enable-background:new 0 0 92 64;" xml:space="preserve" class="icure-logo">
-								<style type="text/css">
-								.st1 {
-                                    fill: #FFFFFF;
-                                }
+                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:a="http://ns.adobe.com/AdobeSVGViewerExtensions/3.0/"
+                            x="0px" y="0px" width="100px" height="17.3px" viewBox="0 0 100 17.3" style="enable-background:new 0 0 100 17.3;"
+                            xml:space="preserve" class="taktik-logo">
 
-                                .st2 {
-                                    fill: #66DEA1;
-                                }
-								</style>
-								<defs>
-								</defs>
-								<g style="transform: translateY(-5px);">
-									<g>
-										<rect x="44.3" y="32.2" class="st1" width="1.3" height="12.6"/>
-										<path class="st1" d="M45,27.6c-0.6,0-1,0.5-1,1.2c0,0.6,0.4,1.2,1,1.2h0c0.6,0,1-0.5,1-1.2C46,28.1,45.6,27.6,45,27.6z"/>
-										<path class="st1" d="M60.2,43c-1,0.5-2.3,0.8-3.7,0.8c-4.3,0-6.9-2.9-6.9-7.7c0-5,2.6-8,7-8c1.3,0,2.5,0.3,3.4,0.7l0.1,0l0.4-1.2
-											l-0.1,0c-0.4-0.2-1.7-0.8-3.8-0.8c-5,0-8.4,3.7-8.4,9.2c0,6.6,4.2,9,7.9,9c2.1,0,3.7-0.5,4.5-0.9l0.1,0L60.2,43L60.2,43z"/>
-										<path class="st1" d="M72.3,41.7v-9.5H71V40c0,0.4-0.1,0.9-0.2,1.3c-0.5,1.1-1.6,2.4-3.4,2.4c-2,0-3-1.5-3-4.5v-7.1H63v7.3
-											c0,5,2.9,5.6,4.1,5.6c1.9,0,3.3-1.2,4-2.3l0.1,2.1h1.3l0-0.1C72.3,43.8,72.3,42.9,72.3,41.7z"/>
-										<path class="st1" d="M80.5,31.9c-1.4,0-2.7,1-3.3,2.6l0-2.3h-1.3l0,0.1C76,33.4,76,34.6,76,36v8.8h1.3v-6.9c0-0.5,0-0.9,0.1-1.2
-											c0.3-2.1,1.5-3.4,3-3.4c0.2,0,0.4,0,0.5,0l0.1,0V32L81,32C80.9,31.9,80.7,31.9,80.5,31.9z"/>
-										<path class="st1" d="M91.1,34.1c-0.8-1.4-2.1-2.2-3.8-2.2c-3.2,0-5.4,2.7-5.4,6.8c0,3.8,2.2,6.3,5.5,6.3c2.1,0,3.3-0.6,3.7-0.8
-											l0.1,0L91,43.1l-0.1,0c-0.7,0.4-1.6,0.7-3.2,0.7c-1.3,0-4.3-0.5-4.4-5.3h8.6l0-0.1C92,38.1,92,38,92,37.6
-											C92,37.1,91.9,35.5,91.1,34.1z M83.4,37.3c0.3-1.9,1.4-4.1,3.8-4.1c1,0,1.8,0.3,2.3,0.9c0.9,1,1.1,2.5,1.1,3.2H83.4z"/>
-									</g>
-									<path class="st2" d="M36.2,38.4c-0.4-4.3-2.9-6.6-7.4-6.6l-5.5,0c-0.2,0-0.4,0.1-0.5,0.3l-0.6,1.5l-1.9-8.4c0-0.3-0.3-0.5-0.6-0.5
-									c-0.3,0-0.5,0.2-0.6,0.5l-2.3,10.4L15.4,29c0-0.3-0.3-0.5-0.6-0.5c-0.3,0-0.5,0.2-0.6,0.4L13,31.8H8.3V33h5.2
-									c0.3,0,0.5-0.2,0.6-0.4l0.6-1.5l1.6,7.2c0.1,0.3,0.3,0.5,0.6,0.5c0.3,0,0.5-0.2,0.6-0.5l2.2-10.3l1.7,7.5c0,0.3,0.2,0.5,0.5,0.5
-									c0.2,0.1,0.5-0.1,0.6-0.3l1.2-2.7l5.1,0c3.8,0,5.8,1.5,6.3,4.7c0.3,2-0.2,3.8-1.3,5.1c-1.2,1.4-3,2-5,1.9H8.8
-									c-4.1,0-7.5-3.4-7.6-7.6C1,32.8,4,29.1,8,28.8c0.3,0,0.5-0.3,0.5-0.5c0.3-2.3,1.2-4.4,2.7-6c1.8-1.9,4.2-3,6.8-3c2.6,0,5,1.1,6.8,3
-									c1.2,1.3,2.3,3.7,2.7,6.4l0,0.2l0.2,0c0.2,0,0.7-0.1,0.8-0.1l0.2,0l0-0.2c-0.5-3-1.6-5.6-3-7.1c-2-2.1-4.7-3.3-7.6-3.3
-									c-2.9,0-5.6,1.2-7.6,3.3c-1.6,1.7-2.6,3.9-3,6.3C3.1,28.3-0.1,32.3,0,37c0.1,2.4,1,4.6,2.7,6.4C4.4,45.1,6.6,46,8.8,46l19.7,0
-									c0.1,0,0.2,0,0.4,0c2.2,0,4.2-0.9,5.6-2.4C35.7,42.2,36.3,40.4,36.2,38.4z"/>
-								</g>
-							</svg>
-							<paper-menu-button horizontal-align="right" close-on-activate no-overlap no-animations focused="false">
-								<paper-icon-button icon="icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
-								<paper-listbox class="extra-menu" slot="dropdown-content"  stop-keyboard-event-propagation>
-									<div class="dropdown-content"></div><!-- workaround to fix that the fist element of the list was always focus -->
+                            <defs>
+                            </defs>
+                            <polygon class="st1" points="0,8.3 6.9,8.3 6.9,17.2 10,17.2 10,8.3 16.9,8.3 16.9,5.3 0,5.3 "/>
+                            <path class="st1" d="M36.1,17.2v-8c0-2.1-1.6-3.9-3.6-3.9H19.3v3H33v1.5H22.5c-2.1,0-3.8,1.7-3.8,3.7c0,2.1,1.8,3.8,4,3.8H36.1z
+                            M21.9,12.8H33v1.5H21.9V12.8z"/>
+                            <polygon class="st1" points="56.8,8.3 63.7,8.3 63.7,17.2 66.8,17.2 66.8,8.3 73.7,8.3 73.7,5.3 56.8,5.3 "/>
+                            <rect x="75.7" y="5.3" class="st1" width="3.1" height="11.9"/>
+                            <rect x="75.7" class="st1" width="3.1" height="3.1"/>
+                            <path class="st1" d="M43,9.4C43,9.4,43,9.4,43,9.4C43,9.4,43,9.4,43,9.4z"/>
+                            <path class="st1" d="M86.9,9.4C87,9.4,87,9.4,86.9,9.4C87,9.4,87,9.4,86.9,9.4z"/>
+                            <path class="st1" d="M91.3,12.3l8.7,5h-6.3l-5.2-3.1c-0.2-0.1-0.5-0.3-0.7-0.4c-0.2-0.1-0.4-0.3-0.6-0.4c-0.2-0.2-0.4-0.4-0.6-0.6
+                            c0,0,0-0.1-0.1-0.1c-0.2-0.3-0.4-0.7-0.4-1.2v5.7h-3.1V5.4h3.1V11c0.1-0.6,0.3-1.2,0.7-1.6c0,0,0,0,0.1-0.1c0,0,0,0,0,0
+                            c0.3-0.3,0.7-0.6,1.3-0.9l5.5-3.1h6.3l-8.7,4.9l-1.7,1L91.3,12.3z"/>
+                            <path class="st1" d="M43.1,9.4C43.1,9.4,43.1,9.4,43.1,9.4C43.1,9.4,43.1,9.4,43.1,9.4z"/>
+                            <path class="st1" d="M43.1,9.4C43.1,9.4,43.1,9.4,43.1,9.4C43.1,9.4,43.1,9.4,43.1,9.4z"/>
+                            <path class="st1" d="M47.4,12.3l8.7,5h-6.3l-5.2-3.1c-0.2-0.1-0.5-0.3-0.7-0.4c-0.2-0.1-0.4-0.3-0.6-0.4c-0.2-0.2-0.4-0.4-0.6-0.6
+                            c0,0,0-0.1-0.1-0.1c-0.2-0.3-0.4-0.7-0.4-1.2v5.7h-3.1V5.4h3.1V11c0.1-0.6,0.3-1.2,0.7-1.6c0,0,0,0,0.1-0.1c0,0,0,0,0,0
+                            c0.3-0.3,0.7-0.6,1.3-0.9l5.5-3.1h6.3l-8.7,4.9l-1.7,1L47.4,12.3z"/>
+                            </svg>
 
-									<paper-item class="extra-menu-item" on-tap="_openExportKey">[[localize('tra_pri_key_/_con_tab','Transfer private key / Connect tablet',language)]]</paper-item>
-									<paper-item class="extra-menu-item" on-tap="_importKeychain">[[localize('imp_my_ehe_key','Import my eHealth keychain',language)]]</paper-item>
-									<paper-item class="extra-menu-item" on-tap="_inviteHCP">[[localize('inviteHCP','Invite a colleague ',language)]]</paper-item>
-									<paper-item class="extra-menu-item" on-tap="_myProfile"><iron-icon icon="icons:account-circle"></iron-icon>[[localize('my_pro','My profile',language)]]</paper-item>
-								</paper-listbox>
-							</paper-menu-button>
-							<div class="timer" id="timer">[[localize('time_lft','Time left:',language)]] {{disconnectionTimer}} m.</div>
-						</div>
-					</app-toolbar>
 
-				</app-header>
-				<iron-pages
-						selected="[[view]]"
-						attr-for-selected="name"
-						fallback-selection="view404"
-						role="main">
-					<ht-main name="main" api="[[api]]" user="[[user]]" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]"><splash-screen></splash-screen></ht-main>
-					<ht-pat name="pat" api="[[api]]" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" user="[[user]]" route="{{subroute}}" on-user-saved="_userSaved"><splash-screen></splash-screen></ht-pat>
-					<ht-hcp name="hcp" api="[[api]]" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" user="[[user]]"><splash-screen></splash-screen></ht-hcp>
-					<ht-msg name="msg" api="[[api]]" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" user="[[user]]"><splash-screen></splash-screen></ht-msg>
-					<ht-view404 name="view404"></ht-view404>
-				</iron-pages>
-			</app-header-layout>
-		</app-drawer-layout>
+                            <paper-menu-button horizontal-align="right" close-on-activate no-overlap no-animations focused="false">
+                                <paper-icon-button icon="icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
+                                <paper-listbox class="extra-menu" slot="dropdown-content" stop-keyboard-event-propagation>
+                                    <div class="dropdown-content"></div><!-- workaround to fix that the fist element of the list was always focus -->
 
-		<paper-dialog id="ht-invite-hcp">
-			<h3>[[localize('inviteHCP','Invite a colleague ',language)]]</h3>
-			<div id="" class="formNewHcp">
-				<paper-input class="inviteHcpInput" label="[[localize('las_nam','Last name',language)]]" value="{{lastName}}"></paper-input>
-				<paper-input class="inviteHcpInput" label="[[localize('fir_nam','First name',language)]]" value="{{firstName}}"></paper-input>
-				<paper-input class="inviteHcpInput" label="[[localize('ema','Email',language)]]" value="{{email}}"></paper-input>
-				<paper-input class="inviteHcpInput" label="[[localize('inami','NIHII',language)]]" value="{{nihii}}"></paper-input>
-				<paper-input class="inviteHcpInput" label="[[localize('ssin','SSIN',language)]]" value="{{ssin}}"></paper-input>
-			</div>
+                                    <paper-item class="extra-menu-item" on-tap="_openExportKey">[[localize('tra_pri_key_/_con_tab','Transfer private key / Connect
+                                        tablet',language)]]
+                                    </paper-item>
+                                    <paper-item class="extra-menu-item" on-tap="_importKeychain">[[localize('imp_my_ehe_key','Import my eHealth keychain',language)]]</paper-item>
+                                    <paper-item class="extra-menu-item" on-tap="_inviteHCP">[[localize('inviteHCP','Invite a colleague ',language)]]</paper-item>
+                                    <paper-item class="extra-menu-item" on-tap="_logList">[[localize('acc_log','Access Log',language)]]</paper-item>
+                                    <paper-item class="extra-menu-item" on-tap="_myProfile">
+                                        <iron-icon icon="icons:account-circle"></iron-icon>
+                                        [[localize('my_pro','My profile',language)]]
+                                    </paper-item>
+                                </paper-listbox>
+                            </paper-menu-button>
 
-			<div class="buttons">
-				<paper-button dialog-dismiss>[[localize('can','Cancel',language)]]</paper-button>
-				<paper-button dialog-confirm autofocus on-tap="confirmUserInvitation">[[localize('invite','Invite',language)]]</paper-button>
-			</div>
-		</paper-dialog>
-		<paper-dialog id="ht-invite-hcp-link">
-			<h3>Lien de première connexion</h3>
-			<h4>[[invitedHcpLink]]</h4>
-		</paper-dialog>
+                        </div>
 
-	</template>
+                    </app-toolbar>
 
-	<script>
+                </app-header>
+                <iron-pages
+                        selected="[[view]]"
+                        attr-for-selected="name"
+                        fallback-selection="view404"
+                        role="main">
+                    <ht-main id="ht-main" name="main" api="[[api]]" user="[[user]]" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]">
+                        <splash-screen></splash-screen>
+                    </ht-main>
+                    <ht-pat id="ht-pat" name="pat" api="[[api]]" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" user="[[user]]" route="{{subroute}}"
+                            on-user-saved="_userSaved">
+                        <splash-screen></splash-screen>
+                    </ht-pat>
+                    <ht-hcp id="ht-hcp" name="hcp" api="[[api]]" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" user="[[user]]" route="{{subroute}}">
+                        <splash-screen></splash-screen>
+                    </ht-hcp>
+                    <ht-msg id="ht-msg" name="msg" api="[[api]]" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" user="[[user]]" credentials="[[credentials]]">
+                        <splash-screen></splash-screen>
+                    </ht-msg>
+                    <ht-view404 name="view404"></ht-view404>
+                </iron-pages>
+            </app-header-layout>
+        </app-drawer-layout>
+
+        <paper-dialog id="ht-invite-hcp">
+            <h3>[[localize('inviteHCP','Invite a colleague ',language)]]</h3>
+            <div id="" class="formNewHcp">
+                <paper-input class="inviteHcpInput" label="[[localize('las_nam','Last name',language)]]" value="{{lastName}}"></paper-input>
+                <paper-input class="inviteHcpInput" label="[[localize('fir_nam','First name',language)]]" value="{{firstName}}"></paper-input>
+                <paper-input class="inviteHcpInput" label="[[localize('ema','Email',language)]]" value="{{email}}"></paper-input>
+                <paper-input class="inviteHcpInput" label="[[localize('inami','NIHII',language)]]" value="{{nihii}}"></paper-input>
+                <paper-input class="inviteHcpInput" label="[[localize('ssin','SSIN',language)]]" value="{{ssin}}"></paper-input>
+            </div>
+
+            <div class="buttons">
+                <paper-button dialog-dismiss class="modal-button modal-button--cancel">[[localize('can','Cancel',language)]]</paper-button>
+                <paper-button dialog-confirm autofocus on-tap="confirmUserInvitation" class="modal-button modal-button--save">[[localize('invite','Invite',language)]]</paper-button>
+            </div>
+        </paper-dialog>
+        <paper-dialog id="ht-invite-hcp-link">
+            <h3>Lien de première connexion</h3>
+            <h4>[[invitedHcpLink]]</h4>
+        </paper-dialog>
+
+
+
+        <paper-dialog id="ht-invite-hcp-user-already-exists">
+            <h3>[[localize('warning','Attention',language)]]</h3>
+            <h4> [[localize( 'email_address_already_exists', 'L\'adresse email de ce collègue existe déjà\, veuillez svp en spécifier une autre', language)]]</h4>
+            <paper-button dialog-confirm autofocus class="modal-button modal-button--close" on-tap="_inviteHCP" >[[localize('clo','Close',language)]]</paper-button>
+        </paper-dialog>
+
+
+
+        <paper-item id="ehboxInboxMessage" class="ehbox-notification-panel inboxMessage">
+            <iron-icon icon="communication:email"></iron-icon>
+            [[ehboxWebWorkerMessage]]
+        </paper-item>
+
+    </template>
+    <script>
         import moment from 'moment/src/moment'
+        import Worker from 'worker-loader!./workers/ehboxWebworker.js'
 
         class HtApp extends Polymer.TkLocalizerMixin(Polymer.Element) {
-	        static get is() { return 'ht-app'}
+            static get is() {
+                return 'ht-app'
+            }
 
-	        static get properties() {
-		        return {
-				api: {
-					type: Object,
-					value: null
-				},
-				user: {
-					type: Object,
-					value: null
-				},
-                language: {
-				    type: String,
-				  	value: 'fr'
-                },
-				i18n: {
-					Type: Object,
-					value() {
-						moment.locale('fr')
-						const res = {
-							monthNames: moment.months(),
-							weekdays: moment.weekdays(),
-							weekdaysShort: moment.weekdaysShort(),
-							firstDayOfWeek: moment.localeData().firstDayOfWeek(),
-							week: 'Semaine',
-							calendar: 'Calendrier',
-							clear: 'Clear',
-							today: 'Aujourd\'hui',
-							cancel: 'Annuler',
-							formatDate(d) {
-								//return moment(d).format(moment.localeData().longDateFormat('L'))
-								return moment(d).format('DD/MM/YYYY')
-							},
-							parseDate(s) {
-								return moment(s, 'DD/MM/YYYY').toDate()
-							},
-							formatTitle(monthName, fullYear) {
-								return monthName + ' ' + fullYear
-							}
-						}
-						return res
-					}
-				},
-				view: {
-					type: String,
-					reflectToAttribute: true,
-					observer: '_viewChanged'
-				},
-				headers: {
-					type: Object,
-					value: {"Content-Type": "application/json"}
-				},
-				credentials: {
-					type: Object,
-					value: {logout: false}
-				},
-				lazyPages: {
-					type: Object,
-					value: {
-						main() {
-							import(/* webpackChunkName: "ht-main" */ './ht-main.html')
-						},
-						pat() {
-							import(/* webpackChunkName: "ht-pat" */ './ht-pat.html')
-						},
-						hcp() {
-							import(/* webpackChunkName: "ht-hcp" */ './ht-hcp.html')
-						},
-						msg() {
-							import(/* webpackChunkName: "ht-msg" */ './ht-msg.html')
-						},
-						view404() {
-							import(/* webpackChunkName: "ht-view404" */ './ht-view404.html')
-						}
-					}
-				},
-				resources: {
-					value() {
-						return require('./elements/language/language.json')
-					}
-				},
-				invitedHcpLink:{
-				    type : String,
-					value : ""
-				},
-                disconnectionTimer: {
-                    type: Number,
-                    value: 60
-                },
-                connectionTime: {
-                    type: Number
+            static get properties() {
+                return {
+                    api: {
+                        type: Object,
+                        noReset: true,
+                        value: null
+                    },
+                    user: {
+                        type: Object,
+                        value: null
+                    },
+                    keyHcpId: {
+                        type: Object,
+                        value: null,
+                    },
+                    language: {
+                        type: String,
+                        noReset: true,
+                        value: 'fr'
+                    },
+                    i18n: {
+                        Type: Object,
+                        noReset: true,
+                        value() {
+                            moment.locale('fr')
+                            const res = {
+                                monthNames: moment.months(),
+                                weekdays: moment.weekdays(),
+                                weekdaysShort: moment.weekdaysShort(),
+                                firstDayOfWeek: moment.localeData().firstDayOfWeek(),
+                                week: 'Semaine',
+                                calendar: 'Calendrier',
+                                clear: 'Clear',
+                                today: 'Aujourd\'hui',
+                                cancel: 'Annuler',
+                                formatDate(d) {
+                                    //return moment(d).format(moment.localeData().longDateFormat('L'))
+                                    return moment(d).format('DD/MM/YYYY')
+                                },
+                                parseDate(s) {
+                                    return moment(s, 'DD/MM/YYYY').toDate()
+                                },
+                                formatTitle(monthName, fullYear) {
+                                    return monthName + ' ' + fullYear
+                                }
+                            }
+                            return res
+                        }
+                    },
+                    view: {
+                        type: String,
+                        reflectToAttribute: true,
+                        observer: '_viewChanged',
+                        noReset: true
+                    },
+                    headers: {
+                        type: Object,
+                        value: {"Content-Type": "application/json"}
+                    },
+                    credentials: {
+                        type: Object,
+                        value: {logout: false}
+                    },
+                    lazyPages: {
+                        type: Object,
+                        noReset: true,
+                        value: {
+                            main() {
+                                import(/* webpackChunkName: "ht-main" */ './ht-main.html')
+                            },
+                            pat() {
+                                import(/* webpackChunkName: "ht-pat" */ './ht-pat.html')
+                            },
+                            hcp() {
+                                import(/* webpackChunkName: "ht-hcp" */ './ht-hcp.html')
+                            },
+                            msg() {
+                                import(/* webpackChunkName: "ht-msg" */ './ht-msg.html')
+                            },
+                            view404() {
+                                import(/* webpackChunkName: "ht-view404" */ './ht-view404.html')
+                            }
+                        }
+                    },
+                    resources: {
+                        value() {
+                            return require('./elements/language/language.json')
+                        },
+                        noReset: true
+                    },
+                    invitedHcpLink: {
+                        type: String,
+                        value: ""
+                    },
+                    disconnectionTimer: {
+                        type: Number,
+                        value: 60,
+                        noReset: true
+                    },
+                    connectionTime: {
+                        type: Number,
+                        noReset: true
+                    },
+                    ehboxWebWorkerMessage: {
+                        type: String,
+                        value: ""
+                    },
+                    EhboxCheckingActive: {
+                        type: Boolean,
+                        value: false
+                    },
+                    worker: {
+                        type: Worker,
+                        noReset: true
+                    },
+                    timeOutId: {
+                        type: String
+                    },
+                    keyPairKeystore:{
+                    	type: Array,
+                        value: () => []
+                    }
                 }
-			}}
+            }
 
-	        static get observers() {
-		        return [
-				'_routePageChanged(routeData.page)'
-			]}
+            static get observers() {
+                return [
+                    '_routePageChanged(routeData.page)'
+                ]
+            }
 
-	        constructor() {
-		        super()
-	        }
+            constructor() {
+                super()
+            }
 
-			ready() {
-	        	super.ready()
-                if(!this.route.__queryParams.token && !this.route.__queryParams.userId){
-                    let newHref = window.location.href.includes('#/') ? window.location.href : window.location.href.replace(/\/?#?$/,'/#')
-                    let fullHref = newHref.endsWith('/') ? newHref : newHref +'/'
-                    if (fullHref !== window.location.href) { window.location.href = fullHref }
+
+            setUrls() {
+                const params = this.route.__queryParams //_.fromPairs((this.route.path.split('?')[1] || "").split('&').map(p => p.split('=')))
+
+                this.set('icureUrl', params.icureUrl || 'https://icure.cloud/rest/v1')
+                this.set('fhcUrl', params.fhcUrl || 'https://fhcprd.icure.cloud')
+            }
+
+            reset() {
+                const props = HtApp.properties
+                Object.keys(props).forEach(k => { if (!props[k].noReset) { this.set(k, (typeof props[k].value === 'function' ? props[k].value() : (props[k].value || null))) }})
+                ;['#ht-main', '#ht-pat', '#ht-hcp', '#ht-msg'].map(x => this.root.querySelector(x)).map(el => el && typeof el.reset === 'function' && el.reset())
+            }
+
+            ready() {
+                super.ready()
+
+                const url = new URL(window.location.href)
+                if (!url.hash || !url.hash.startsWith('#/')) {
+                    url.hash = '#/'
+                    window.location.replace(url.toString())
                 }
+
                 window.app = this
+
+                if (!this.icureUrl) { this.setUrls() }
+
                 this.set('api', this.$.api)
 
-                document.onmousemove = this.resetTimer.bind(this);
-                document.onkeypress = this.resetTimer.bind(this);
+                document.onmousemove = this.resetTimer.bind(this)
+                document.onkeypress = this.resetTimer.bind(this)
 
                 this._startCheckInactiveTimer()
             }
 
             resetTimer() {
-                this.set('connectionTime',+new Date())
+                this.set('connectionTime', +new Date())
             }
 
             _userSaved(e) {
-	        	this.set('user',e.detail)
-			}
+                this.set('user', e.detail)
+            }
 
-
-            _startCheckInactiveTimer(){
+            _startCheckInactiveTimer() {
                 clearInterval(this.interval)
                 this.interval = setInterval(() => {
-                    const newTimer = Math.floor(60 - (+new Date() - this.connectionTime)/1000/60)
+                    const newTimer = Math.floor(60 - (+new Date() - this.connectionTime) / 1000 / 60)
                     if (newTimer > 0) {
                         this.set('disconnectionTimer', newTimer)
                     } else {
+                        const creds = _.clone(this.credentials)
                         this.set('routeData.page', 'logout')
+                        this.credentials.username = creds.username
+                        this.credentials.ehpassword = creds.ehpassword
                         this._triggerMenu()
                     }
                 }, 10000)
 
             }
 
-            _timeCheck(period = 300000) {
-               setTimeout(() => {
-	                if (this.api.tokenId) {
-	                    this.api.fhc().Stscontroller().checkTokenUsingGET(this.api.tokenId).then(isTokenValid => {
+            _timeCheck(period = 30000) {
+                setTimeout(() => {
+                    if (this.api.tokenId) {
+                        this.api.fhc().Stscontroller().checkTokenValidUsingGET(this.api.tokenId).then(isTokenValid => {
                             if (!isTokenValid) {
-                                this._getToken().then(() => {
+                                this.uploadKeystoreAndCheckToken().then(() => {
                                     this._timeCheck()
                                 }).catch(() => this._timeCheck(10000))
                             } else {
@@ -717,243 +933,432 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             }
                         }).catch(() => this._timeCheck(10000))
                     } else {
+                        this.uploadKeystoreAndCheckToken().then(() => {
                         this._timeCheck()
-					}
+                        }).catch(() => this._timeCheck(10000))
+                    }
                 }, period)
-			}
+            }
 
-			_routePageChanged(page) {
-				if (page === 'logout') {
-					sessionStorage.removeItem('auth')
-					this.authenticated = false
-					this.set('view', 'auth');
-				} else {
-					console.log("page is -> "+page)
-					if (!this.authenticated && (!page || !page.startsWith('auth'))) {
-						if (sessionStorage.getItem('auth')||(this.route.__queryParams.token && this.route.__queryParams.userId)) {
-							this.loginAndRedirect(page)
-						} else {
-							this.set('routeData.page', 'auth/'+ (!page ? 'main' : page.startsWith('logout') ? 'main' : page));
-						}
-					} else {
-						this.set('view', page ? page.replace(/\/$/,'') : 'main')
-					}
-					this._startCheckInactiveTimer('refresh')
-				}
-			}
+            _inboxMessageCheck(period = 1000) {
+                clearTimeout(this.timeOutId)
+                if (this.EhboxCheckingActive === false) {
+                    this.timeOutId = setTimeout(() => {
+                        if (this.api.tokenId) {
+                            this.set('EhboxCheckingActive', true)
+                            console.log("EhboxCheckingActive "+this.EhboxCheckingActive)
+                            this.checkEhboxMessage()
+                        }else {
+                            this._inboxMessageCheck()
+                        }
 
-			_triggerMenu() {
-				let menu = this.$.mobileMenu
-				let overlay = this.$.overlayMenu
+                   }, period)
+                }
+            }
 
-				overlay.classList.toggle('open')
-				menu.classList.toggle('open')
+            _routePageChanged(page) {
+                if (page === 'logout') {
+                    sessionStorage.removeItem('auth')
+
+                    this.authenticated = false
+
+                    this.reset()
+
+                    this.worker && this.worker.terminate()
+                    this.set('view', 'auth')
+                } else {
+                    console.log("page is -> " + page)
+
+                    if (!this.icureUrl) { this.setUrls() }
+
+                    if (!this.authenticated && (!page || !page.startsWith('auth'))) {
+                        if (sessionStorage.getItem('auth') || (this.route.__queryParams.token && this.route.__queryParams.userId)) {
+                            this.loginAndRedirect(page)
+                        } else {
+                            this.set('routeData.page', 'auth/' + (!page ? 'main' : page.startsWith('logout') ? 'main' : page))
+                        }
+                    } else {
+                        const dest = page ? page.replace(/\/$/, '') : 'main'
+                        if (dest !== this.view) { this.set('view', dest) }
+                    }
+                    this._startCheckInactiveTimer('refresh')
+                }
+            }
+
+            _triggerMenu() {
+                let menu = this.$.mobileMenu
+                let overlay = this.$.overlayMenu
+
+                overlay.classList.toggle('open')
+                menu.classList.toggle('open')
 
 
-			}
+            }
 
-			_viewChanged(view) {
+            _viewChanged(view) {
                 if (view.startsWith('auth')) {
                     this.$.loginDialog.opened = true
                     return
                 }
-                if(this.lazyPages[view]){
-                    this.lazyPages[view]();
+                if (this.lazyPages[view]) {
+                    this.lazyPages[view]()
                 } else {
                     this._showPage404()
                 }
 
-			}
+            }
 
-			_showPage404() {
-				this.view = 'view404';
-			}
+            _showPage404() {
+                this.view = 'view404'
+            }
 
             doRoute(e) {
-				this.set('routeData.page', (e.target.getAttribute('name') || e.target.parentElement.getAttribute('name'))+"/")
-				this._triggerMenu()
-			}
+                this.set('routeData.page', ( (e.target.getAttribute('name') || 'main' ) || e.target.parentElement.getAttribute('name')) + "/")
+                this._triggerMenu()
+            }
 
-			_openExportKey() {
-				this.$['export-key'].open()
-			}
+            _openExportKey() {
+                this.$['export-key'].open()
+            }
 
-			_importKeychain() {
-				this.$['ht-import-keychain'].open()
-			}
+            _importKeychain() {
+                this.$['ht-import-keychain'].open()
+            }
 
-            _inviteHCP(){
-	            this.$['ht-invite-hcp'].open()
-			}
+            _inviteHCP() {
+                this.$['ht-invite-hcp'].open()
+            }
 
-			_myProfile() {
-				this.$['ht-my-profile'].open()
-			}
+            _myProfile() {
+                this.$['ht-my-profile'].open()
+            }
 
             _getToken() {
-               return this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId).then(hcp =>
-			    	this.api.fhc().Stscontroller().requestTokenUsingGET(this.credentials.ehpassword, hcp.ssin, this.api.keystoreId).then(res => {
-			    		this.$.eHealthStatus.classList.remove('pending')
-						this.$.eHealthStatus.classList.remove('disconnected')
-						this.$.eHealthStatus.classList.add('connected')
+                return this.$.api.hcparty().getHealthcareParty(this.user.healthcarePartyId).then(hcp =>
+                    this.$.api.fhc().Stscontroller().requestTokenUsingGET(this.credentials.ehpassword, hcp.ssin, this.api.keystoreId).then(res => {
+                        this.$.eHealthStatus.classList.remove('pending')
+                        this.$.eHealthStatus.classList.remove('disconnected')
+                        this.$.eHealthStatus.classList.add('connected')
 
-                    	this.set('api.tokenId', res.tokenId)
-                    	this.set('api.token', res.token)
+                        this.set('api.tokenId', res.tokenId)
+                        this.set('api.token', res.token)
 
-					  	return res.tokenId
-                	}).catch(()=>{
-						this.$.eHealthStatus.classList.remove('pending')
-						this.$.eHealthStatus.classList.remove('connected')
-						this.$.eHealthStatus.classList.add('disconnected')
-					})
-				)
-			}
+                        return res.tokenId
+                    }).catch((e) => {
+                        this.$.eHealthStatus.classList.remove('pending')
+                        this.$.eHealthStatus.classList.remove('connected')
+                        this.$.eHealthStatus.classList.add('disconnected')
+                        throw(e)
+                    })
+                )
+            }
 
-			loginAndRedirect(page) {
-				const sAuth = JSON.parse(sessionStorage.getItem('auth'))
+            loginAndRedirect(page) {
+                const sAuth = JSON.parse(sessionStorage.getItem('auth'))
                 if (!this.credentials || (!this.credentials.password && sAuth && sAuth.password) || (!this.credentials.appToken && sAuth && sAuth.appToken)) {
-					this.set('credentials',sAuth)
-				}
+                    this.set('credentials', sAuth)
+                }
 
-                if(this.route.__queryParams.token && this.route.__queryParams.userId) {
+                if (this.route.__queryParams.token && this.route.__queryParams.userId) {
                     this.set('headers', _.assign(_.assign({}, this.headers),
-                        {Authorization:'Basic ' + btoa(this.route.__queryParams.userId + ':' + this.route.__queryParams.token)}))
-                } else if ((this.credentials.userId && this.credentials.appToken)) { this.set('headers', _.assign(_.assign({}, this.headers),
-				  {Authorization:'Basic ' + btoa(this.credentials.userId + ':' + this.credentials.appToken)})) }
-				else if ((this.credentials.username && this.credentials.password)) { this.set('headers', _.assign(_.assign({}, this.headers),
-				  {Authorization:'Basic ' + btoa(this.credentials.username + ':' + this.credentials.password + (this.credentials.twofa?'|'+this.credentials.twofa:''))})) }
+                        {Authorization: 'Basic ' + btoa(this.route.__queryParams.userId + ':' + this.route.__queryParams.token)}))
+                } else if ((this.credentials.userId && this.credentials.appToken)) {
+                    this.set('headers', _.assign(_.assign({}, this.headers),
+                        {Authorization: 'Basic ' + btoa(this.credentials.userId + ':' + this.credentials.appToken)}))
+                }
+                else if ((this.credentials.username && this.credentials.password)) {
+                    this.set('headers', _.assign(_.assign({}, this.headers),
+                        {Authorization: 'Basic ' + btoa(this.credentials.username + ':' + this.credentials.password + (this.credentials.twofa ? '|' + this.credentials.twofa : ''))}))
+                }
 
-				//Be careful not to use this.api here as it might not have been defined yet
-				this.$.api.user().getCurrentUser().then(u => {
-				    this.set('user', u)
+                //Be careful not to use this.api here as it might not have been defined yet
+                //TODD debounce here
+                this.$.api.user().getCurrentUser().then(u => {
+                    this.set('user', u)
                     this.set('connectionTime', +new Date())
                     this.api.hcparty().getCurrentHealthcareParty().then(hcp => {
-						const language = (hcp.languages || ['fr']).find(lng => lng && lng.length === 2)
-						language && this.set('language', language)
-					})
+                        const language = (hcp.languages || ['fr']).find(lng => lng && lng.length === 2)
+                        language && this.set('language', language)
 
-					this.$.loginDialog.opened = false
+                        this.$.loginDialog.opened = false
 
-					this.set('credentials.twofa',null)
-					this.set('credentials.userId',u.id)
-					this.set('credentials.appToken',u.applicationTokens && u.applicationTokens.ICC)
+                        this.set('credentials.twofa', null)
+                        this.set('credentials.userId', u.id)
+                        this.set('credentials.appToken', u.applicationTokens && u.applicationTokens.ICC)
 
-					if ((this.credentials.userId && this.credentials.appToken)) {
-						this.set('credentials.password',null)
-						this.set('headers.Authorization', 'Basic ' + btoa(this.credentials.userId + ':' + this.credentials.appToken))
-					}
-					sessionStorage.setItem('auth', JSON.stringify(this.credentials))
+                        if ((this.credentials.userId && this.credentials.appToken)) {
+                            this.set('credentials.password', null)
+                            this.set('headers.Authorization', 'Basic ' + btoa(this.credentials.userId + ':' + this.credentials.appToken))
+                        }
+                        sessionStorage.setItem('auth', JSON.stringify(this.credentials))
 
-					if (!this.authenticated) {
-						this.authenticated = true
+                        if (!this.authenticated) {
+                            this.authenticated = true
 
-						if (this.$.api.crypto().RSA.loadKeyPairNotImported(u.healthcarePartyId)) {
-                            if (this.credentials.ehpassword) {
-                                const ehKeychain = this.$.api.crypto().loadKeychainFromBrowserLocalStorage(this.user.healthcarePartyId)
-                                if (ehKeychain) {
-                                    this.$.api.fhc().Stscontroller().uploadKeystoreUsingPOST(ehKeychain).then(res => {
-                                        this.$.api.keystoreId = res.uuid
-                                        this._getToken();
-                                    })
-                                } else {
-                                    this.$.noehealth.classList.add("notification")
-
-                                    this.$.eHealthStatus.classList.remove('pending')
-                                    this.$.eHealthStatus.classList.remove('connected')
-                                    this.$.eHealthStatus.classList.add('disconnected')
-                                }
+                        const loadKeysForParent = (parentId, prom) => {
+                            if (parentId) {
+                                return prom.then(([success, destPage]) => {
+                                    if (success) {
+                                        return this.api.hcparty().getHealthcareParty(parentId).then(hcp =>
+                                            loadKeysForParent(hcp.parentId, this.loadOrImportRSAKeys(u, hcp, destPage))
+                                        )
+                                    } else {
+                                        return Promise.resolve([success, destPage])
+                                    }
+                                })
                             } else {
-                                this.$.eHealthStatus.classList.remove('pending')
-                                this.$.eHealthStatus.classList.remove('connected')
-                                this.$.eHealthStatus.classList.add('disconnected')
+                                return prom
                             }
-							const destPage = page || (this.routeData && this.routeData.page === 'auth' && this.subrouteData && this.subrouteData.page ? this.subrouteData.page : 'main')
-							if (!this.routeData || destPage !== this.routeData.page) {
-								this.set('routeData.page', destPage);
-							} else {
-								this._routePageChanged(destPage)
-							}
-						} else {
-                            this.api.hcparty().getCurrentHealthcareParty().then(hcp => {
+                        }
 
-                                if(hcp.publicKey){
+                        loadKeysForParent(hcp.parentId, this.loadOrImportRSAKeys(u, hcp, page)).then(([success, page]) => {
+                            if (success) {
+                                        const destPage = page || (this.routeData && this.routeData.page === 'auth' && this.subrouteData && this.subrouteData.page ? this.subrouteData.page : 'main')
+                                        if (!this.routeData || destPage !== this.routeData.page) {
+                                            this.set('routeData.page', destPage)
+                                        } else {
+                                            this._routePageChanged(destPage)
+                                        }
+                            }
+                        })
+                    }
+                    this._timeCheck()
+                    this._inboxMessageCheck()
+                    })
+                }).catch(function (e) {
+                    this.authenticated = false
+                    sessionStorage.removeItem('auth')
+                    this.set("credentials.error", "Wrong user or password")
+                }.bind(this))
+            }
+
+            loadOrImportRSAKeys(u, hcp, page) {
+                return new Promise((resolve, reject) => {
+                    if (this.$.api.crypto().RSA.loadKeyPairNotImported(hcp.id)) {
+                        this.$.api.crypto().checkPrivateKeyValidity(hcp).then(ok => {
+                            this.set("keyHcpId", hcp.id)
+                            if (ok) {
+                                this.api.loadUsersAndHcParties()
+                                this.uploadKeystoreAndCheckToken().catch(e => console.log(e))
+                                resolve([true, page])
+                                    } else {
+                                        this.registerKeyPairDialogMessage = "The key registered in your browser is invalid"
+                                this.registerKeyPairDialogResolution = ([resolve,reject])
+                                        this.$.registerKeyPairDialog.opened = true
+                                    }
+                                })
+                            } else {
+                        this.set("keyHcpId", hcp.id)
+                                if (hcp.publicKey) {
                                     this.registerKeyPairDialogMessage = ""
+                            this.registerKeyPairDialogResolution = ([resolve,reject])
                                     this.$.registerKeyPairDialog.opened = true
-                                }else{
+                                } else {
+                                    console.log("HCP public key is " + hcp.publicKey, hcp)
+                            this.registerKeyPairDialogResolution = ([resolve,reject])
                                     this.$.firstConnectionDialog.opened = true
                                 }
+                            }
 
+                    })
+            }
 
-                            })
-						}
-					}
-                    this._timeCheck()
-				}).catch(function (e) {
-					this.authenticated = false
-					sessionStorage.removeItem('auth')
-					this.set("credentials.error", "Wrong user or password")
-				}.bind(this))
+            uploadKeystoreAndCheckToken() {
+                if (this.credentials.ehpassword) {
+                    const ehKeychain = this.$.api.crypto().loadKeychainFromBrowserLocalStorage(this.user.healthcarePartyId)
+                    if (ehKeychain) {
+                        return this.$.api.fhc().Stscontroller().uploadKeystoreUsingPOST(ehKeychain).then(res => {
+                            this.$.api.keystoreId = res.uuid
+                            return this._getToken()
+                        }).catch((e) => {
+                            this.$.eHealthStatus.classList.remove('pending')
+                            this.$.eHealthStatus.classList.remove('connected')
+                            this.$.eHealthStatus.classList.add('disconnected')
+                            throw(e)
+                        })
+                    } else {
+                        this.$.noehealth.classList.add("notification")
+
+                        this.$.eHealthStatus.classList.remove('pending')
+                        this.$.eHealthStatus.classList.remove('connected')
+                        this.$.eHealthStatus.classList.add('disconnected')
+                    }
+                } else {
+                    this.$.eHealthStatus.classList.remove('pending')
+                    this.$.eHealthStatus.classList.remove('connected')
+                    this.$.eHealthStatus.classList.add('disconnected')
+                }
+                return Promise.resolve(null);
+            }
+
+            login(event, loginObject) /* this is called from mouseDown with 2 arguments */ {
+                this.set('credentials', loginObject && loginObject.credentials)
+                this.loginAndRedirect(loginObject && loginObject.page)
+            }
+
+            importPrivateKey(e, selectedRsaFile) {
+                let hcpId;
+                if(this.keyHcpId == null) {
+                    hcpId = this.user.healthcarePartyId
+                } else {
+                    hcpId = this.keyHcpId
+                }
+                selectedRsaFile && selectedRsaFile.name && this.api.crypto().loadKeyPairsInBrowserLocalStorage(hcpId, selectedRsaFile).then(function () {
+                    if (this.$.api.crypto().RSA.loadKeyPairNotImported(hcpId)) {
+                        this.$.registerKeyPairDialog.opened = false
+                        this.set("registerKeyPairDialogMessage", "")
+
+                        this.registerKeyPairDialogResolution[0]([true, 'main/'])
+                    } else {
+                        this.set("registerKeyPairDialogMessage", "Invalid key file")
+                        this.$.registerKeyPairDialog.reset()
+                    }
+                }.bind(this)).catch(e => {console.log(e); this.registerKeyPairDialogResolution[1](e)})
+            }
+
+            importScannedPrivateKey(e, jwkKey) {
+                let hcpId;
+                if(this.keyHcpId == null) {
+                    hcpId = this.user.healthcarePartyId
+                } else {
+                    hcpId = this.keyHcpId
+                }
+                this.api.crypto().loadKeyPairsAsJwkInBrowserLocalStorage(hcpId, jwkKey).then(function () {
+                    if (this.$.api.crypto().RSA.loadKeyPairNotImported(hcpId)) {
+                        this.$.registerKeyPairDialog.opened = false
+                        this.set("registerKeyPairDialogMessage", "")
+                        this.registerKeyPairDialogResolution[0]([true, 'main/'])
+                    } else {
+                        this.set("registerKeyPairDialogMessage", "Invalid key file")
+                        this.$.registerKeyPairDialog.reset()
+                    }
+                }.bind(this)).catch(e => {console.log(e); this.registerKeyPairDialogResolution[1](e)})
+            }
+
+            togglePanel(e) {
+            }
+
+            confirmUserInvitation() {
+
+                // See if user exists first, based on email address
+                this.api.user().getUserByEmail(this.email).then( existingUserDto => {
+                    if( existingUserDto && existingUserDto.id ) {
+                        this.$['ht-invite-hcp-user-already-exists'].open()
+                    } else {
+                        this.createAndInviteUser();
+                    }
+                }).catch( error=> {
+                    this.createAndInviteUser();
+                })
+
+            }
+
+            checkEhboxMessage() {
+                const keyPair = this.api.crypto().RSA.loadKeyPairNotImported(this.user.healthcarePartyId)
+                this.$.ehboxInboxMessage.classList.remove('notificationEhbox')
+
+                this.worker = new Worker()
+
+                this.getAlternateKeystores().then(alternateKeystores => {
+                    this.worker.postMessage({
+                        action: "loadEhboxMessage",
+						hcpartyBaseApi: this.api.hcpartyLight(),
+                        fhcHost: this.api.fhc().host,
+                        fhcHeaders: JSON.stringify(this.api.fhc().headers),
+                        iccHost: this.api.host,
+                        iccHeaders: JSON.stringify(this.api.headers),
+                        tokenId: this.api.tokenId,
+                        keystoreId: this.api.keystoreId,
+                        user: this.user,
+                        ehpassword: this.credentials.ehpassword,
+                        boxId: ["INBOX","SENTBOX"],
+                        alternateKeystores: ({keystores:alternateKeystores.filter(ak => ak.passPhrase)}),
+                        keyPair: keyPair
+                    })
+				})
+
+                this.worker.onmessage = e => {
+                    this.set('ehboxWebWorkerMessage', e.data.message)
+                    this.$.ehboxInboxMessage.classList.add('notificationEhbox')
+                    console.log("Le worker à repondu " + e.data.message)
+                }
+
+            }
+
+			getAlternateKeystores(){
+				const healthcarePartyId = this.user.healthcarePartyId;
+
+                return Promise.all(
+				Object.keys(localStorage).filter(k => k.includes(this.api.crypto().keychainLocalStoreIdPrefix + healthcarePartyId + ".") === true)
+                    .map(fk => this.getDecryptedValueFromLocalstorage(healthcarePartyId, fk.replace("keychain.","keychain.password."))
+					    .then( password =>
+							(this.keyPairKeystore[fk])?
+                                // Get fhc keystore UUID in cache
+								new Promise(x => x(({uuid: this.keyPairKeystore[fk], passPhrase: password}))):
+                                // Upload new keystore
+								this.$.api.fhc().Stscontroller().uploadKeystoreUsingPOST(this.api.crypto().utils.base64toByteArray(localStorage.getItem(fk)))
+									.then(res => this.addUUIDKeystoresInCache(fk, res.uuid, password))
+
+						)
+                    )
+                )
 			}
 
-			login(event, loginObject) /* this is called from mouseDown with 2 arguments */ {
-				this.set('credentials',loginObject && loginObject.credentials)
-				this.loginAndRedirect(loginObject && loginObject.page)
+			addUUIDKeystoresInCache(key, uuid, password){
+            	return new Promise(x =>{
+					this.keyPairKeystore[key] = uuid;
+                    x(({uuid: uuid, passPhrase: password}))
+                })
+
+            }
+
+			getDecryptedValueFromLocalstorage(healthcarePartyId, key){
+				let item = localStorage.getItem(key);
+
+                return this.api.crypto().hcpartyBaseApi.getHcPartyKeysForDelegate(healthcarePartyId)
+                    .then(encryptedHcPartyKey =>
+                        this.api.crypto().decryptHcPartyKey(healthcarePartyId, healthcarePartyId, encryptedHcPartyKey[healthcarePartyId], true)
+                    )
+                    .then(importedAESHcPartyKey =>
+                        (item)?this.api.crypto().AES.decrypt(importedAESHcPartyKey.key, this.api.crypto().utils.text2ua(item)):null
+                    )
+                    .then(data =>
+                        (data)?this.api.crypto().utils.ua2text(data):null
+                    );
 			}
 
-			importPrivateKey(e, selectedRsaFile) {
-				selectedRsaFile && selectedRsaFile.name && this.api.crypto().loadKeyPairsInBrowserLocalStorage(this.user.healthcarePartyId, selectedRsaFile).then(function() {
-					if (this.$.api.crypto().RSA.loadKeyPairNotImported(this.user.healthcarePartyId)) {
-						this.$.registerKeyPairDialog.opened = false
-						this.set("registerKeyPairDialogMessage","")
-						this.set('routeData.page', 'main/');
-					} else {
-						this.set("registerKeyPairDialogMessage","Invalid key file")
-						this.$.registerKeyPairDialog.reset()
-					}
-				}.bind(this)).catch(e => console.log(e))
-			}
+            _logList() {
+                this.$['ht-access-log'].open()
+            }
 
-			importScannedPrivateKey(e, jwkKey) {
-				this.api.crypto().loadKeyPairsAsJwkInBrowserLocalStorage(this.user.healthcarePartyId, jwkKey).then(function() {
-					if (this.$.api.crypto().RSA.loadKeyPairNotImported(this.user.healthcarePartyId)) {
-						this.$.registerKeyPairDialog.opened = false
-						this.set("registerKeyPairDialogMessage","")
-						this.set('routeData.page', 'main/');
-					} else {
-						this.set("registerKeyPairDialogMessage","Invalid key file")
-						this.$.registerKeyPairDialog.reset()
-					}
-				}.bind(this)).catch(e => console.log(e))
-			}
-
-			togglePanel(e) {
-			}
-
-            confirmUserInvitation(){
-
+            createAndInviteUser(){
                 this.api.hcparty().createHealthcareParty({
-                    "name" 			: this.lastName+" "+this.firstName,
-                    "lastName" 		: this.lastName,
-                    "firstName" 	: this.firstName,
-                    "nihii" 		: this.nihii,
-                    "ssin"			: this.ssin
+                    "name": this.lastName + " " + this.firstName,
+                    "lastName": this.lastName,
+                    "firstName": this.firstName,
+                    "nihii": this.nihii,
+                    "ssin": this.ssin
                 }).then(hcp => {
                     this.api.user().createUser({
-                        "healthcarePartyId" 	: hcp.id,
-                        "name" 					: this.lastName+" "+this.firstName,
-                        "email" 				: this.email,
-                        "applicationTokens" 	: {"tmpFirstLogin" : this.api.crypto().randomUuid()},
-                        "status" 				: "ACTIVE",
-                        "type"                  : "database"
+                        "healthcarePartyId": hcp.id,
+                        "name": this.lastName + " " + this.firstName,
+                        "email": this.email,
+                        "applicationTokens": {"tmpFirstLogin": this.api.crypto().randomUuid()},
+                        "status": "ACTIVE",
+                        "type": "database"
                     }).then(usr => {
-                        this.invitedHcpLink = window.location.origin+'/?userId='+usr.id+'&token='+usr.applicationTokens.tmpFirstLogin
+                        this.invitedHcpLink = window.location.origin + window.location.pathname + '/?userId=' + usr.id + '&token=' + usr.applicationTokens.tmpFirstLogin
                         this.$['ht-invite-hcp-link'].open()
-					})
-				})
-			}
-		}
+                    })
+                })
 
-        customElements.define(HtApp.is, HtApp);
+            }
 
-	</script>
+
+
+        }
+
+        customElements.define(HtApp.is, HtApp)
+
+    </script>
 </dom-module>

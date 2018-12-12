@@ -26,6 +26,7 @@
 <link rel="import" href="../../../bower_components/paper-input/paper-textarea.html">
 
 <link rel="import" href="../../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../../bower_components/paper-spinner/paper-spinner.html">
 
 <link rel="import" href="../../../bower_components/paper-dialog/paper-dialog.html">
 
@@ -34,13 +35,24 @@
 <link rel="import" href="../../../bower_components/paper-fab-speed-dial/paper-fab-speed-dial-action.html">
 
 <link rel="import" href="../dynamic-form/dynamically-loaded-form.html">
-<link rel="import" href="../dynamic-form/dynamic-doc.html">
 <link rel="import" href="../dynamic-form/entity-selector.html">
+<link rel="import" href="../../spinner-style.html">
+<link rel="import" href="../dynamic-form/dynamic-doc.html">
+
+<link rel="import" href="../pdf-element/pdf-element.html">
+
+<!--<link rel="import" href="../ht-lab/ht-lab-details.html">-->
+
 
 
 <dom-module id="ht-msg-detail">
 	<template>
-		<style>
+		<style include="shared-style spinner-style">
+			:host{
+				position: relative;
+				background: var(--app-background-color-light);
+				overflow-y: auto;
+			}
 			.notification-panel {
 				position: fixed;
 				top:50%;
@@ -93,15 +105,14 @@
 				box-sizing: border-box;
 				grid-column: 3 / span 1;
 				grid-row: 1 / span 1;
-				background:var(--app-background-color-light);
-				float:left;
-				padding:20px;
-				display:flex;
+				background: var(--app-background-color-light);
+				display: flex;
+				overflow-y: auto;
 				flex-flow: column nowrap;
 				align-items: flex-start;
-				z-index:0;
-				height: 100%;
+				z-index: 0;
 				width: 100%;
+                flex: 1;
 			}
 
 			.contact-title{
@@ -114,13 +125,21 @@
 			/*.contact-title:first-child{
 				padding-top:0;
 			}*/
-			.pat-details-card > .card-content {
+			.msg-detail-card > .card-content {
 				padding: 16px 16px 32px !important;
 			}
 
-			.pat-details-card {
-				width: calc(100% - 64px);
-				margin: 0 32px;
+			.msg-detail-card {
+				width: 100%;
+                padding: 0 0 0 12px;
+                height: calc(80vh - 20%);
+				display: flex;
+				flex-flow: column nowrap;
+				justify-content: flex-start;
+				align-items: stretch;
+				background: transparent;
+				box-shadow: none;
+                flex-grow: 1;
 			}
 
 			.horizontal {
@@ -223,6 +242,11 @@
 				padding: 16px 24px;
 			}
 
+			.modal-subtitle{
+				display: inline-flex;
+				margin-top: 16px;
+			}
+
 			.modal-button{
 				--paper-button-ink-color: var(--app-secondary-color-dark);
 				color: var(--app-text-color);
@@ -231,7 +255,13 @@
 				height: 40px;
 				min-width: 100px;
 				padding: 10px 1.2em;
+				text-transform: capitalize;
 			}
+            @media screen and (max-width: 1314px) {
+                .modal-button {
+                    margin: 0;
+                }
+            }
 
 			.modal-button--save{
 				box-shadow: var(--shadow-elevation-2dp_-_box-shadow);
@@ -239,6 +269,18 @@
 				color: var(--app-primary-color-dark);
 				font-weight: 700;
 			}
+
+			.modal-button--delete{
+				box-shadow: var(--shadow-elevation-2dp_-_box-shadow);
+				background: var(--app-background-color-light);
+				color: var(--app-primary-color-dark);
+				font-weight: 700;
+			}
+            @media screen and (max-width: 1200px) {
+                .modal-button--delete.remove {
+                    display: none;
+                }
+            }
 
 			filter-panel{
 				flex-grow: 9;
@@ -299,7 +341,7 @@
 				--paper-fab-speed-dial-action-label-background: transparent;
 				--paper-fab-iron-icon: {
 					transform: scale(0.8);
-					
+
 				};
 				--paper-fab: {
 					background: var(--app-primary-color-dark);
@@ -348,20 +390,372 @@
 				height: calc(100% - 48px);
 				padding-bottom: 32px;
 			}
-		</style>
-		<template is="dom-if" if="[[messages]]">
-		<div class="details-panel" on-dragover="_onDrag">
-			<div class="contact-card-container">
-				<template is="dom-repeat" items="[[messages]]" as="msg">
-				From : [[msg.fromAddress]]
-				To : [[msg.toAddresses]]
-				Subject: [[msg.subject]]
-					Body: <template is="dom-repeat" items="[[msg.body]]" as="text">[[text]]</template>
-				</template>
-			</div>
-		</div>
 
-	</template>
+            dynamic-doc {
+                overflow-x: hidden;
+                overflow-y: auto;
+                margin-top: 16px;
+            }
+
+			.annexe-card{
+				padding: 4px;
+                width: 50%;
+                box-sizing: border-box;
+				background: var(--app-background-color)
+			}
+
+			.annexe-card:first-of-type{
+				margin-left:0;
+			}
+
+			.annexe-card--header{
+				background-color: white;
+    			padding: 0 8px;
+				flex-flow: row nowrap!important;
+                overflow: hidden;
+                text-overflow: ellipsis;
+			}
+
+			.annexe-card--header span{
+				flex-grow: 1;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.annexe-card--header paper-icon-button{
+				height: 32px;
+				width: 32px;
+				min-width: 32px;
+				min-height: 32px;
+				padding: 4px;
+				opacity: .7;
+				color: var(--app-text-color);
+			}
+
+			.annexe-card--content{
+    			padding: 0 8px;
+			}
+
+			.annexe-card--action-button{
+				font-size: 14px;
+				font-weight: 400;
+				text-transform: capitalize;
+                margin: 0 auto;
+			}
+
+			.annexe-card--action-button:hover{
+				background-color: var(--app-background-color-dark);
+				font-weight: 500;
+			}
+
+			.img-container img{
+				width: 100%;
+				max-width: 100%;
+				height: auto;
+			}
+
+            .action-buttons {
+                width: 100%;
+                padding: 0;
+				border-bottom: 1px solid var(--app-background-color-dark);
+				height: 40px;
+            }
+            .action-buttons > .buttons {
+                float: left;
+            }
+            .action-buttons > .del-button {
+                float: right;
+            }
+
+            .clearb {
+                clear: both;
+            }
+            .flexbox {
+                display: flex;
+                flex-direction: row;
+            }
+            .flexbox.read {
+                width: 100%;
+            }
+            .inlined {
+                flex: 1;
+                float: left;
+                width: 30%;
+                margin: 0 1%;
+            }
+
+            .read-txt {
+                width: 100%;
+                max-height: 50vh;
+                overflow-y: auto;
+				flex-grow: 1;
+				border-top: 1px solid var(--app-background-color-dark);
+                padding: 0 10px;
+                box-sizing: border-box;
+            }
+
+			.read-txt p{
+				font-size: 14px;
+			}
+
+            .attached {
+                width: 100%;
+                max-height: 176px;
+                padding: 10px;
+                overflow-y: auto;
+                border-top: 1px solid var(--app-background-color-dark);
+                box-sizing: border-box;
+				display: flex;
+				flex-flow: row wrap;
+				justify-content: flex-start;
+				align-items: flex-start;
+            }
+            .attached paper-button {
+                margin-bottom: 4px;
+            }
+
+			.attached h3{
+				width: 100%;
+			}
+
+			.msg-detail-btn{
+				font-size: 14px;
+				font-weight: 400;
+				color: var(--app-text-color);
+				text-transform: capitalize;
+				transition: all .12s cubic-bezier(0.075, 0.82, 0.165, 1);
+				margin-bottom: 8px;
+				height: 40px;
+			}
+
+			.msg-detail-btn:hover{
+				background-color: var(--app-background-color-dark);
+				color: var(--app-text-color);
+			}
+
+			.msg-detail-btn iron-icon{
+				height: 20px;
+				width: 20px;
+				padding: 4px;
+				opacity: .7;
+				color: var(--app-text-color);
+			}
+
+			.layout-horizontal{
+				display:flex;
+				flex-flow: row wrap;
+				align-items: center;
+				justify-content: flex-start;
+			}
+
+			.layout-horizontal--nowrap{
+				flex-flow: row nowrap;
+			}
+
+			.space-between{
+				justify-content: space-between;
+                height: 80px;
+			}
+
+			.layout-horizontal--flex-end{
+				justify-content: flex-end;
+			}
+
+			.msg-header-grid{
+				display: grid;
+				grid-template-columns: 50px 1fr;
+				grid-template-rows: 25px 25px;
+				grid-row-gap: 0;
+				grid-column-gap: 8px;
+			}
+
+			.initials-avatar{
+				grid-column: 1 / 1;
+				grid-row: 1 / 2;
+				display: inline-flex;
+				flex-flow: row wrap;
+				align-items: center;
+				justify-content: center;
+				background: var(--app-secondary-color-dark);
+				border-radius: 50%;
+				height: 50px;
+				width: 50px;
+				color: white;
+				font-size: 1.2em;
+				text-transform: uppercase;
+			}
+
+			.from{
+				-webkit-font-smoothing: antialiased;
+				font-family: Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
+				font-size: 1rem;
+				letter-spacing: .2px;
+				color: var(--app-text-color);
+				line-height: 20px;
+				font-weight: 500;
+				grid-column: 2 / 2;
+				grid-row: 1 / 1;
+				place-self: end start;
+			}
+
+			.to{
+				-webkit-font-smoothing: auto;
+				font-family: Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
+				font-size: 13px;
+				letter-spacing: .3px;
+				color: var(--app-text-color-disabled);
+				line-height: 20px;
+				grid-column: 2 / 2;
+				grid-row: 2 / 2;
+				place-self: start start;
+			}
+
+			paper-icon-button{
+				color: var(--app-text-color);
+				height: 32px;
+				width: 32px;
+				padding: 4px;
+				margin: 4px;
+				transition: all .12s cubic-bezier(0.075, 0.82, 0.165, 1);
+				opacity: .7;
+			}
+
+			paper-icon-button:hover{
+				border-radius: 50%;
+				background-color: var(--app-background-color-dark);
+				color: var(--app-text-color);
+				opacity: 1;
+			}
+
+			.date{
+				font-size: 13px;
+				background-color: var(--app-background-color-dark);
+				padding: 0 12px;
+				border-radius: 12px;
+				color: var(--app-text-color);
+			}
+
+			paper-spinner {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                z-index: 150;
+                transform: translate(-50%,-50%);
+            }
+
+            .close-panel {
+                width: 100%;
+                text-align: center;
+                padding: 4px 16px;
+                box-sizing: border-box;
+                background: var(--app-background-color-darker);
+                cursor: pointer;
+                border-top: 1px solid black;
+            }
+
+            #main-details-panel {
+                flex: 1;
+            }
+
+            ht-msg-list.selected .col-right {
+                width: 100%;
+            }
+
+            h2.subject {
+                margin-bottom: 0;
+            }
+
+            .message-box {
+                padding: 4px;
+                width: 100%;
+                box-sizing: border-box;
+                flex: 1;
+            }
+
+            .mobileOnly {display: none;}
+
+            .doc-container {
+                max-width: 50%;
+            }
+
+            @media screen and (max-width: 1025px) {
+                .mobileOnly {display: block;}
+                .attached {
+                    max-height: 25vh;
+                    width: 100%;
+                    overflow-y: auto;
+                }
+
+                .read-txt {
+                    height: auto;
+                    overflow-y: hidden;
+                    min-height: 80px;
+                }
+            }
+
+		</style>
+		<paper-spinner class="center spinner" active="[[isLoadingMessage]]"></paper-spinner>
+		<template is="dom-if" if="[[messages]]">
+			<div id="main-details-panel" class="details-panel" on-dragover="_onDrag">
+                <div class="action-buttons">
+                    <div class="buttons">
+						<!--<paper-button class="msg-detail-btn"  msgId$='[[msg.id]]'><iron-icon icon="check-box-outline-blank"></iron-icon>[[localize('markread','Mark as read',language)]]</paper-button>-->
+                        <paper-button class="msg-detail-btn" on-tap="_forwardMsgs"  msgId$='[[msg.id]]'><iron-icon icon="forward"></iron-icon>[[localize('fw','Forward',language)]]</paper-button>
+                        <paper-button class="msg-detail-btn" on-tap="_replyMsgs" msgId$='[[msg.id]]'><iron-icon icon="reply"></iron-icon>[[localize('reply','Reply',language)]]</paper-button>
+                        <template is="dom-if" if="[[isDeleted]]">
+                            <paper-button class="msg-detail-btn" on-tap="_restoreMsgs"><iron-icon icon="icons:undo"></iron-icon>[[localize('restore','Restore',language)]]</paper-button>
+                        </template>
+                    </div>
+                    <template is="dom-if" if="[[!isDeleted]]">
+                        <div class="del-button">
+                            <paper-button class="msg-detail-btn" on-tap="_removeMsg"  msgId$='[[msg.id]]' ><iron-icon icon="delete-forever"></iron-icon>[[localize('del','Delete',language)]]</paper-button>
+                        </div>
+                    </template>
+                </div>
+                <template is="dom-repeat" items="[[messages]]" as="msg">
+                    <paper-card class="msg-detail-card" >
+                        <h2 class="subject">[[msg.subject]]</h2>
+                        <div class="layout-horizontal space-between">
+                            <div class="msg-header-grid">
+                                <div class="initials-avatar"><span>[[_getInitials(msg.fromAddress)]]</span></div>
+                                <div class="from">[[msg.fromAddress]]</div>
+                                <div class="to">[[localize('to','To',language)]] [[msg.toAddresses]]</div>
+                            </div>
+                            <div class="layout-horizontal layout-horizontal--flex-end">
+                                <div class="date">[[_timeFormat(msg.received)]]</div>
+                                <!--<paper-icon-button icon="print" id="print-btn" msgId$='[[msg.id]]'></paper-icon-button>-->
+                                <!--<paper-tooltip for="print-btn" position="bottom" offset="4">[[localize('pri','Print',language)]]</paper-tooltip>-->
+                            </div>
+                        </div>
+                        <template is="dom-if" if="[[msg.patientInss]]">
+                            <div class="patient">[[localize('inv_pat','Patient',language)]] : [[_getPatientDataByInss('displayName',msg.patientInss)]]</div>
+                        </template>
+                        <template is="dom-if" if="[[bodyDocument.id]]">
+                            <!--<div class="read-txt"><p>[[_displayLengthOrEmpty(msg.body)]]</p></div>-->
+                            <dynamic-doc api="[[api]]" user="[[user]]" patient="[[patient]]" document-id="[[bodyDocument.id]]" i18n="[[i18n]]" language="[[language]]"
+                                         resources="[[resources]]" title="[[item.label]]"></dynamic-doc>
+                        </template>
+
+
+
+                    </paper-card>
+                </template>
+            </div>
+
+            <div class="attached">
+                <h3>[[localize('attachments','Attachments',language)]] ([[attachmentQuantity]])</h3>
+                <template is="dom-repeat" items="[[selectedDocuments]]">
+                    <template is="dom-if" if="[[!_isEqualTo(item.documentLocation,'body')]]">
+                            <div class="layout-vertical annexe-card">
+                                <dynamic-doc api="[[api]]" user="[[user]]" patient="[[patient]]" document-id="[[item.id]]" i18n="[[i18n]]" language="[[language]]"
+                                             resources="[[resources]]" title="[[item.label]]" downloadable="true"></dynamic-doc>
+                            </div>
+                    </template>
+                </template>
+            </div>
+
+		</template>
 	</template>
 	<script>
 
@@ -369,8 +763,9 @@ import jsPDF from 'jspdf/dist/jspdf.min';
 import _ from 'lodash/lodash';
 import JsBarcode from 'JsBarcode';
 import moment from 'moment/src/moment';
+import XML from 'parse-xml/dist/parse-xml';
 
-class HtMsgDetail extends Polymer.TkLocalizerMixin(Polymer.mixinBehaviors([], Polymer.Element)) {
+class HtMsgDetail extends Polymer.TkLocalizerMixin(Polymer.Element) {
 	static get is() {
 		return 'ht-msg-detail';
 	}
@@ -389,6 +784,9 @@ class HtMsgDetail extends Polymer.TkLocalizerMixin(Polymer.mixinBehaviors([], Po
 			user: {
 				type: Object
 			},
+			credentials:{
+				type: Object
+			},
 			currentContact: {
 				type: Object,
 				value: null
@@ -397,8 +795,32 @@ class HtMsgDetail extends Polymer.TkLocalizerMixin(Polymer.mixinBehaviors([], Po
 			    type: Object
 			},
 			messages: {
-			    type: Object
-			}
+			    type: Object,
+				value: null
+			},
+			selectedDocuments:{
+				type: Object
+			},
+			documentAttachment:{
+				type: String,
+				value: null
+			},
+			showDetail:{
+				type: Boolean,
+				value: false
+			},
+			isLoadingMessage: {
+				type: Boolean,
+				value: false
+			},
+            isDeleted: {
+			    type: Boolean,
+                value: false
+            },
+            attachmentQuantity: {
+			    type: Number,
+                value: 0
+            }
 		};
 	}
 
@@ -410,39 +832,422 @@ class HtMsgDetail extends Polymer.TkLocalizerMixin(Polymer.mixinBehaviors([], Po
 		super();
 	}
 
+	ready(){
+		super.ready();
+	}
+
+	close() {
+	    this.set('selectMessage.selection.item',null)
+        this._focusChanged()
+    }
+
+	_getInitials(fromAddress){
+		var names = fromAddress.split(' ')
+		var	initials = names[0].substring(0, 1)
+
+		return names.length > 1 ?  initials += names[names.length -1].substring(0, 1) : initials
+	}
+
+	_displayLengthOrEmpty(msgBody){
+        return msgBody.body != '' ? msgBody.body : this.localize('no_msg_content','No message',this.language)
+	}
+
     _focusChanged(){
 	    if(this.selectMessage.selection.item){
-            this.selectMessage.selection.item.body = [];
+	        console.log('focusChanged, selectedDocuments',this.selectMessage)
+			this.set('isLoadingMessage',true)
+            this.set('isDeleted',this.selectMessage.selection.item.transportGuid.startsWith("BIN"))
+            // this.selectMessage.selection.item.body = [];
 	        let tempSelect = this.selectMessage.selection.item;
-        	this.api.document().findByMessage(this.user.healthcarePartyId, tempSelect).then(docs => {
-				docs.length ?
-        	    docs.map(doc => this.api.document().getAttachment(doc.id,doc.attachmentId, doc.secretForeignKeys).then(a=> {
-                    console.log("on a un attachment !" + typeof a)
-                    tempSelect.body.push(a.toString())
-                    console.log(tempSelect.body)
-                    this.set('messages', [tempSelect]);
-                }))
-					: this.set('messages', [tempSelect]);
-                this.getChildren(tempSelect.id)
-	    	})
-	    }
+        	this.api.document().findByMessage(this.user.healthcarePartyId, tempSelect)
+				.then(docs => { if(docs.length) {
+					return docs.filter(doc => doc.id && doc.attachmentId && doc.secretForeignKeys)
+						.map(doc => {
+                            return this.api.document().getAttachment(doc.id, doc.attachmentId, null)
+                                .then(a => {
+                                    doc.dataUrl = this.getDataUrls(doc)
+                                    if (this._isEqualTo(doc.documentLocation, 'body')) {
+                                        console.log('this doc is the body', doc)
+                                        this.set('bodyDocument',doc)
+                                        const url = doc && this.api.document().getAttachmentUrl(doc.id, doc.attachmentId)
+                                        fetch(url,{credentials:'include'})
+                                            .then(res=>res.text())
+                                            .then(res=>this.set('docTxt',res))
+                                    }
+                                    return doc
+                            });
+                        }
+					)
+				}
+
+	    	}).then(docs =>{
+	    		if(docs && docs.length){
+	    		    console.log('docs',docs)
+                    Promise.all(docs).then(docs=>{
+						this.set('isLoadingMessage',false)
+                        this.set('messages', [tempSelect]);
+                        this.set("selectedDocuments", docs);
+                        this.set('attachmentQuantity',this.selectedDocuments.length-1)
+                        this.getChildren(tempSelect.id)
+                    })
+				}
+				else{
+					this.set('isLoadingMessage',false)
+					this.set('messages', [tempSelect]);
+					this.set("selectedDocuments", []);
+                    this.set('attachmentQuantity',0)
+					this.getChildren(tempSelect.id)
+                }
+                console.log(this.messages)
+            })
+	    }else{
+			this.set('isLoadingMessage',false)
+			this.set('messages', null);
+		}
 	}
 
 	getChildren(item){
-        this.api.message().getChildren(item).then(function(m) {
+	    console.log('getChildren',item)
+        this.api.message().getChildren(item).then(m=> { //TODO: check if api.message.getChildren actually returns m
 			if(m.length){
                 m.map(r => r.body = []);
                 this.api.document().findByMessage(this.user.healthcarePartyId, m).then(docs => {
+                    console.log('findByMessage',docs)
                     docs.length?
                     	docs.map(doc => this.api.document().getAttachment(doc.id,doc.attachmentId, doc.secretForeignKeys).then(a => {m.map(r => {r.body.push(a);this.messages.push(r)});}))
-						:m.map(r => this.messages.push(r));
-                    this.set('messages',this.messages)
+						:m.map(r => this.push('messages',r));
                     m.map(r => this.getChildren(r));
                 })
 			}
-        }.bind(this))
+        })
+        // }.bind(this))
 	}
 
+    _getPatientDataByInss(wantedValue,inss){
+        if(inss && inss.length > 1) {
+            this.api.patient().findByNameBirthSsinAutoWithUser(this.user,this.user.healthcarePartyId, inss, null, null, 100, "asc")
+                .then(patients => {
+                    console.log(patients);
+                    let filtredpatients = patients.rows.filter(pat => pat.ssin)
+                        .map(pat => {
+                            let newPat = {};
+                            newPat.firstName = pat.firstName ? pat.firstName : "";
+                            newPat.lastName = pat.lastName ? pat.lastName : "";
+                            newPat.fullName = pat.firstName + " " + newPat.lastName;
+                            newPat.ssin = pat.ssin ? pat.ssin : "";
+                            newPat.displayName = newPat.firstName + " " + newPat.lastName + " " + newPat.ssin;
+                            const res =
+                                wantedValue == 'firstName' ? newPat.firstName :
+                                wantedValue == 'lastName' ? newPat.lastName :
+                                wantedValue == 'fullName' ? newPat.fullName :
+                                wantedValue == 'ssin' ? newPat.ssin :
+                                wantedValue == 'displayName' ? newPat.displayName :
+                                newPat
+                            return res
+                        })
+                })
+        }
+        else{
+            this.set("patientList", [])
+        }
+    }
+
+	getDataUrls(doc) {
+	    // console.log('getDataUrls',doc)
+        if (Object.keys(doc.encryptionKeys).length) { // if encryption keys
+            console.log(this.user.healthcarePartyId,doc.encryptionKeys)
+            return this.api.crypto().decryptAndImportAesHcPartyKeysInDelegations(this.user.healthcarePartyId, doc.encryptionKeys && Object.keys(doc.encryptionKeys).length ? doc.encryptionKeys : doc.delegations)
+                .then(decryptedAndImportedAesHcPartyKeys => {
+                    let collatedAesKeys = {};
+                    decryptedAndImportedAesHcPartyKeys.map(k => collatedAesKeys[k.delegatorId] = k.key);
+
+                    return this.api.crypto().decryptDelegationsSFKs((doc.encryptionKeys && Object.keys(doc.encryptionKeys).length? doc.encryptionKeys: doc.delegations)[this.user.healthcarePartyId], collatedAesKeys, doc.id)
+                        .then(enckeys =>
+                            this._xmlMimeType(doc.mainUti, doc.otherUtis, this.dataUrl)?
+                                this.api.document().getAttachment(doc.id, doc.attachmentId, enckeys).then(att => {
+                                    let xml = XML.parseXml(att);
+                                    if(xml.kmehrmessage && xml.kmehrmessage.header && xml.kmehrmessage.header.standard &&
+                                        xml.kmehrmessage.header.standard.specialisation &&
+                                        xml.kmehrmessage.header.standard.specialisation.cd &&
+                                        xml.kmehrmessage.header.standard.specialisation.cd.S){
+                                        this.set("type",xml.kmehrmessage.header.standard.specialisation.cd.S);
+                                    }else{
+                                        this.set("type","Non Valid Type")
+                                    }
+                                })
+                                : (doc && this.api.document().getAttachmentUrl(doc.id, doc.attachmentId, enckeys))
+                        );
+                })
+        } else { // no encryption keys
+            console.log('no encryption keys',this.user.healthcarePartyId)
+            this.set('bodyDocument',{})
+            this.set("type","");
+            if (this._xmlMimeType(doc.mainUti, doc.otherUtis, this.dataUrl)){
+                return this.api.document().getAttachment(doc.id, doc.attachmentId, null).then(att => {
+                    let xml = XML.parseXml(att);
+                    if(xml.kmehrmessage && xml.kmehrmessage.header && xml.kmehrmessage.header.standard &&
+                        xml.kmehrmessage.header.standard.specialisation &&
+                        xml.kmehrmessage.header.standard.specialisation.cd &&
+                        xml.kmehrmessage.header.standard.specialisation.cd.S){
+                        this.set("type",xml.kmehrmessage.header.standard.specialisation.cd.S);
+                    }else{
+                        this.set("type","Non Valid Type")
+                    }
+                    return att
+                })
+            }else {
+                return (doc && this.api.document().getAttachmentUrl(doc.id, doc.attachmentId, null));
+            }
+        } // encrypt? end
+    }
+
+	_forwardMsgs(e) {
+	    const origMsg = this.messages[0]
+        console.log('origMsg',origMsg)
+        const msgToFw = {
+	        destinations: [],
+            patientInss: origMsg.patientINSS,
+            annex: this.selectedDocuments,
+            document: {
+	            title: 'Fw: '+origMsg.subject,
+                textContent: this.docTxt != '' ? this.docTxt : this.localize('no_msg_content','No message',this.language)
+            },
+            customMetas: origMsg.metas,
+            type: 'fwd'
+        }
+        const target = this.parentElement.parentNode.children[1]
+        target.dispatchEvent(new CustomEvent('fw-msg', {detail: {bubbles: true, composed: true, params:msgToFw}}))
+    }
+
+    _replyMsgs(e) {
+	    const origMsg = this.messages[0]
+        console.log('origMsg',origMsg)
+        let dest = [{
+            delegations: origMsg.delegations,
+            displayName: origMsg.fromAddress,
+            nihii: origMsg.senderId,
+            cbe: undefined,
+            ssin: origMsg.senderInss,
+            type: this.localize('replyto','In reply to',this.language)
+        }]
+        this.api.contact().getContactWithUser(this.user, origMsg.author).then(c=>dest=c)
+        const msgToRe = {
+	        delegations: origMsg.delegations,
+            destinations: dest,
+            patientInss: origMsg.patientINSS,
+            annex: undefined,
+            document: {
+                title: 'Re: '+origMsg.subject,
+                textContent: this.docTxt != '' ? this.docTxt : this.localize('no_msg_content','No message',this.language)
+            },
+            customMetas: origMsg.metas,
+            type: 'replyto'
+        }
+        const target = this.parentElement.parentNode.children[1]
+        target.dispatchEvent(new CustomEvent('re-msg', {detail: {bubbles: true, composed: true, params:msgToRe}}))
+    }
+
+    _removeMsg(){
+        let msg = this.messages[0]
+        if (msg) {
+            const thisBox = msg.transportGuid.substring(0,msg.transportGuid.indexOf(':'))
+            const delBox = thisBox == 'INBOX' ? 'BININBOX' : thisBox =='SENTBOX' ? 'BINSENTBOX' : 'BININBOX'
+            if (!msg.transportGuid.startsWith("BIN")) {
+                const idOfMsg = msg.transportGuid.substring(msg.transportGuid.indexOf(':')+1)
+                this.api.fhc().Ehboxcontroller().moveMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, [idOfMsg], thisBox, delBox)
+                    .then(this.api.fhc().Ehboxcontroller().deleteMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, [idOfMsg], delBox))
+                    .finally(()=>{
+                        msg.transportGuid = delBox + msg.transportGuid.substring(msg.transportGuid.indexOf(':'))
+                        this.api.message().modifyMessage(msg).then(()=>this.dispatchEvent(new CustomEvent('item-delete', { detail: { selection: { item: "Refresh" } } })))
+                    })
+            } else {console.log(msg.id+' is already in bin !')}
+            const target = this.parentElement.parentNode.children[1]
+            target.dispatchEvent(new CustomEvent('selection-messages-change', { detail: { selection: { item: null } } }));
+        }
+    }
+
+    _restoreMsgs(){
+        let msg = this.messages[0]
+        if (msg) {
+            const idOfMsg = msg.transportGuid.substring(msg.transportGuid.indexOf(':')+1)
+            const thisBox = msg.transportGuid.substring(0,msg.transportGuid.indexOf(':'))
+            const restoreBox = thisBox == 'BININBOX' ? 'INBOX' : thisBox == 'BINSENTBOX' ? 'SENTBOX' : 'INBOX'
+            this.api.fhc().Ehboxcontroller().moveMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, [idOfMsg], thisBox, restoreBox)
+                .then(this.api.fhc().Ehboxcontroller().deleteMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, [idOfMsg], restoreBox))
+                .finally(()=>{
+                    msg.transportGuid = restoreBox + msg.transportGuid.substring(msg.transportGuid.indexOf(':'))
+                    this.api.message().modifyMessage(msg).then(()=>this.dispatchEvent(new CustomEvent('item-delete', { detail: { selection: { item: "Refresh" } } })))
+                })
+        }
+        const target = this.parentElement.parentNode.children[1]
+        target.dispatchEvent(new CustomEvent('selection-messages-change', { detail: { selection: { item: null } } }));
+    }
+
+	_imageMimeType(uti, utis, dataUrl) {
+		console.log(uti + " " + utis + " " + dataUrl);
+		return dataUrl && (uti && [uti] || []).concat(utis && utis.value || []).map(u => this.mimeType(u)).find(m => m && (m.startsWith('image/') || m === 'public/jpeg'));
+	}
+
+	_pdfMimeType(uti, utis, dataUrl) {
+		return dataUrl && (uti && [uti] || []).concat(utis && utis.value || []).map(u => this.mimeType(u)).find(m => m === 'application/pdf');
+	}
+
+	_xmlMimeType(uti, utis) {
+		return (uti && [uti] || []).concat(utis && utis.value || []).map(u => this.mimeType(u)).find(m => m === 'text/xml' || m === 'application/xml');
+	}
+
+	_textType(uti, utis){
+		return (uti && [uti] || []).concat(utis && utis.value || []).map(u => this.mimeType(u)).find(m => m === 'text/plain');
+	}
+
+    _plainMimeType(uti, utis) {
+        return (uti && [uti] || []).concat(utis && utis.value || []).map(u => this.mimeType(u)).find(m => m === 'text/plain');
+    }
+
+	_isEqualTo(title, string) {
+		return title == string;
+	}
+
+	mimeType(u){
+		return this.api.document().mimeType(u)
+	}
+
+	_timeFormat(date) {
+		return date && this.api.moment(date).format('DD/MM/YYYY') || '';
+	}
+
+    // _download(item) {
+    //     let file = new Blob([this.api.crypto().utils.ua2hex(item)] ,{type: "text/plain"})
+    //     let a = document.createElement("a");
+    //     document.body.appendChild(a);
+    //     a.style = "display: none";
+    //
+    //     let url = window.URL.createObjectURL(file);
+    //     a.href = url;
+    //     a.download = this.user.healthcarePartyId+".2048.key";
+    //     a.click();
+    //     window.URL.revokeObjectURL(url);
+    //
+    //     // const origin = window.location.origin
+    //     // window.location.href = origin
+    // }
+
+    _base64(data) {
+        return base64js.fromByteArray(data);
+    }
+
+	_downloadAnnex(e){
+        const parent = this.parentNode
+        parent.dispatchEvent(new CustomEvent('file-dl', {detail: {bubbles: true, composed: true, url:this.dataUrl}}))
+	}
+
+	_getAttachment(e){
+		let id = e.target.getAttribute('id');
+		let attachmentId = e.target.getAttribute('attachmentId');
+		this.api.document().getAttachment(id, attachmentId, null).then(att => this.set("documentAttachment",att));
+		this.showDetail = !this.showDetail
+	}
+
+	importAnnexe(e){
+		let id = e.target.getAttribute('docId');
+		let mainUti = e.target.getAttribute('mainUti');
+		let otherUtis = e.target.getAttribute('otherUtis');
+		let dataUrl = e.target.getAttribute('dataUrl');
+		// this.api.document().getAttachment(document.id, document.attachmentId, null)
+		// 	.then(att => {
+		//
+		// 	});
+
+		// IMG
+		if(this._imageMimeType(mainUti, otherUtis, dataUrl)){
+
+		}
+		// PDF
+		else if (this._pdfMimeType(mainUti, otherUtis, dataUrl)) {
+
+		}
+		// XML
+		else if(this._xmlMimeType(mainUti, otherUtis)){
+			let xml = XML.parseXml(this.documentAttachment);
+			if (xml.kmehrmessage && xml.kmehrmessage.header && xml.kmehrmessage.header.standard &&
+				xml.kmehrmessage.header.standard.specialisation &&
+				xml.kmehrmessage.header.standard.specialisation.cd){
+				// SMF
+				if(xml.kmehrmessage.header.standard.specialisation.cd.value === "gpsoftwaremigration"){
+					this.api.bekmehr().importSmf(doc.id, "", this.patient.id, this.user.language,xml).then(
+						contacts => {
+							contacts.forEach(contact => {
+								contact.ctcs.forEach(ctc => {
+									this.api.contact().initDelegationsAndEncryptionKeys(this.user, this.patient, ctc).then(c => {
+										console.log(c);
+										return c
+									});
+								})
+							})
+						})
+
+				}
+				//	PMF
+				else if(xml.kmehrmessage.header.standard.specialisation.cd.value === "gppatientmigration"){
+					// this.api.bekmehr().importSmf(doc.id, "123245", this.patient.id, this.user.language,xml).then(
+					// 	contacts => {
+					// 		contacts.forEach(contact => {
+					// 			contact.ctcs.forEach(ctc => {
+					// 				this.api.contact().initDelegationsAndEncryptionKeys(this.user, this.patient, ctc).then(c => {
+					// 					console.log(c);
+					// 					return c
+					// 				});
+					// 			})
+					// 		})
+					// 	})
+				}
+			}
+
+
+		}
+		// TEXT
+		else if(this._textType(mainUti, otherUtis)){
+			// if(this._checkHealthone(mainUti)){
+			this.api.patient().getPatientWithUser(this.user,"1d6eee30-6c8f-4204-a3ea-56a01ed3132d").then(patient => {
+				this.api.contact().newInstance(this.user, patient, {
+					created: new Date().getTime() ,
+					modified: new Date().getTime() ,
+					author: this.user.id,
+					responsible: this.user.healthcarePartyId,
+					openingDate: moment().format('YYYYMMDD') || '',
+					closingDate: moment().format('YYYYMMDD') || '',
+					encounterType: {type: "CD-TRANSACTION", version: "1.13", code: "labresult"},
+					descr: "Lab" + new Date().getTime(),
+					subContacts: []
+				}).then(c=>{
+					this.api.contact().createContactWithUser(this.user, c).then(c => {
+						this.api.form().newInstance(this.user, patient, {
+							contactId: c.id,
+							descr: "Lab" + new Date().getTime(),
+						}).then(f => this.api.form().createForm(f)).then(f => {
+							this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId).then(hcp => {
+								this.api.beresultimporticc.doImport(id, this.user.healthcarePartyId, hcp.languages.find(e => !!e) || "en", "***", f.id, null, c)
+									.then(c => console.log("Contact id" + c.id))
+							})
+						})
+
+					});
+				})
+			});
+			// }
+		}
+
+	}
+
+    _checkHealthone(file) {
+        const rawFile = new XMLHttpRequest();
+        rawFile.open("GET", file, true);
+        rawFile.onreadystatechange = () => {
+            if (rawFile.readyState === 4) {
+                return rawFile.responseText.startsWith('A1/')
+            }
+        }
+    }
 }
 
 customElements.define(HtMsgDetail.is, HtMsgDetail);

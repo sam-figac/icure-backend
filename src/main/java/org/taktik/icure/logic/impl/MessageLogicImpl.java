@@ -81,11 +81,19 @@ public class MessageLogicImpl extends GenericLogicImpl<Message, MessageDAO> impl
 	}
 
 	@Override
+	public PaginatedList<Message> findByTransportGuidReceived(String partyId, String transportGuid, PaginationOffset<List<Object>> paginationOffset) {
+		return messageDAO.findByTransportGuidReceived(partyId, transportGuid, paginationOffset);
+	}
+
+	@Override
 	public PaginatedList<Message> findByTransportGuid(String partyId, String transportGuid, PaginationOffset<List<Object>> paginationOffset) {
 		return messageDAO.findByTransportGuid(partyId, transportGuid, paginationOffset);
 	}
 
-
+	@Override
+	public PaginatedList<Message> findByTransportGuidSentDate(String partyId, String transportGuid, Long fromDate, Long toDate, PaginationOffset<List<Object>> paginationOffset) {
+		return messageDAO.findByTransportGuidSentDate(partyId, transportGuid, fromDate, toDate, paginationOffset);
+	}
 
 	@Override
 	public Message addDelegation(String messageId, Delegation delegation) {
@@ -104,6 +112,11 @@ public class MessageLogicImpl extends GenericLogicImpl<Message, MessageDAO> impl
 	@Override
 	public List<Message> getChildren(String messageId) {
 		return messageDAO.getChildren(messageId);
+	}
+
+	@Override
+	public List<List<Message>> getChildren(List<String> parentIds) {
+		return messageDAO.getChildren(parentIds);
 	}
 
 	@Override
@@ -129,11 +142,8 @@ public class MessageLogicImpl extends GenericLogicImpl<Message, MessageDAO> impl
 			if (message == null) {
 				logger.error("Cannot create 'null' message. ");
 			} else {
-				if (message.getAuthor()==null) { message.setAuthor(loggedUser.getHealthcarePartyId()); }
 				if (message.getFromAddress()==null) { message.setFromAddress(loggedUser.getEmail()); }
 				if (message.getFromHealthcarePartyId()==null) { message.setFromHealthcarePartyId(loggedUser.getHealthcarePartyId()); }
-
-				message.setResponsible(loggedUser.getHealthcarePartyId());
 
 				success = success && super.createEntities(Collections.singletonList(message), createdEntities);
 			}

@@ -17,10 +17,10 @@
 			<form is="form" id="keys-form">
 				<div class="layout vertical center">
 					<h3>[[localize('a_pri_key_fil_is_nee_for_thi_use','A private key file is needed for this user',language)]]</h3>
-					<h5>ID: {{user.healthcarePartyId}}</h5>
+					<h5>ID: [[keyhcpid]]</h5>
 					<paper-input type="file" id="rsaFileInput" on-change="rsaKeySelected"></paper-input>
 					<paper-button raised="true" id="submitButton" type="submit" on-tap="selectFile" autofocus>[[localize('imp','Import',language)]]</paper-button>
-					<div>{{message}}</div>
+					<div>[[message]]</div>
 				</div>
 			</form>
 
@@ -33,7 +33,7 @@
 
 	</template>
 	<script>
-class HtAppRegisterKeypairDialog extends Polymer.TkLocalizerMixin(Polymer.mixinBehaviors([], Polymer.Element)) {
+class HtAppRegisterKeypairDialog extends Polymer.TkLocalizerMixin(Polymer.Element) {
 	static get is() {
 		return 'ht-app-register-keypair-dialog';
 	}
@@ -42,11 +42,13 @@ class HtAppRegisterKeypairDialog extends Polymer.TkLocalizerMixin(Polymer.mixinB
 		return {
 			user: {
 				type: Object,
-				value: {}
+				value: {},
+                noReset: true
 			},
 			api: {
 				type: Object,
-				value: {}
+				value: {},
+                noReset: true
 			},
 			message: {
 				type: String,
@@ -80,7 +82,7 @@ class HtAppRegisterKeypairDialog extends Polymer.TkLocalizerMixin(Polymer.mixinB
 
 	selectFile() {
 		console.log('File selected');
-		this.fire('file-selected', this.selectedRsaFile);
+        this.dispatchEvent(new CustomEvent('file-selected', { detail: this.selectedRsaFile, bubbles: true, composed: true }))
 	}
 
 	_qrCodeDetected(e, code) {
@@ -114,7 +116,7 @@ class HtAppRegisterKeypairDialog extends Polymer.TkLocalizerMixin(Polymer.mixinB
 				[jwk.d, jwk.dp, jwk.dq, jwk.p, jwk.q, jwk.qi] = String.fromCharCode.apply(null, pako.inflate(this.api.crypto().utils.hex2ua(combinedCode))).split(' ');
 			}
 			this.set('rsaKey', jwk);
-			this.fire('key-scanned', jwk);
+			this.dispatchEvent(new CustomEvent('key-scanned', { detail: jwk, bubbles: true, composed: true }))
 		}
 	}
 

@@ -54,6 +54,7 @@
 								"multiline" : false,
 								"left" : 308,
 								"top" : 33,
+								"pattern": ":ssin",
 								"key" : "StringEditor"
 							},
 							"sortOrder" : 1465333559,
@@ -138,16 +139,16 @@
 								"multiline" : false,
 								"left" : 664,
 								"top" : 143,
-								"key" : "PopupMenuEditor"
+								"key" : "TokenFieldEditor"
 							},
 							"sortOrder" : 1463236407,
 							"codeTypes" : [
 								{"type":"ISO-639-1"}
 							],
-							"label" : "Language",
+							"label" : "Languages",
 							"subForm" : false,
-							"type" : "TKString",
-							"name" : "languages.0"
+							"type" : "TKStringTable",
+							"name" : "languages"
 						},
 						{
 							"editor" : {
@@ -194,7 +195,7 @@
 							"label" : "Status",
 							"subForm" : false,
 							"type" : "TKString",
-							"name" : "status"
+							"name" : "personalStatus"
 						},
 						{
 							"editor" : {
@@ -240,12 +241,21 @@
 							"editor" : {
 								"readOnly" : false,
 								"height" : 22,
+								"menuOptions" : [
+									"enseignement fondamental",
+									"secondaire cycle inférieur",
+									"secondaire cycle supérieur",
+									"universitaire",
+									"supérieur de type long",
+									"supérieur de type court",
+									"promotion sociale"
+								],
 								"labelPosition" : "Left",
 								"width" : 498,
 								"multiline" : false,
 								"left" : 664,
-								"top" : 88,
-								"key" : "StringEditor"
+								"top" : 62,
+								"key" : "PopupMenuEditor"
 							},
 							"sortOrder" : 926365495,
 							"codeTypes" : [
@@ -317,7 +327,7 @@
 							"irrelevant" : true,
 							"subForm" : false,
 							"type" : "TKString",
-							"name" : "job"
+							"name" : "profession"
 						},
 						{
 							"editor" : {
@@ -408,6 +418,58 @@
 							"subForm" : false,
 							"type" : "TKBoolean",
 							"name" : "active"
+						},
+						{
+							"editor" : {
+								"readOnly" : false,
+								"height" : 48,
+								"compulsoryFormGuids" : [
+
+								],
+								"labelPosition" : "Left",
+								"width" : 1162,
+								"multiline" : false,
+								"left" : 5,
+								"top" : 206,
+								"key" : "SubFormEditor",
+								"optionalFormGuids" : [
+									"2b915c79-4c29-47f8-9ce9-ae09dc6dc109"
+								]
+							},
+							"sortOrder" : 1616336695,
+							"codeTypes" : [
+
+							],
+							"label" : "Insurances",
+							"type" : "TKSubConsult",
+							"subForm" : true,
+							"name" : "insurabilities"
+						},
+						{
+							"editor" : {
+								"readOnly" : false,
+								"height" : 48,
+								"compulsoryFormGuids" : [
+
+								],
+								"labelPosition" : "Left",
+								"width" : 1162,
+								"multiline" : false,
+								"left" : 5,
+								"top" : 262,
+								"key" : "SubFormEditor",
+								"optionalFormGuids" : [
+									"2d6620d1-7ac6-4627-973c-cf06f361c570"
+								]
+							},
+							"sortOrder" : 1616336695,
+							"codeTypes" : [
+
+							],
+							"label" : "Medical House Contract",
+							"type" : "TKSubConsult",
+							"subForm" : true,
+							"name" : "medicalHouseContracts"
 						}
                       ]
 				}

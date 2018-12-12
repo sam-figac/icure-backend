@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.jetbrains.annotations.Nullable;
 import org.taktik.icure.entities.base.Code;
+import org.taktik.icure.entities.base.CodeStub;
 import org.taktik.icure.entities.base.Person;
 import org.taktik.icure.entities.base.StoredDocument;
 import org.taktik.icure.entities.embed.Address;
@@ -58,9 +59,14 @@ public class HealthcareParty extends StoredDocument implements Person {
 	protected String invoiceHeader;
 	protected String cbe;
 
-	protected Integer convention; //0,1,2,9
+	protected String userId;
 
-	protected String nihii; //institution, person
+	protected String parentId;
+
+	protected Integer convention; //0,1,2,9
+    protected String supervisorId;
+
+    protected String nihii; //institution, person
 	protected String nihiiSpecCode; //don't show field in the GUI
 
     protected String ssin;
@@ -71,7 +77,7 @@ public class HealthcareParty extends StoredDocument implements Person {
     protected List<HealthcarePartyStatus> statuses;
 
     @ValidCode(autoFix = AutoFix.NORMALIZECODE)
-    protected List<Code> specialityCodes; //Speciality codes, default is first
+    protected List<CodeStub> specialityCodes; //Speciality codes, default is first
 	protected Map<TelecomType, String> sendFormats;
 
 	protected String notes;
@@ -88,6 +94,13 @@ public class HealthcareParty extends StoredDocument implements Person {
 	protected Map<String, String> options = new HashMap<>();
 
     protected String publicKey;
+
+
+    // Medical houses
+    protected String billingType;                       // "serviceFee" (à l'acte) or "flatRate" (forfait)
+    protected String type;                              // "persphysician" or "medicalHouse"
+    protected String contactPerson;
+
 
 	public HealthcareParty() {
 
@@ -270,11 +283,11 @@ public class HealthcareParty extends StoredDocument implements Person {
         this.statuses = statuses;
     }
 
-    public List<Code> getSpecialityCodes() {
+    public List<CodeStub> getSpecialityCodes() {
         return specialityCodes;
     }
 
-    public void setSpecialityCodes(List<Code> specialityCodes) {
+    public void setSpecialityCodes(List<CodeStub> specialityCodes) {
         this.specialityCodes = specialityCodes;
     }
 
@@ -294,6 +307,14 @@ public class HealthcareParty extends StoredDocument implements Person {
 		this.convention = convention;
 	}
 
+    public String getSupervisorId() {
+        return supervisorId;
+    }
+
+    public void setSupervisorId(String supervisorId) {
+        this.supervisorId = supervisorId;
+    }
+
 	public List<FinancialInstitutionInformation> getFinancialInstitutionInformation() {
         return financialInstitutionInformation;
     }
@@ -310,6 +331,14 @@ public class HealthcareParty extends StoredDocument implements Person {
 		this.options = options;
 	}
 
+	public String getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(String parentId) {
+		this.parentId = parentId;
+	}
+
 	@JsonIgnore
 	public @Nullable String getFullName() {
 		String full;
@@ -321,4 +350,32 @@ public class HealthcareParty extends StoredDocument implements Person {
 
 		return full;
 	}
+
+    public String getUserId() { return userId; }
+
+    public void setUserId(String userId) { this.userId = userId; }
+
+    public String getBillingType() {
+        return billingType;
+    }
+
+    public void setBillingType(String billingType) {
+        this.billingType = billingType;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getContactPerson() {
+        return contactPerson;
+    }
+
+    public void setContactPerson(String contactPerson) {
+        this.contactPerson = contactPerson;
+    }
 }

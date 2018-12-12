@@ -22,7 +22,7 @@ package org.taktik.icure.be.drugs.logic.impl;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Transformer;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -222,7 +222,7 @@ public class DrugsLogicImpl implements DrugsLogic {
     public MpExtendedInfos getExtendedMpInfos(MppId medecinePackageID) {
         try {
             drugsDAO.openDataStoreSession();
-            return getExtendedMpInfos(drugsDAO.getInfos(medecinePackageID).getMp().getId());
+            return MP_TO_MPEXTENDEDINFOS.transform(drugsDAO.getExtendedInfos(drugsDAO.getInfos(medecinePackageID).getMp().getId()));
         } finally {
             drugsDAO.closeDataStoreSession();
         }
@@ -241,13 +241,13 @@ public class DrugsLogicImpl implements DrugsLogic {
         }
     }
 
-    public List<MpPreview> getCheapAlternativesBasedOnAtc(MppId medecinePackageID) {
+    public List<MppPreview> getCheapAlternativesBasedOnAtc(MppId medecinePackageID) {
         try {
             drugsDAO.openDataStoreSession();
             try {
                 Atc atc = drugsDAO.getAtc(medecinePackageID);
 
-                return (List<MpPreview>) CollectionUtils.collect(drugsDAO.getMpsWithAtc(atc), MP_TO_MPPREVIEW);
+                return (List<MppPreview>) CollectionUtils.collect(drugsDAO.getMppsWithAtc(atc), MPP_TO_MPPPREVIEW);
             } catch (Exception ignored) {
             }
             return new ArrayList<>();

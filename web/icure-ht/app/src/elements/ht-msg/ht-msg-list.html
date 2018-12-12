@@ -13,11 +13,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../bower_components/vaadin-material-theme/vaadin-grid.html">
 <link rel="import" href="../../../bower_components/vaadin-grid/vaadin-grid.html">
 
-<link rel="import" href="../../../bower_components/vaadin-grid/vaadin-grid.html">
 <link rel="import" href="../../../bower_components/vaadin-grid/vaadin-grid-column.html">
 <link rel="import" href="../../../bower_components/vaadin-grid/vaadin-grid-sorter.html">
 <link rel="import" href="../../../bower_components/vaadin-themes/material/vaadin-date-picker.html">
 <link rel="import" href="../../../bower_components/vaadin-date-picker/vaadin-date-picker.html">
+<link rel="import" href="../../../bower_components/vaadin-grid/vaadin-grid-selection-column.html">
+<link rel="import" href="../../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../../bower_components/vaadin-checkbox/vaadin-checkbox.html">
+<link rel="import" href="../../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../dynamic-form/ckmeans-grouping.html">
 
 <dom-module id="ht-msg-list">
@@ -25,7 +28,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <custom-style>
             <style include="shared-styles">
                 :host {
-                    display: block;
+                    display: flex;
+                    flex-direction: column;
+                    z-index:2;
                 }
 
                 :host *:focus {
@@ -39,6 +44,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         width: 80%;
                         margin: 0 auto;
                         height: 48px;
+                        text-transform: capitalize;
                     };
                     --paper-button-ink-color: var(--app-secondary-color-dark);
                 }
@@ -50,19 +56,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
 
                 .col-right {
+                    position: relative;
                     box-sizing: border-box;
                     grid-column: 2 / span 1;
                     grid-row: 1 / span 1;
                     background:var(--app-background-color);
                     float:left;
-                    @apply --shadow-elevation-2dp;
                     padding:20px;
+                    padding-top: 0;
                     display:flex;
                     flex-flow: column nowrap;
                     align-items: flex-start;
-                    z-index:2;
                     height: 100%;
-                    width: 100%;
+                    width: calc(100vw - 38%)
                 }
 
                 .card-title-container{
@@ -132,7 +138,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
 
                 vaadin-grid {
-                    height: calc(100% - 16px - 32px);
+                    height: calc(100% - 16px - 32px - 50px);
                     width: 100%;
                     box-shadow: var(--app-shadow-elevation-1);
                     border: none;
@@ -183,12 +189,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 vaadin-grid.material .cell {
                     overflow: hidden;
                     text-overflow: ellipsis;
-                    padding-right: 56px;
+                    padding-right: 8px;
                 }
 
                 vaadin-grid.material .cell.last {
-                    padding-right: 24px;
-                    text-al;
+                    padding-right: 8px;
                 }
 
                 vaadin-grid.material .cell.numeric {
@@ -236,62 +241,251 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                 paper-checkbox {
                     --paper-checkbox-unchecked-color: var(--app-text-color);
-                    --paper-checkbox-unchecked-ink-color: var(--app-secondary-color);
-                    --paper-checkbox-checkmark-color: var(--app-secondary-color);
-                    --paper-checkbox-checked-color: var(--app-primary-color);
+                    --paper-checkbox-label-color: var(--app-text-color);
+                    --paper-checkbox-checked-color: var(--app-secondary-color);
+                    --paper-checkbox-checked-ink-color: var(--app-secondary-color-dark);
+                }
+
+                .buttons{
+                    padding-bottom: 10px;
+                }
+
+                .modal-button--delete{
+                    box-shadow: var(--shadow-elevation-2dp_-_box-shadow);
+                    background: var(--app-background-color-light);
+                    color: var(--app-primary-color-dark);
+                    font-weight: 700;
+                }
+
+                .modal-button{
+                    box-shadow: var(--shadow-elevation-2dp_-_box-shadow);
+                    background: var(--app-background-color-light);
+                    color: var(--app-primary-color-dark);
+                    font-weight: 700;
+                }
+
+                .table-top {
+                    width: calc(100vw - 38%);
+                    min-height: 56px;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: flex-end;
+                }
+                .table-top > .checkbox {
+                    width: 16px;
+                    margin-left: 20px;
+                    display: flex;
+                    justify-content: space-around;
+                    padding-left: 12px;
+                    flex-direction: column;
+                }
+                .table-top > div {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    z-index: 1;
+                }
+                .table-top > div > div {
+                    text-align: center;
+                }
+                .table-top > div.indicators {
+                    flex-grow: 1;
+                    justify-content: flex-end;
+                    padding-right: 24px;
+                }
+                .table-top > div.indicators > div {
+                    display: flex;
+                    flex-direction: column;
+                    padding: 8px;
+                }
+                .table-top > div.indicators > div > * {
+                    margin: 0 auto;
+                }
+                .table-top > div.indicators > div#stamp-indicator.hasNew span {color: var(--app-secondary-color);}
+                .table-top > div.indicators > div#capacity-indicator > * {
+                    display: inline-block;
+                }
+                .table-top > div.actions {
+                    margin: 0 16px;
+                }
+                .table-top > div.actions paper-icon-button {
+                    margin: 8px 0;
+                }
+
+                .mb4 {margin-bottom: 4px !important;}
+
+                #actions-spinner {
+                    position: absolute;
+                    right: 148px;
+                    top: 30px;
+                    z-index: 1;
+                    height: 35px;
+                }
+
+                #mail-list {
+                    padding-right: 0;
+                    margin-right: 0;
+                    height: 100%;
+                }
+
+                .get-msg-btn{
+                    margin-bottom: 16px;
+                    --paper-button: {
+                        background: var(--app-secondary-color);
+                        color: var(--app-text-color);
+                        width: 100%;
+                        margin: 0 auto;
+                        font-size: 14px;
+                        font-weight: bold;
+                        text-transform: capitalize;
+                    };
+                    --paper-button-ink-color: var(--app-secondary-color-dark);
+                }
+                paper-spinner.center {
+                    z-index: 999999;
+                    position: fixed;
+                    left: 33vw;
+                    top: 150px;
+                }
+
+                div.pagination {
+                    width: calc(100vw - 38%);
+                    display: flex;
+                    flex-direction: row;
+                    padding: 0 8px;
+                }
+                div.pagination span {
+                    line-height: 40px;
+                }
+                div.pagination paper-button.change-page {
+                    cursor: pointer;
+                }
+                div.pagination .selector {
+                    flex-grow: 1;
+                    display: flex;
+                    justify-content: space-around;
+                }
+                div.pagination button.page-number {
+                    margin: 8px 4px;
+                    background: var(--app-background-color-dark);
+                    border: 0;
+                    border-radius: 50%;
+                    width: 24px;
+                    height: 24px;
+                    text-align: center;
+                    box-sizing: border-box;
+                    padding: 0 !important;
+                    cursor: pointer;
+                }
+                div.pagination button.page-number:selected {
+                    background: var(--app-secondary-color);
+                }
+
+                paper-progress {
+                    --paper-progress-active-color: var(--app-secondary-color);
+                }
+                paper-progress.full {
+                    --paper-progress-active-color: var(--app-error-color);
+                }
+
+                @media screen and (max-width:1025px) {
+                    .col-right {
+                        width: 100vw;
+                        transition: all .5s ease;
+                        box-shadow: none;
+                    }
+
+                    paper-spinner.center {
+                        left: 50vw;
+                    }
                 }
 
             </style>
         </custom-style>
         <template is="dom-if" if="[[selectList]]">
-            <div class="second-panel col-right">
-                <div class="card-title-container">
-                    <h1 class="card-title new-notif"><iron-icon icon="icons:arrow-forward"></iron-icon>[[localize('lat_lab_res','Latest Lab Results',language)]]</h1>
+            <div class="table-top">
+                <div class="checkbox">
+                    <vaadin-checkbox id="checkerAll" on-checked-changed="_toggleSelectAll"></vaadin-checkbox>
                 </div>
-                <vaadin-grid id="mail-list" class="material" multi-sort="[[multiSort]]" active-item="{{activeItem}}"
-                             items="[[messages]]" on-tap="click">
-                    <!-- <template is="dom-if" if="[[selectList.selection.item]] === 'sentbox'">
-                        <vaadin-grid-column width="100px">
-                            <template class="header">
-                                <vaadin-grid-sorter path="fromAddress">[[localize('sen_to','Send To',language)]]
-                                </vaadin-grid-sorter>
-                            </template>
+
+                <div class="actions">
+                    <template is="dom-if" if="[[!checkedMessages.length]]">
+                        <template is="dom-if" if="[[!_isEqual(selectList.selection.item,'trash')]]">
+                            <paper-icon-button id="refresh-button" icon="icons:refresh" on-tap="_refresh"></paper-icon-button>
+                            <paper-tooltip for="refresh-button" offset="2">[[localize('refresh','Refresh',language)]]</paper-tooltip>
+                        </template>
+                    </template>
+                    <template is="dom-if" if="[[checkedMessages.length]]">
+                        <template is="dom-if" if="[[_isEqual(selectList.selection.item,'trash')]]">
+                            <paper-icon-button id="restore-button" icon="icons:undo" on-tap="_restoreMsgs"></paper-icon-button>
+                            <paper-tooltip for="restore-button" offset="2">[[localize('restore','Restore',language)]]</paper-tooltip>
+                        </template>
+                        <template is="dom-if" if="[[!_isEqual(selectList.selection.item,'trash')]]">
+                            <paper-icon-button id="del-button" icon="delete" on-tap="_removeMsgs"></paper-icon-button>
+                            <paper-tooltip for="del-button" offset="2">[[localize('del_sel','Delete selected',language)]]</paper-tooltip>
+                        </template>
+                    </template>
+                </div>
+
+                <div class="indicators">
+                    <template is="dom-if" if="[[!_isEqual(bufferedMsgs,0)]]">
+                        <div id="stamp-indicator" class="stamp-indicator hasNew"><iron-icon icon="warning"></iron-icon><span class="label">[[bufferedMsgs]]</span></div>
+                        <paper-tooltip for="stamp-indicator" offset="0">[[localize('buff_msgs','buffered msgs',language)]]</paper-tooltip>
+                    </template>
+                    <div id="capacity-indicator">
+                        <div class="mb4"><iron-icon icon="cloud"></iron-icon> <span>[[localize('mail_cap','mailbox capacity',language)]] ([[capacityPercent]]%)</span></div>
+                        <paper-progress value$="[[capacityPercent]]" min="0" max="100" class$="[[_mailBoxCapacityColor]]"></paper-progress>
+                    </div>
+                    <template is="dom-if" if="[[actualCapacity]] >= 100">
+                        <paper-tooltip for="capacity-indicator" offset="0">[[actualCapacity]]%</paper-tooltip>
+                    </template>
+                </div>
+
+            </div>
+            <div class="second-panel col-right">
+                <paper-spinner class="center" active="[[isLoadingMailList]]"></paper-spinner>
+
+                <vaadin-grid id="mail-list" class="material" multi-sort="[[multiSort]]" 
+                             active-item="{{activeItem}}" items="[[messages]]" 
+                             on-tap="click" on-removed-opened="_deselectMessages"
+                             selection-mode="multi" width="100%" pageSize="30">
+                    <template is="dom-if" if="[[selectList.selection.item]] != 'sentbox'">
+                        <vaadin-grid-column flex-grow="0" width="46px">
                             <template>
-                                <div class="cell frozen">[[getToAddresses(item)]]</div>
+                                <vaadin-checkbox on-checked-changed="_itemSelected" data-item$="[[item]]" class="checkbox"></vaadin-checkbox>
                             </template>
                         </vaadin-grid-column>
-                    </template> -->
-                    <template is="dom-if" if="[[selectList.selection.item]] != 'sentbox'">
-                        <vaadin-grid-column width="30%">
+                        <vaadin-grid-column flex-grow="0" width="102px">
                             <template class="header">
-                                <vaadin-grid-sorter path="fromAddress">[[localize('sen','Sender',language)]]
+                                <vaadin-grid-sorter path="received" direction="asc">[[localize('dat','Date',language)]]</vaadin-grid-sorter>
+                            </template>
+                            <template>
+                                <div class="cell frozen">[[_timeFormat(item.received)]]</div>
+                            </template>
+                        </vaadin-grid-column>
+                        <vaadin-grid-column flex-grow="1">
+                            <template class="header">
+                                <vaadin-grid-sorter path="fromAddress"><b>[[localize('sen','Sender',language)]]</b> [[localize('and','and',language)]] [[localize('sub','Subject',language)]]
                                 </vaadin-grid-sorter>
                             </template>
                             <template>
-                                <div class="cell frozen">[[item.fromAddress]]</div>
+                                <div class="cell frozen"><b>[[item.fromAddress]]</b> - [[item.subject]]</div>
                             </template>
                         </vaadin-grid-column>
                     </template>
-                    <vaadin-grid-column width="30%">
-                        <template class="header">
-                            <div>[[localize('dat','Date',language)]]</div>
-                        </template>
-                        <template>
-                            <div class="cell frozen">[[_timeFormat(item.received)]]</div>
-                        </template>
-                    </vaadin-grid-column>
-                    <vaadin-grid-column width="40%">
-                        <template class="header">
-                            <vaadin-grid-sorter class="cell frozen" path="subject">
-                                [[localize('sub','Subject',language)]]
-                            </vaadin-grid-sorter>
-                        </template>
-                        <template>
-                            <div class="cell frozen">[[item.subject]]</div>
-                        </template>
-                    </vaadin-grid-column>
                 </vaadin-grid>
             </div>
+            <!-- WORK IN PROGRESS -->
+            <!--<div class="pagination">-->
+                <!--<span>Pages : </span>-->
+                <!--<paper-button class="change-page" on-tap="_prevPage"><iron-icon icon="chevron-left"></iron-icon></paper-button>-->
+                <!--<div class="selector">-->
+                    <!--<template is="dom-repeat" items="[[pages]]">-->
+                        <!--<button class="page-number" on-tap="_selectPage" selected$="[[_isPage(page, item)]]">[[item]]</button>-->
+                    <!--</template>-->
+                <!--</div>-->
+                <!--<paper-button class="change-page" on-tap="_nextPage"><iron-icon icon="chevron-right"></iron-icon></paper-button>-->
+            <!--</div>-->
         </template>
     </template>
 
@@ -301,7 +495,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         import _ from 'lodash/lodash';
         import filterExParser from '../../../scripts/filterExParser';
 
-        class HtMsgList extends Polymer.TkLocalizerMixin(Polymer.mixinBehaviors([], Polymer.Element)) {
+        class HtMsgList extends Polymer.TkLocalizerMixin(Polymer.Element) {
             static get is() {
                 return 'ht-msg-list';
             }
@@ -319,7 +513,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         notify: true
                     },
                     activeItem: {
-                        type: Object
+                        type: Object,
+                        observer: '_activeItemChanged'
                     },
                     messages: {
                         type: Array,
@@ -357,6 +552,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             };
                             return res;
                         }
+                    },
+                    listTitle:{
+                    	type: String
+                    },
+                    isLoadingMailList: {
+                        type: Boolean,
+                        value: false
+                    },
+                    checkedMessages: {
+                        type: Array,
+                        value: []
+                    },
+                    page: {
+                        type: Number,
+                        value: 0
+                    },
+                    pages: {
+                        type: Array,
+                        value: [1,2,3,4]
+                    },
+                    bufferedMsgs: {
+                        type: Number,
+                        value: 0
+                    },
+                    mailboxCapacity: {
+                        type: Number,
+                        value: 0
+                    },
+                    mailboxMaxCapacity: {
+                        type: Number,
+                        value: 0
+                    },
+                    capacityPercent: {
+                        type: Number,
+                        value: 0
                     }
                 };
             }
@@ -366,17 +596,55 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             static get observers() {
-                return ['_refresh(selectList,selectList.*)'];
+                return ['_refresh(selectList,selectList.*),_messagesChanged(messages, page)'];
             }
 
             ready() {
                 super.ready();
+                this._getBoxCapacity()
             }
 
+            _getBoxCapacity() {
+                if (this.api.keystoreId && this.api.tokenId && this.api.credentials.ehpassword) {
+                    this.api.fhc().Ehboxcontroller().getInfosUsingGET(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword)
+                        .then(boxInfo=>{
+                            this.set('bufferedMsgs',boxInfo.nbrMessagesInStandBy)
+                            this.set('mailboxCapacity',boxInfo.currentSize)
+                            this.set('mailboxMaxCapacity',boxInfo.maxSize)
+                            this.set('actualCapacity',((this.mailboxCapacity / this.mailboxMaxCapacity)*100).toFixed(2))
+                            if (this.actualCapacity >= 100) this.set('_mailBoxCapacityColor','full')
+                            this.set('capacityPercent', this.actualCapacity <= 100 ? this.actualCapacity : '+100')
+                        })
+                }
+            }
+
+            _isPage(page,item) {return page === item -1}
+            _selectPage(e) {this.set('page',e.model.item -1)}
+            _prevPage(e) {this.set('page',Math.max(0, this.page - 1))}
+            _nextPage(e) {this.set('page',Math.min(this.pages.length - 1, this.page + 1))}
+            _messagesChanged(messages,page) {
+                console.log('messagesChanged')
+                const grid = this.shadowRoot.getElementById('mail-list')
+                grid.size = 30
+                if (!this.pages) {
+                    this.set('pages',Array.apply( null, {length: Math.ceil(messages.length / grid.pageSize)} ).map(function(message, index) {
+                        return index + 1;
+                    }));
+                }
+                let start = page * grid.pageSize;
+                let end = (page + 1) * grid.pageSize;
+                grid.items = messages.slice(start, end);
+                grid.clearCache()
+            }
+			_newMsg(){
+				this.dispatchEvent(new CustomEvent('selection-messages-change', { detail: { selection: { item: null } } }));
+				this.findMessagesByTransportGUID('SENTBOX:*').then(messages => this.set('messages', messages || []));
+			}
 
             getInbox() {
                 this.api.message().findMessagesByToAddress('INBOX', null, null, 1000).then(messages => {
-                    return this.sortByDates(messages.rows);
+                    console.log('getInbox',messages)
+                    return this.sortByDatesAndGUID(messages.rows).filter(msg => msg.fromAddress !== 'EFACT').filter(msg => !msg.transportGuid.startsWith('BIN'));
                 }).then(messages => this.set('messages', messages || []));
             }
 
@@ -388,13 +656,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         }
                         return acc
                     }, [])
-                    return this.sortByDates(msg);
+                    return this.sortByDates(msg).filter(msg => !msg.transportGuid.startsWith('BIN'));
                 }).then(messages => this.set('messages', messages || []));
             }
 
             getSentMessages() {
                 this.api.message().findMessagesByToAddress('SENTBOX', null, null, 1000).then(messages => {
-                    return this.sortByDates(messages.rows);
+                    return this.sortByDates(messages.rows).filter(msg => !msg.transportGuid.startsWith('BIN'));
                 }).then(messages => this.set('messages', messages || []));
             }
 
@@ -406,7 +674,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         }
                         return acc
                     }, [])
-                    return this.sortByDates(msg);
+                    return this.sortByDates(msg).filter(msg => !msg.transportGuid.startsWith('BIN'));
                 }).then(messages => this.set('messages', messages || []));
             }
 
@@ -418,25 +686,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         }
                         return acc
                     }, [])
-                    return this.sortByDates(msg);
+                    return this.sortByDates(msg).filter(msg => !msg.transportGuid.startsWith('BIN'));
                 }).then(messages => this.set('messages', messages || []));
             }
 
             getReport(){
-                this.findMessagesByTransportGUID('REPORT:OUT:*').then(messages => this.set('messages', messages || []));
-
+                this.findMessagesByTransportGUID('REPORT:OUT:*').then(messages => {
+                    let msgs = messages.filter(msg => !msg.transportGuid.startsWith('BIN'));
+                    this.set('messages', msgs || [])
+                });
             }
 
             getEInv(){
                 console.log(this.messages)
                 this.api.message().findMessagesByTransportGuid('EFACT:OUT:*', null, null, 1000).then(messages => {
                     console.log(messages.rows)
-                    return this.sortByDates(messages.rows);
+                    return this.sortByDates(messages.rows).filter(msg => !msg.transportGuid.startsWith('BIN'));
                 }).then(messages => this.set('messages', messages || []));
             }
 
             getReportIn(){
-                this.findMessagesByTransportGUID('REPORT:IN:*').then(messages => this.set('messages', messages || []));
+                this.findMessagesByTransportGUID('REPORT:IN:*').then(messages => {
+                    let msgs = messages.filter(msg => !msg.transportGuid.startsWith('BIN'));
+                    this.set('messages', msgs || [])
+                });
+            }
+
+            getMycarenetIn() {
+                this.findMessagesByTransportGUID('GMD:IN:*').then(messages => this.set('messages', messages || []));
             }
 
             getEInvIn(){
@@ -444,16 +721,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             getEheIn(){
-                this.findMessagesByTransportGUID('CHAP4IN:*').then(messages => this.set('messages', messages || []));
+                this.findMessagesByTransportGUID('INBOX:*').then(messages => {
+                    let msgs = messages.filter(msg => !msg.transportGuid.startsWith('BIN'));
+                    this.set('messages', msgs || [])
+                });
             }
+
+			getChap4In(){
+				this.findMessagesByTransportGUID('CHAP4IN:*').then(messages => this.set('messages', messages || []));
+			}
 
             getProtIn(){
                 this.findMessagesByTransportGUID('BININBOX:*').then(messages => this.set('messages', messages || []));
             }
 
             getEheOut(){
-                this.findMessagesByTransportGUID('CHAP4OUT:*').then(messages => this.set('messages', messages || []));
+                this.findMessagesByTransportGUID('SENTBOX:*').then(messages => this.set('messages', messages || []));
             }
+
+			getChap4Out(){
+				this.findMessagesByTransportGUID('CHAP4OUT:*').then(messages => this.set('messages', messages || []));
+			}
 
             getProtOut(){
                 this.findMessagesByTransportGUID('BINSENTBOX:*').then(messages => this.set('messages', messages || []));
@@ -468,7 +756,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             getEhealthMessages(){
-                this.api.message().findMessagesByTransportGuid('SENTBOX:*', null, null, 1000).then(messages => {
+				// return this.findMessagesByTransportGUID('SENTBOX:*', null, null, 1000)
+                //     .then(messages => this.set('messages', messages || []));
+
+				this.api.message().findMessagesByTransportGuid('SENTBOX:*', null, null, 1000).then(messages => {
                     const msg = messages.rows.reduce((acc, m) => {
                         if (!(m.status && 1 << 8 == 0)) {//status STATUS_SUBMITTED
                             acc.push(m)
@@ -477,17 +768,43 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     }, [])
                     return this.sortByDates(msg);
                 }).then(messages => this.set('messages', messages || []));
+                
+            }
+
+            getTrash(){
+				return this.findMessagesByTransportGUIDs(['BININBOX:*','BINSENTBOX:*','BIN:*'], null, null, 1000)
+					.then(messages => this.set('messages', messages || []));
             }
 
             findMessagesByTransportGUID(guid){
                 return this.api.message().findMessagesByTransportGuid(guid, null, null, 1000).then(messages => {
-                    return this.sortByDates(messages.rows);
+                    // console.log('findMessagesByTransportGUID',messages)
+                    return this.sortByDatesAndGUID(messages.rows);
                 })
             }
 
+            findMessagesByTransportGUIDs(guids){
+				let p = []
+				guids.forEach(guid => {
+					p.push(this.findMessagesByTransportGUID(guid))
+				});
+                return Promise.all(p).then(items =>{
+                	let results = [];
+                	items.forEach(item => results = results.concat(item));
+                    return results;
+                });
+            }
+
             _refresh() {
+                console.log('refresh',this.selectList.selection)
                 if (this.selectList && this.selectList.selection) {
-                    switch (this.selectList.selection.item) {
+                    this.set('isLoadingMailList', true)
+                	let item = this.selectList.selection.item
+					if(!['newMsg','Refresh'].includes(item)) this.setListTitle(item);
+                    switch (item) {
+                        case 'newMsg':
+                        	this._newMsg();
+                        	break;
                         case 'inbox' :
                             this.getInbox();
                             break;
@@ -521,6 +838,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         case 'eheIn' :
                             this.getEheIn();
                             break;
+                        case 'mycarenet' :
+                            this.getMycarenetIn();
+                            break;
+                        case 'Chap4In' :
+                        	this.getChap4In();
+                        	break;
                         case 'protIn' :
                             this.getProtIn();
                             break;
@@ -536,15 +859,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         case 'GMD' :
                             this.getGMD();
                             break;
+                        case 'trash' :
+                        	this.getTrash();
+                        	break;
+                        case 'Refresh':
+                        	// Fake selection to refresh binding
+                        	break;
                     }
                 }
+                this.dispatchEvent(new CustomEvent('selection-messages-change', { detail: { selection: { item: null } } }));
+                this._deselectAll();
             }
 
             sortByDates(messages){
-                return messages.sort(function (a, b) {
-                    return b.received - a.received ;
+                this.set('isLoadingMailList', false)
+				return messages.sort(function (a, b) {
+					return b.received - a.received ;
+				});
+			}
+
+			sortByDatesAndGUID(messages){
+                this.set('isLoadingMailList', false)
+				return messages.sort(function (a, b) {
+					if(b.received === a.received){
+						let bGuid = (b.transportGuid+'').split(":")[1] || "";
+						let aGuid = (a.transportGuid+'').split(":")[1] || "";
+						return bGuid > aGuid? 1: -1;
+                    }
+                    else{
+                    	return b.received - a.received;
+                    }
                 });
-            }
+			}
 
             getToAddresses(item){
                 return item.toAddresses.reduce((acc, i) =>{return acc + ", " + i}, "" )
@@ -554,13 +900,124 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 const selected = this.activeItem;
                 this.set('selectedMessages', selected);
                 this.dispatchEvent(new CustomEvent('selection-messages-change', { detail: { selection: { item: this.selectedMessages } } }));
+                // this._deselectAll();
+            }
+
+            _deselectMessages() {
+                this.set('activeItem', null)
+                this.click()
+            }
+
+            _itemSelected(e) {
+                // console.log('e',e,'target',e.target,'item',e.target.dataset.item)
+                if (e.path[0].checked) {
+                    const checkedMsg = JSON.parse(e.target.dataset.item)
+                    this.push('checkedMessages',checkedMsg)
+                }
+                else {
+                    this.splice('checkedMessages', this.checkedMessages.indexOf(e.target.dataset.item))
+                }
+                console.log(this.checkedMessages.length+' checked',this.checkedMessages)
+            }
+
+            _toggleSelectAll() {
+                let mailList = this.shadowRoot.querySelector('#mail-list');
+                let allCheckboxes = mailList? mailList.querySelectorAll('.checkbox') : []
+                allCheckboxes.forEach(box=>{
+                    box.checked = !box.checked;
+                })
+            }
+
+            _deselectAll() {
+                let checkerAll = this.shadowRoot.querySelector('#checkerAll')
+                    , mailList = this.shadowRoot.querySelector('#mail-list')
+                let allCheckboxes = mailList? mailList.querySelectorAll('.checkbox') : []
+                // checkerAll.checked = false;
+                allCheckboxes.forEach(box=>{
+                    box.checked = false;
+                })
+                this.set('checkedMessages',[])
+            }
+
+			_removeMsgs(){
+				let mailList = this.shadowRoot.querySelector('#mail-list'), allCheckboxes = mailList.querySelectorAll('.checkbox'), checkedMsgs = this.checkedMessages, msgsToDelete = []
+                const selectedBox = this.selectList.selection.item.toUpperCase()
+				const thisBox = selectedBox == 'EHEALTHMESSAGES' || selectedBox == 'REPORTOUT' || selectedBox == 'SENTBOX' ? 'SENTBOX' : 'INBOX'
+                const delBox = thisBox == 'INBOX' ? 'BININBOX' : thisBox == 'SENTBOX' ? 'BINSENTBOX' : 'BININBOX'
+				if(checkedMsgs.length) {
+                    checkedMsgs.forEach(msg =>{if (!msg.transportGuid.startsWith("BIN")) {msgsToDelete.push(msg.transportGuid.substring(msg.transportGuid.indexOf(':')+1))}}) // forEach end
+                    if(msgsToDelete.length){
+                        this.api.fhc().Ehboxcontroller().moveMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, msgsToDelete, thisBox, delBox)
+                            .then(this.api.fhc().Ehboxcontroller().deleteMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, msgsToDelete, delBox))
+                        checkedMsgs.forEach(msg=>{
+                            msg.transportGuid = delBox + msg.transportGuid.substring(msg.transportGuid.indexOf(':'))
+                            this.api.message().modifyMessage(msg).then(()=>this.dispatchEvent(new CustomEvent('item-delete', { detail: { selection: { item: "Refresh" } } })))
+                            this._refresh()
+                        })
+                    }
+                    allCheckboxes.forEach(box=>box.checked = false)
+                    this.dispatchEvent(new CustomEvent('selection-messages-change', { detail: { selection: { item: null } } }));
+                    this._deselectAll();
+				} // if checked length end
+            }
+
+            _isEqual(a,b) {return (a === b)}
+
+            _restoreMsgs(){
+                const checkedMsgs = this.checkedMessages
+                if(checkedMsgs.length) {
+                    let mailList = this.shadowRoot.querySelector('#mail-list')
+                        , allCheckboxes = mailList.querySelectorAll('.checkbox')
+                        , tempBinInbox = []
+                        , tempBinSentbox = []
+                        , msgsToRestore = []
+                    checkedMsgs.forEach(msg =>{
+                        const msgId = msg.transportGuid.substring(msg.transportGuid.indexOf(':')+1)
+                        const thisBox = msg.transportGuid.substring(0,msg.transportGuid.indexOf(':'))
+                        if (thisBox == 'BININBOX') {tempBinInbox.push(msgId)}
+                        if (thisBox == 'BINSENTBOX') {tempBinSentbox.push(msgId)}
+                        msgsToRestore.push(msg)
+                    }) // forEach end
+                    if(tempBinInbox.length){
+                        this.api.fhc().Ehboxcontroller().moveMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, tempBinInbox, 'BININBOX', 'INBOX')
+                            .then(this.api.fhc().Ehboxcontroller().deleteMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, tempBinInbox, 'INBOX'))
+                    }
+                    if(tempBinSentbox.length){
+                        this.api.fhc().Ehboxcontroller().moveMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, tempBinSentbox, 'BINSENTBOX', 'SENTBOX')
+                            .then(this.api.fhc().Ehboxcontroller().deleteMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, tempBinSentbox, 'SENTBOX'))
+                    }
+                    msgsToRestore.forEach(msg=>{
+                        if (tempBinInbox.indexOf(msg.transportGuid.substring(msg.transportGuid.indexOf(':')+1))) {
+                            msg.transportGuid = 'INBOX' + msg.transportGuid.substring(msg.transportGuid.indexOf(':'))
+                        } else {
+                            msg.transportGuid = 'SENTBOX' + msg.transportGuid.substring(msg.transportGuid.indexOf(':'))
+                        }
+                        this.api.message().modifyMessage(msg.id)
+                    })
+                    this.dispatchEvent(new CustomEvent('item-restore', { detail: { selection: { item: "Refresh" } } }))
+                    allCheckboxes.forEach(box=>box.checked = false)
+                    this._refresh()
+                } // if checked length end
             }
 
             _timeFormat(date) {
-                return date && this.api.moment(date).format(date > 99991231 ? 'DD/MM/YYYY HH:mm' : 'DD/MM/YYYY') || '';
+                return date && this.api.moment(date).format('DD/MM/YYYY') || '';
             }
 
-        }
+			_activeItemChanged(item){
+                let mailList = this.shadowRoot.querySelector('#mail-list');
+                if(mailList) mailList.selectedItems = item ? [item] : [];
+            }
+
+            setListTitle(title){
+            	this.set("listTitle",this.localize("boxtitle." + title,'List',this.language))
+            }
+
+            _displayRestoreButton(){
+                return (this.selectList.selection.item == 'trash')
+            }
+
+		}
 
         customElements.define(HtMsgList.is, HtMsgList);
     </script>

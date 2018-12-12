@@ -25,19 +25,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.collections4.Transformer;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
@@ -101,7 +103,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 
 	protected Map<String, Analyzer> analyzers;
 
-	private String dbMainFile = "drugs.h2.db";
+	private String dbMainFile = "drugs.mv.db";
 	private File dbDir;
 	private PropertyLogic propertyLogic;
 
@@ -115,12 +117,38 @@ public class DrugsDAOImpl implements DrugsDAO {
 	}
 
 	public File getDbDir() {
-		if (dbDir == null) {
-			String tempDir = propertyLogic.getSystemPropertyValue(PropertyTypes.System.ICURE_PATH_TEMP.getIdentifier());File drugsDir = new File(tempDir, "drugs");
-			if (drugsDir.exists() && drugsDir.isDirectory()) {
-				dbDir = drugsDir;
-			} else {
-				drugsDir.mkdirs();
+		synchronized(this) {
+			if (dbDir == null) {
+				String tempDir = propertyLogic.getSystemPropertyValue(PropertyTypes.System.ICURE_PATH_TEMP.getIdentifier());
+				File drugsDir = new File(tempDir, "drugs");
+				File dbFile = new File(drugsDir, dbMainFile);
+
+				if (drugsDir.exists() && drugsDir.isDirectory() && dbFile.exists()) {
+					//Should Check validity
+					InputStream stream = this.getClass().getClassLoader().getResourceAsStream("be/drugs/drugs.zip");
+					ZipInputStream zis = new ZipInputStream(stream);
+					ZipEntry ze;
+					try {
+						while ((ze = zis.getNextEntry()) != null) {
+							if (dbMainFile.equals(ze.getName())) {
+								if (ze.getSize() == dbFile.length()) {
+									dbDir = drugsDir;
+									return dbDir;
+								}
+							}
+						}
+					} catch (Exception ignored) {
+					}
+				}
+
+				if (drugsDir.isFile()) {
+					drugsDir.delete();
+				}
+
+				boolean mkdirs = drugsDir.mkdirs();
+				if (!mkdirs) {
+					Optional.ofNullable(drugsDir.listFiles()).ifPresent(files->Arrays.asList(files).forEach(File::delete));
+				}
 				if (drugsDir.exists() && drugsDir.isDirectory()) {
 					InputStream stream = this.getClass().getClassLoader().getResourceAsStream("be/drugs/drugs.zip");
 					ZipInputStream zis = new ZipInputStream(stream);
@@ -150,8 +178,8 @@ public class DrugsDAOImpl implements DrugsDAO {
 					}
 				}
 			}
+			return dbDir;
 		}
-		return dbDir;
 	}
 
 	public void setDbDir(File dbDir) {
@@ -161,7 +189,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@SuppressWarnings("unchecked")
 	public List<Mpp> getMedecinePackages(String searchString, String lang, List<String> types, int first, int count) {
 		log.debug("Getting medecine packages for " + searchString + " from " + first + ", count=" + count);
-		Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+		Session sess = getSessionFactory().getCurrentSession();
 		Criteria c = sess.createCriteria(Mpp.class);
 		addLangRestriction(c, lang);
 		addTypesRestriction(c, types);
@@ -176,7 +204,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@SuppressWarnings("unchecked")
 	public List<Mpp> getMedecinePackagesFromIngredients(String searchString, String lang, List<String> types, int first, int count) {
 		log.debug("Getting medecine packages from ingredients for " + searchString + " from " + first + ", count=" + count);
-		Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+		Session sess = getSessionFactory().getCurrentSession();
 		Criteria c = sess.createCriteria(Mpp.class);
 		addLangRestriction(c, lang);
 		addTypesRestriction(c, types);
@@ -197,7 +225,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@SuppressWarnings("unchecked")
 	public Mpp getInfos(MppId medecinePackageID) {
 		log.debug("Getting infos for Mpp " + medecinePackageID);
-		Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+		Session sess = getSessionFactory().getCurrentSession();
 		Criteria c = sess.createCriteria(Mpp.class);
 		c.add(Restrictions.eq("id", medecinePackageID));
 		c.setFetchMode("mp", FetchMode.JOIN);
@@ -213,7 +241,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 		return new HibernateTemplate(getSessionFactory());
 	}
 
-	protected SessionFactory getSessionFactory() {
+	private synchronized SessionFactory getSessionFactory() {
 		if (sessionFactory == null) {
 			if (!isDataBasePresent()) {
 				throw new DrugsDatabaseNotFoundException();
@@ -350,7 +378,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@SuppressWarnings("unchecked")
 	public Mp getExtendedInfos(MpId medecineID) {
 		log.debug("Getting infos for Mp " + medecineID);
-		Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+		Session sess = getSessionFactory().getCurrentSession();
 		Criteria c = sess.createCriteria(Mp.class);
 		c.add(Restrictions.eq("id", medecineID));
 		List<Mp> result = c.list();
@@ -365,7 +393,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@SuppressWarnings("unchecked")
 	public Doc getExtendedInfos(DocId docID) {
 		log.debug("Getting infos for doc " + docID);
-		Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+		Session sess = getSessionFactory().getCurrentSession();
 		Criteria c = sess.createCriteria(Doc.class);
 		c.add(Restrictions.eq("id", docID));
 		List<Doc> result = c.list();
@@ -377,14 +405,14 @@ public class DrugsDAOImpl implements DrugsDAO {
 	}
 
 	public Doc getDoc(DocId docID) {
-		Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+		Session sess = getSessionFactory().getCurrentSession();
 		Doc doc = (Doc) sess.get(Doc.class, docID);
 		return doc;
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Doc> getRootDocs(String lang) {
-		Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+		Session sess = getSessionFactory().getCurrentSession();
 		Criteria c = sess.createCriteria(Doc.class);
 		addLangRestriction(c, lang);
 		c.add(Restrictions.sqlRestriction("parent_id is null"));
@@ -396,7 +424,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@SuppressWarnings("unchecked")
 	public Mp getFullMpInfos(MpId mpId) {
 		log.debug("Getting infos for Mp " + mpId);
-		Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+		Session sess = getSessionFactory().getCurrentSession();
 		Criteria c = sess.createCriteria(Mp.class);
 		c.add(Restrictions.eq("id", mpId));
 		List<Mp> result = c.list();
@@ -510,7 +538,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	}
 
 	public Mpp getMpp(MppId mppId) {
-		Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+		Session sess = getSessionFactory().getCurrentSession();
 		Mpp mpp = (Mpp) sess.get(Mpp.class, mppId);
 		return mpp;
 	}
@@ -603,19 +631,19 @@ public class DrugsDAOImpl implements DrugsDAO {
 
 
 	public Mp getMp(MpId mpId) {
-		Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+		Session sess = getSessionFactory().getCurrentSession();
 		Mp mp = (Mp) sess.get(Mp.class, mpId);
 		return mp;
 	}
 
 	public Atc getAtc(MppId medecinePackageID) {
-		Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+		Session sess = getSessionFactory().getCurrentSession();
 		Atc atc = (Atc) sess.get(Atc.class, new AtcId(medecinePackageID.getId(), medecinePackageID.getLang()));
 		return atc;
 	}
 
 	public List<Mp> getMpsWithAtc(Atc atc) {
-		Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+		Session sess = getSessionFactory().getCurrentSession();
 
 		Set<Mp> mps = new HashSet<>();
 		if (atc != null && atc.getCode() != null)
@@ -630,9 +658,25 @@ public class DrugsDAOImpl implements DrugsDAO {
 		return new ArrayList<>(mps);
 	}
 
+	public List<Mpp> getMppsWithAtc(Atc atc) {
+		Session sess = getSessionFactory().getCurrentSession();
+
+		Set<Mpp> mpps = new HashSet<>();
+		if (atc != null && atc.getCode() != null)
+			for (Atc a : (List<Atc>) sess.createCriteria(Atc.class).add(Restrictions.eq("code", atc.getCode())).add(Restrictions.eq("current", true)).list()) {
+				if (a.getId().getLang().equals(atc.getId().getLang())) {
+					Mpp mpp = (Mpp) sess.get(Mpp.class, new MppId(a.getId().getMppId(), a.getId().getLang()));
+					if (mpp != null && mpp.getRrsstate() != null && (mpp.getRrsstate().equals("G") || mpp.getRrsstate().equals("C") || mpp.getRrsstate().equals("B"))) {
+						mpps.add(mpp);
+					}
+				}
+			}
+		return new ArrayList<>(mpps);
+	}
+
 	public List<Mpp> getCheapMppsWithInn(String inn, String lang) {
 		if (inn != null && lang != null) {
-			Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+			Session sess = getSessionFactory().getCurrentSession();
 			ArrayList<Mpp> result = new ArrayList<>();
 			for (Mpp candidate : (Collection<Mpp>) sess.createCriteria(Mpp.class).add(Restrictions.eq("inncluster", inn)).addOrder(Order.asc("index")).list()) {
 				if (candidate.getId().getLang().equals(lang) && candidate.getRrsstate() != null && (candidate.getRrsstate().equals("G") || candidate.getRrsstate().equals("C") || candidate.getRrsstate().equals("B"))) {
@@ -646,7 +690,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 
 	public List<Mpp> getMppsWithInn(String inn, String lang) {
 		if (inn != null && lang != null) {
-			Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+			Session sess = getSessionFactory().getCurrentSession();
 			ArrayList<Mpp> result = new ArrayList<>();
 			for (Mpp candidate : (Collection<Mpp>) sess.createCriteria(Mpp.class).add(Restrictions.eq("inncluster", inn)).addOrder(Order.asc("index")).list()) {
 				if (candidate.getId().getLang().equals(lang)) {
@@ -660,7 +704,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 
 	public List<Iam> getIams(String id, String lang) {
 		if (id != null) {
-			Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+			Session sess = getSessionFactory().getCurrentSession();
 			List<Iam> result = new ArrayList<>();
 			for (Iam iam : (List<Iam>) sess.createCriteria(Iam.class).add(Restrictions.eq("atc1", id)).list()) {
 				if (iam.getIamId().getLang().equals(lang)) {
@@ -675,7 +719,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@Override
 	public Ampp getAmpp(MppId mppId) {
 		if (mppId != null) {
-			Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+			Session sess = getSessionFactory().getCurrentSession();
 			return (Ampp) sess.get(Ampp.class, mppId.getId());
 		}
 		return null;
@@ -684,7 +728,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@Override
 	public Therapy getTherapy(Long therapyId) {
 		if (therapyId != null) {
-			Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+			Session sess = getSessionFactory().getCurrentSession();
 			return (Therapy) sess.get(Therapy.class, therapyId);
 		}
 		return null;
@@ -693,7 +737,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@Override
 	public Paragraph getParagraph(Therapy therapy) {
 		if (therapy != null) {
-			Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+			Session sess = getSessionFactory().getCurrentSession();
 			return (Paragraph) sess.createCriteria(Paragraph.class)
 					.add(Restrictions.eq("chapterName", therapy.getChapterName()))
 					.add(Restrictions.eq("paragraphName", therapy.getParagraphName()))
@@ -705,7 +749,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@Override
 	public Verse getHeaderVerse(Paragraph paragraph) {
 		if (paragraph != null) {
-			Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+			Session sess = getSessionFactory().getCurrentSession();
 			return (Verse) sess.createCriteria(Verse.class)
 					.add(Restrictions.eq("chapterName", paragraph.getChapterName()))
 					.add(Restrictions.eq("paragraphName", paragraph.getParagraphName()))
@@ -718,7 +762,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@Override
 	public List<Verse> getChildrenVerses(Verse verse) {
 		if (verse != null) {
-			Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+			Session sess = getSessionFactory().getCurrentSession();
 			return (List<Verse>) sess.createCriteria(Verse.class)
 					.add(Restrictions.eq("chapterName", verse.getChapterName()))
 					.add(Restrictions.eq("paragraphName", verse.getParagraphName()))
@@ -733,7 +777,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	public List<Paragraph> findParagraphsWithCnk(Long cnk, String language) {
 		if (cnk != null) {
 			Set<Paragraph> result = new HashSet<>();
-			Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+			Session sess = getSessionFactory().getCurrentSession();
 
 			Map<String, List<String>> chapterParagraphs = new HashMap<>();
 			for (Therapy t : (List<Therapy>) sess.createCriteria(Therapy.class, "a_th")
@@ -768,7 +812,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	public List<Paragraph> findParagraphs(String searchString, String language) {
 		if (searchString != null && searchString.length() >= 2) {
 			Set<Paragraph> result = new HashSet<>();
-			Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+			Session sess = getSessionFactory().getCurrentSession();
 
 			result.addAll(sess.createCriteria(Paragraph.class)
 					.add(Restrictions.or(
@@ -817,7 +861,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@Override
 	public Paragraph getParagraph(String chapterName, String paragraphName) {
 		if (chapterName != null && paragraphName != null) {
-			Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+			Session sess = getSessionFactory().getCurrentSession();
 			return (Paragraph) sess.createCriteria(Paragraph.class)
 					.add(Restrictions.eq("chapterName", chapterName))
 					.add(Restrictions.eq("paragraphName", paragraphName))
@@ -829,7 +873,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@Override
 	public List<AddedDocument> getAddedDocuments(String chapterName, String paragraphName) {
 		if (chapterName != null && paragraphName != null) {
-			Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+			Session sess = getSessionFactory().getCurrentSession();
 			return (List<AddedDocument>) sess.createCriteria(AddedDocument.class)
 					.add(Restrictions.eq("chapterName", chapterName))
 					.add(Restrictions.eq("paragraphName", paragraphName))
@@ -841,7 +885,7 @@ public class DrugsDAOImpl implements DrugsDAO {
 	@Override
 	public String getShortText(Long nameId, String lng) {
 		if (nameId != null && lng != null) {
-			Session sess = getHibernateTemplate().getSessionFactory().getCurrentSession();
+			Session sess = getSessionFactory().getCurrentSession();
 			return ((NameTranslation) sess.createCriteria(NameTranslation.class)
 					.createAlias("name", "n")
 					.add(Restrictions.eq("n.id", nameId))

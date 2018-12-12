@@ -24,10 +24,12 @@ import java.util.Set;
 import org.ektorp.ComplexKey;
 import org.taktik.icure.db.PaginatedList;
 import org.taktik.icure.db.PaginationOffset;
+import org.taktik.icure.dto.data.LabelledOccurence;
 import org.taktik.icure.entities.Invoice;
 import org.taktik.icure.entities.embed.Delegation;
 import org.taktik.icure.entities.embed.InvoiceType;
 import org.taktik.icure.entities.embed.InvoicingCode;
+import org.taktik.icure.entities.embed.MediumType;
 import org.taktik.icure.exceptions.DeletionException;
 
 public interface InvoiceLogic {
@@ -45,6 +47,16 @@ public interface InvoiceLogic {
 	List<Invoice> listByHcPartyRecipientIds(String hcParty, Set<String> recipientIds);
 	List<Invoice> listByHcPartyPatientSks(String hcParty, Set<String> patientSks);
 
+	List<Invoice> listByHcPartyEfactUnsent(String hcParty, Long fromDate, Long toDate);
+	List<Invoice> listByHcPartyEfactPending(String hcParty, Long fromDate, Long toDate);
+	List<Invoice> listByHcPartyEfactToBeCorrected(String hcParty, Long fromDate, Long toDate);
+	List<Invoice> listByHcPartyEfactTreated(String hcParty, Long fromDate, Long toDate);
+	List<Invoice> listByHcPartyEfactArchived(String hcParty, Long fromDate, Long toDate);
+	List<Invoice> listByHcPartySentMediumTypeInvoiceTypeSentDate(String hcParty, MediumType sentMediumType, InvoiceType invoiceType, boolean sent, Long fromDate, Long toDate);
+	List<Invoice> listByHcPartyEfactStatus(String hcParty, Boolean pending, Boolean canceled, Boolean accepted, Boolean resent, Boolean archived, Long fromDate, Long toDate);
+
+	List<Invoice> listByHcPartyGroupId(String hcParty, String groupId);
+
 	List<Invoice> listByHcPartyRecipientIdsUnsent(String hcParty, Set<String> recipientIds);
 
 	List<Invoice> listByHcPartyPatientSksUnsent(String hcParty, Set<String> secretPatientKeys);
@@ -55,7 +67,7 @@ public interface InvoiceLogic {
 
 	Invoice validateInvoice(String hcParty, Invoice invoice, String refScheme, String forceValue);
 
-	List<Invoice> appendCodes(String hcParty, String userId, String insuranceId, Set<String> secretPatientKeys, InvoiceType type, List<InvoicingCode> invoicingCodes, String invoiceId, Integer invoiceGraceTime);
+	List<Invoice> appendCodes(String hcParty, String userId, String insuranceId, Set<String> secretPatientKeys, InvoiceType type, MediumType sentMediumType, List<InvoicingCode> invoicingCodes, String invoiceId, Integer invoiceGraceTime);
 
 	Invoice addDelegations(String invoiceId, List<Delegation> delegations);
 
@@ -63,6 +75,10 @@ public interface InvoiceLogic {
 
 	List<Invoice> listAllHcpsByStatus(String status, Long from, Long to, List<String> hcpIds);
 
+	List<LabelledOccurence> getTarificationsCodesOccurences(String hcPartyId, long minOccurences);
+
 	void solveConflicts();
+
+
 
 }

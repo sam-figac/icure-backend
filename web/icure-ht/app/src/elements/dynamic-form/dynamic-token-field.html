@@ -112,7 +112,7 @@
 
 		</style>
 
-		<tk-token-field label="[[label]]" value="{{localizedValue}}" on-value-splices-change="_localizedValueChanged" data-value-path="id"  data-label-path="stringValue" data-source="[[dataSource]]" always-float-label>
+		<tk-token-field label="[[label]]" value="{{localizedValue}}" on-value-splices-change="_localizedValueChanged" data-value-path="codeId"  data-label-path="stringValue" data-source="[[dataSource]]" always-float-label>
 			<span slot="label-suffix">
 				<template is="dom-if" if="[[wasModified]]">
 					<span class="modified-before-out">[[localize('mod','modified',language)]] [[lastModified]] <iron-icon class="modified-icon" icon="schedule"></iron-icon></span>
@@ -122,10 +122,10 @@
 				</template>
 			</span>
 		</tk-token-field>
-		<dynamic-link i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" linkables="[[linkables]]" represented-object="[[label]]"></dynamic-link>
+		<dynamic-link i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" linkables="[[linkables]]" represented-object="[[key]]" api="[[api]]"></dynamic-link>
 	</template>
 	<script>
-class DynamicTokenField extends Polymer.TkLocalizerMixin(Polymer.mixinBehaviors([], Polymer.Element)) {
+class DynamicTokenField extends Polymer.TkLocalizerMixin(Polymer.Element) {
 	static get is() {
 		return 'dynamic-token-field';
 	}
@@ -208,7 +208,8 @@ class DynamicTokenField extends Polymer.TkLocalizerMixin(Polymer.mixinBehaviors(
 		modified.forEach((m, idx) => {
 			const existing = current.find(e => m.id === e.id) || this.shelf.find(e => m.id === e.id);
 			if (existing) {
-				newValue.push(_.extend(existing, { index: idx }));
+			    _.assign(existing, {content: _.fromPairs([[this.language, { stringValue: m.stringValue }]]), codes: m.codes || []})
+				newValue.push(_.assign(existing, { index: idx }));
 				_.pull(current, existing);
 			} else {
 				newValue.push({ id: this.api.crypto().randomUuid(), index: idx, content: _.fromPairs([[this.language, { stringValue: m.stringValue }]]), codes: m.codes || [] });

@@ -24,16 +24,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Nullable;
 import org.taktik.icure.entities.base.Code;
+import org.taktik.icure.entities.base.CodeStub;
 import org.taktik.icure.entities.base.Person;
 import org.taktik.icure.entities.base.StoredICureDocument;
-import org.taktik.icure.entities.embed.Address;
-import org.taktik.icure.entities.embed.FinancialInstitutionInformation;
-import org.taktik.icure.entities.embed.Gender;
-import org.taktik.icure.entities.embed.Insurability;
-import org.taktik.icure.entities.embed.Partnership;
-import org.taktik.icure.entities.embed.PatientHealthCareParty;
-import org.taktik.icure.entities.embed.PersonalStatus;
+import org.taktik.icure.entities.embed.*;
 import org.taktik.icure.entities.utils.MergeUtil;
+import org.taktik.icure.validation.AutoFix;
+import org.taktik.icure.validation.ValidCode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +53,7 @@ public class Patient extends StoredICureDocument implements Person {
     protected String lastName;  //Is usually either maidenName or spouseName
     protected String alias;
     protected boolean active = true;
+    protected DeactivationReason deactivationReason = DeactivationReason.none;
     protected String ssin;
     protected String civility;
     protected Gender gender = Gender.unknown;
@@ -64,6 +62,7 @@ public class Patient extends StoredICureDocument implements Person {
     protected String partnerName; // Name of the partner, sometimes equal to spouseName
     protected PersonalStatus personalStatus = PersonalStatus.unknown;
 
+
     protected Integer dateOfBirth; // YYYYMMDD if unknown, 00, ex:20010000 or
 	protected Integer dateOfDeath; // YYYYMMDD if unknown, 00, ex:20010000 or
     protected String placeOfBirth;
@@ -71,7 +70,9 @@ public class Patient extends StoredICureDocument implements Person {
     protected String education;
     protected String profession;
     protected String note;
-	protected String warning;
+	protected String administrativeNote;
+
+    protected String warning;
 	protected String nationality;
 
 	protected String preferredUserId;
@@ -87,10 +88,12 @@ public class Patient extends StoredICureDocument implements Person {
     protected List<Partnership> partnerships = new ArrayList<>();
 	protected List<PatientHealthCareParty> patientHealthCareParties = new ArrayList<>();
     protected List<FinancialInstitutionInformation> financialInstitutionInformation = new ArrayList<>();
+	protected List<MedicalHouseContract> medicalHouseContracts = new ArrayList<>();
 
     protected Map<String,List<String>> parameters = new HashMap<>();
 
-    protected java.util.List<Code> patientProfessions = new java.util.ArrayList<>();
+	@ValidCode(autoFix = AutoFix.NORMALIZECODE)
+	protected java.util.List<CodeStub> patientProfessions = new java.util.ArrayList<>();
 
 
 	public @Nullable
@@ -317,11 +320,11 @@ public class Patient extends StoredICureDocument implements Person {
         this.patientHealthCareParties = patientHealthCareParties;
     }
 
-    public List<Code> getPatientProfessions() {
+    public List<CodeStub> getPatientProfessions() {
         return patientProfessions;
     }
 
-    public void setPatientProfessions(List<Code> patientProfessions) {
+    public void setPatientProfessions(List<CodeStub> patientProfessions) {
         this.patientProfessions = patientProfessions;
     }
 
@@ -341,7 +344,15 @@ public class Patient extends StoredICureDocument implements Person {
 		this.warning = warning;
 	}
 
-	@Override
+    public List<MedicalHouseContract> getMedicalHouseContracts() {
+        return medicalHouseContracts;
+    }
+
+    public void setMedicalHouseContracts(List<MedicalHouseContract> medicalHouseContracts) {
+        this.medicalHouseContracts = medicalHouseContracts;
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -533,4 +544,20 @@ public class Patient extends StoredICureDocument implements Person {
 	public void setEncryptedSelf(String encryptedSelf) {
 		this.encryptedSelf = encryptedSelf;
 	}
+
+    public String getAdministrativeNote() {
+        return administrativeNote;
+    }
+
+    public void setAdministrativeNote(String administrativeNote) {
+        this.administrativeNote = administrativeNote;
+    }
+
+    public DeactivationReason getDeactivationReason() {
+        return deactivationReason;
+    }
+
+    public void setDeactivationReason(DeactivationReason deactivationReason) {
+        this.deactivationReason = deactivationReason;
+    }
 }

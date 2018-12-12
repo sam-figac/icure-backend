@@ -57,6 +57,19 @@ public enum DocumentType {
     result,
     sumehr,
     telemonitoring,
+    template,
+    template_admin,
     treatmentsuspension,
-    vaccination
+    vaccination;
+
+
+    public static DocumentType fromName(String name){
+        DocumentType[] tmpList = DocumentType.values();
+        for(DocumentType tmpElem : tmpList){
+            if(tmpElem.name().equals(name)){
+                return tmpElem;
+            }
+        }
+        return null;
+    }
 }

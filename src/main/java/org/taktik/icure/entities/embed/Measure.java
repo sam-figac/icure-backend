@@ -21,6 +21,9 @@ package org.taktik.icure.entities.embed;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.taktik.icure.entities.base.Code;
+import org.taktik.icure.entities.base.CodeStub;
+import org.taktik.icure.validation.AutoFix;
+import org.taktik.icure.validation.ValidCode;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -39,7 +42,10 @@ public class Measure implements Serializable {
 
 	String unit;
 
-	Set<Code> unitCodes;
+	@ValidCode(autoFix = AutoFix.NORMALIZECODE)
+	Set<CodeStub> unitCodes;
+
+	String comment;
 
 	public Double getValue() {
 		return value;
@@ -89,11 +95,19 @@ public class Measure implements Serializable {
 		this.severity = severity;
 	}
 
-	public Set<Code> getUnitCodes() {
+	public Set<CodeStub> getUnitCodes() {
 		return unitCodes;
 	}
 
-	public void setUnitCodes(Set<Code> unitCodes) {
+	public void setUnitCodes(Set<CodeStub> unitCodes) {
 		this.unitCodes = unitCodes;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 }

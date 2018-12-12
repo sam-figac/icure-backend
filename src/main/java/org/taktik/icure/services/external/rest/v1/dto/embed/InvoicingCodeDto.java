@@ -46,9 +46,11 @@ public class InvoicingCodeDto implements Serializable {
     protected Double doctorSupplement;
 	protected Double vat;
 
-    //Etarif
+	//Etarif
+	protected String code;
     protected String error;
-    protected String contract;
+	protected String contract;
+	protected Long contractDate;
     protected Integer units;
     protected Integer side;
     protected Integer timeOfDay;
@@ -56,36 +58,31 @@ public class InvoicingCodeDto implements Serializable {
 	protected String eidReadingValue;
 	protected Integer override3rdPayerCode;
     protected String override3rdPayerReason;
-    protected String gnotionNihii;
     protected Integer prescriberNorm;
 	protected Integer percentNorm;
+	protected Integer derogationMaxNumber;
 	protected String prescriberNihii;
     protected String relatedCode;
 	protected Boolean canceled;
 	protected Boolean accepted;
 	protected Boolean pending;
 	protected Boolean resent;
+	protected Boolean archived;
 
     protected Integer insuranceJustification;
 	protected Integer cancelPatientInterventionReason;
-	protected Integer longDelayJustification;
 
-	protected String gnotionSsin;
-	protected String gnotionLastName;
-	protected String gnotionFirstName;
-	protected String gnotionCdHcParty;
 	protected String prescriberSsin;
 	protected String prescriberLastName;
 	protected String prescriberFirstName;
 	protected String prescriberCdHcParty;
-	protected String internshipNihii;
-	protected String internshipSsin;
-	protected String internshipLastName;
-	protected String internshipFirstName;
-	protected String internshipCdHcParty;
+
 	protected String locationNihii;
 	protected String locationCdHcParty;
+	protected Long prescriptionDate; // yyyyMMdd
 
+
+	protected Long status;
 
 	public Long getDateCode() {
         return dateCode;
@@ -215,7 +212,15 @@ public class InvoicingCodeDto implements Serializable {
         this.contract = contract;
     }
 
-    public Integer getUnits() {
+	public Long getContractDate() {
+		return contractDate;
+	}
+
+	public void setContractDate(Long contractDate) {
+		this.contractDate = contractDate;
+	}
+
+	public Integer getUnits() {
         return units;
     }
 
@@ -239,28 +244,20 @@ public class InvoicingCodeDto implements Serializable {
         this.timeOfDay = timeOfDay;
     }
 
-    public Integer getOverride3rdPayerCode() {
-        return override3rdPayerCode;
-    }
+	public Integer getOverride3rdPayerCode() {
+		return override3rdPayerCode;
+	}
 
-    public void setOverride3rdPayerCode(Integer override3rdPayerCode) {
-        this.override3rdPayerCode = override3rdPayerCode;
-    }
+	public void setOverride3rdPayerCode(Integer override3rdPayerCode) {
+		this.override3rdPayerCode = override3rdPayerCode;
+	}
 
-    public String getOverride3rdPayerReason() {
+	public String getOverride3rdPayerReason() {
         return override3rdPayerReason;
     }
 
     public void setOverride3rdPayerReason(String override3rdPayerReason) {
         this.override3rdPayerReason = override3rdPayerReason;
-    }
-
-    public String getGnotionNihii() {
-        return gnotionNihii;
-    }
-
-    public void setGnotionNihii(String gnotionNihii) {
-        this.gnotionNihii = gnotionNihii;
     }
 
     public Integer getPrescriberNorm() {
@@ -270,6 +267,10 @@ public class InvoicingCodeDto implements Serializable {
     public void setPrescriberNorm(Integer prescriberNorm) {
         this.prescriberNorm = prescriberNorm;
     }
+
+    public Integer getDerogationMaxNumber() { return derogationMaxNumber; }
+
+    public void setDerogationMaxNumber(Integer derogationMaxNumber) { this.derogationMaxNumber = derogationMaxNumber; }
 
 	public Integer getPercentNorm() {
 		return percentNorm;
@@ -351,13 +352,9 @@ public class InvoicingCodeDto implements Serializable {
 		this.resent = resent;
 	}
 
-	public Integer getLongDelayJustification() {
-		return longDelayJustification;
-	}
+	public Boolean getArchived() { return archived; }
 
-	public void setLongDelayJustification(Integer longDelayJustification) {
-		this.longDelayJustification = longDelayJustification;
-	}
+	public void setArchived(Boolean archived) { this.archived = archived; }
 
 	public String getEidReadingValue() {
 		return eidReadingValue;
@@ -373,38 +370,6 @@ public class InvoicingCodeDto implements Serializable {
 
 	public void setLogicalId(String logicalId) {
 		this.logicalId = logicalId;
-	}
-
-	public String getGnotionSsin() {
-		return gnotionSsin;
-	}
-
-	public void setGnotionSsin(String gnotionSsin) {
-		this.gnotionSsin = gnotionSsin;
-	}
-
-	public String getGnotionLastName() {
-		return gnotionLastName;
-	}
-
-	public void setGnotionLastName(String gnotionLastName) {
-		this.gnotionLastName = gnotionLastName;
-	}
-
-	public String getGnotionFirstName() {
-		return gnotionFirstName;
-	}
-
-	public void setGnotionFirstName(String gnotionFirstName) {
-		this.gnotionFirstName = gnotionFirstName;
-	}
-
-	public String getGnotionCdHcParty() {
-		return gnotionCdHcParty;
-	}
-
-	public void setGnotionCdHcParty(String gnotionCdHcParty) {
-		this.gnotionCdHcParty = gnotionCdHcParty;
 	}
 
 	public String getPrescriberSsin() {
@@ -439,46 +404,6 @@ public class InvoicingCodeDto implements Serializable {
 		this.prescriberCdHcParty = prescriberCdHcParty;
 	}
 
-	public String getInternshipNihii() {
-		return internshipNihii;
-	}
-
-	public void setInternshipNihii(String internshipNihii) {
-		this.internshipNihii = internshipNihii;
-	}
-
-	public String getInternshipSsin() {
-		return internshipSsin;
-	}
-
-	public void setInternshipSsin(String internshipSsin) {
-		this.internshipSsin = internshipSsin;
-	}
-
-	public String getInternshipLastName() {
-		return internshipLastName;
-	}
-
-	public void setInternshipLastName(String internshipLastName) {
-		this.internshipLastName = internshipLastName;
-	}
-
-	public String getInternshipFirstName() {
-		return internshipFirstName;
-	}
-
-	public void setInternshipFirstName(String internshipFirstName) {
-		this.internshipFirstName = internshipFirstName;
-	}
-
-	public String getInternshipCdHcParty() {
-		return internshipCdHcParty;
-	}
-
-	public void setInternshipCdHcParty(String internshipCdHcParty) {
-		this.internshipCdHcParty = internshipCdHcParty;
-	}
-
 	public String getLocationNihii() {
 		return locationNihii;
 	}
@@ -494,4 +419,16 @@ public class InvoicingCodeDto implements Serializable {
 	public void setLocationCdHcParty(String locationCdHcParty) {
 		this.locationCdHcParty = locationCdHcParty;
 	}
+
+	public String getCode() { return code; }
+
+	public void setCode(String code) { this.code = code; }
+
+    public Long getStatus() { return status; }
+
+    public void setStatus(Long status) { this.status = status; }
+
+	public Long getPrescriptionDate() {	return prescriptionDate;	}
+
+	public void setPrescriptionDate(Long prescriptionDate) {	this.prescriptionDate = prescriptionDate;	}
 }

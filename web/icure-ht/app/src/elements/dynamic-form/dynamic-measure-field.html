@@ -7,6 +7,7 @@
 
 <link rel="import" href="../../../bower_components/iron-input/iron-input.html">
 <link rel="import" href="../../../bower_components/paper-input/paper-input-container.html">
+<link rel="import" href="dynamic-link.html">
 
 <dom-module id="dynamic-measure-field">
 	<template>
@@ -102,12 +103,12 @@
 					<input value="{{inputValue::input}}">
 				</iron-input>
 			</paper-input-container>
-			<dynamic-link i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" linkables="[[linkables]]" represented-object="[[label]]"></dynamic-link>
+			<dynamic-link i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" linkables="[[linkables]]" represented-object="[[key]]" api="[[api]]"></dynamic-link>
         </template>
 
 	</template>
 	<script>
-class DynamicMeasureField extends Polymer.TkLocalizerMixin(Polymer.mixinBehaviors([], Polymer.Element)) {
+class DynamicMeasureField extends Polymer.TkLocalizerMixin(Polymer.Element) {
 	static get is() {
 		return 'dynamic-measure-field';
 	}

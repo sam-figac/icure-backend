@@ -22,8 +22,8 @@ import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.XStream;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.beanutils.PropertyUtilsBean;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -385,10 +385,6 @@ public class PatientLogicImpl extends GenericLogicImpl<Patient, PatientDAO> impl
 	@Override
 	public Patient createPatient(@Check @NotNull Patient patient) throws MissingRequirementsException {
 		// checking requirements
-		if (patient.getFirstName() == null || patient.getLastName() == null) {
-			throw new MissingRequirementsException("createPatient: Name, Last name are required.");
-		}
-
 		if (patient.getPreferredUserId() != null && (patient.getDelegations() == null || patient.getDelegations().size() == 0)) {
 			patient.setDelegations(new HashMap<>());
 			User user = userLogic.getUser(patient.getPreferredUserId());

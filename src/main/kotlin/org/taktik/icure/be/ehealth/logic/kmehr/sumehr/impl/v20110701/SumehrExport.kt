@@ -32,10 +32,12 @@ import org.taktik.icure.entities.HealthElement
 import org.taktik.icure.entities.HealthcareParty
 import org.taktik.icure.entities.Patient
 import org.taktik.icure.entities.base.Code
+import org.taktik.icure.entities.base.CodeStub
 import org.taktik.icure.entities.base.ICureDocument
 import org.taktik.icure.entities.embed.Content
 import org.taktik.icure.entities.embed.Service
 import org.taktik.icure.services.external.api.AsyncDecrypt
+import org.taktik.icure.services.external.rest.v1.dto.HealthElementDto
 import org.taktik.icure.services.external.rest.v1.dto.embed.ServiceDto
 import org.taktik.icure.services.external.rest.v1.dto.filter.Filters
 import org.taktik.icure.services.external.rest.v1.dto.filter.service.ServiceByHcPartyLabelFilter
@@ -58,6 +60,7 @@ import javax.xml.bind.Marshaller
  * Time: 22:58
  * To change this template use File | Settings | File Templates.
  */
+@org.springframework.stereotype.Service
 class SumehrExport : KmehrExport() {
     override val log = LogFactory.getLog(SumehrExport::class.java)
 
@@ -174,7 +177,7 @@ class SumehrExport : KmehrExport() {
         addNonPassiveIrrelevantServiceUsingContent(sender.id, sfks, trn, "healthissue", language, decryptor, false, "healthcareelement")
         addNonPassiveIrrelevantServiceUsingContent(sender.id, sfks, trn, "healthcareelement", language, decryptor)
 
-        addHealthCareElements(sender.id, sfks, trn)
+        addHealthCareElements(sender.id, sfks, trn, decryptor)
 
 		extraLabels?.let {	addServiceUsingContent(sender.id, sfks, trn, extraLabels, language, decryptor, false, "labresult") }
 
@@ -367,7 +370,7 @@ class SumehrExport : KmehrExport() {
 							if (e.value.any { p ->
 								Regex(p.replace("*",".*"), RegexOption.IGNORE_CASE).matches(label)
 							}) {
-								svc.tags.add(Code(e.key.first, e.key.second, "1.0"))
+								svc.tags.add(CodeStub(e.key.first, e.key.second, "1.0"))
 								true
 							} else false
 						}
@@ -510,8 +513,21 @@ class SumehrExport : KmehrExport() {
         }
     }
 
-    private fun addHealthCareElements(hcPartyId: String, sfks: List<String>, trn: TransactionType) {
-        for (healthElement in getNonConfidentialItems(getHealthElements(hcPartyId, sfks))) {
+    private fun addHealthCareElements(hcPartyId: String,
+                                      sfks: List<String>,
+                                      trn: TransactionType,
+                                      decryptor: AsyncDecrypt?) {
+
+        var nonConfidentialItems = getNonConfidentialItems(getHealthElements(hcPartyId, sfks))
+
+        val toBeDecryptedHcElements = nonConfidentialItems.filter { it.encryptedSelf?.length ?: 0 > 0 }
+
+        if (decryptor != null && toBeDecryptedHcElements.size ?: 0 >0) {
+            val decryptedHcElements = decryptor.decrypt(toBeDecryptedHcElements.map {mapper!!.map(it, HealthElementDto::class.java)}, HealthElementDto::class.java).get().map {mapper!!.map(it, HealthElement::class.java)}
+            nonConfidentialItems = nonConfidentialItems?.map { if (toBeDecryptedHcElements.contains(it) == true) decryptedHcElements[toBeDecryptedHcElements.indexOf(it)] else it }
+        }
+
+        for (healthElement in nonConfidentialItems) {
             addHealthCareElement(trn, healthElement)
         }
     }

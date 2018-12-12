@@ -26,7 +26,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.UnsupportedCharsetException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -45,8 +44,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Strings;
-import org.apache.commons.lang.StringUtils;
-import org.apache.tika.io.IOUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.taktik.icure.be.format.logic.MedidocLogic;
 import org.taktik.icure.dto.result.ResultInfo;
@@ -230,7 +229,7 @@ public class MedidocLogicImpl extends GenericResultFormatLogicImpl implements Me
 				String code = getProtocolCode(lines, i, isStandardFormat, demandDate);
 				i += isStandardFormat?6:9;
 
-				if (protocolIds.contains(code)) {
+				if (protocolIds.contains(code) || (protocolIds.size() == 1 && protocolIds.get(0) != null && protocolIds.get(0).startsWith("***"))) {
 					do {
 						i++;
 					} while (!p2.matcher(lines.get(i)).matches());
