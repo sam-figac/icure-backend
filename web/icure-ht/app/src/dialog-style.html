@@ -4,7 +4,6 @@
             .modal-title {
                 background: var(--app-background-color-dark);
                 margin-top: 0;
-                padding: 0 24px;
                 height: 48px;
                 padding: 0 24px;
                 display: flex;
@@ -32,6 +31,7 @@
                 display: flex;
                 flex-flow: row wrap;
                 justify-content: flex-end;
+                align-items: center;
                 padding: 4px 0;
                 box-sizing: border-box;
                 border-top: 1px solid var(--app-background-color-dark);
@@ -42,6 +42,11 @@
                 background: var(--app-secondary-color);
                 color: var(--app-primary-color-dark);
                 font-weight: 700;
+            }
+
+             .modal-button--save:disabled {
+                background: var(--app-secondary-color-dark);
+                box-shadow: none;
             }
 
             .content{

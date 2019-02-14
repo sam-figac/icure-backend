@@ -12,6 +12,8 @@
 <link rel="import" href="../../../atc-styles.html">
 <link rel="import" href="../../../scrollbar-style.html">
 <link rel="import" href="../../ht-pat/dialogs/mycarenet/ht-pat-mcn-chapteriv-agreement.html">
+<link rel="import" href="../../icons/medication-icons.html">
+
 
 <dom-module id="medication-plan-dialog">
     <template>
@@ -32,18 +34,8 @@
                 --paper-tab-ink: var(--app-secondary-color);
             }
 
-
-
-            .patient {
-                height: calc(100% - 48px - 48px);
-                overflow-y: auto;
-                margin-top: 0;
-                padding: 24px;
-                box-sizing: border-box;
-            }
-
-            .present {
-                height: calc(100% - 48px - 48px);
+            .present, .patient {
+                height: 100%;
                 overflow-y: auto;
                 margin-top: 0;
                 padding: 24px;
@@ -696,6 +688,15 @@
                 }
             }
 
+            .medIcon{
+                height: 28px;
+                width: 28px;
+            }
+
+            .content{
+                padding: 0;
+            }
+
         </style>
 
         <paper-dialog id="medication-plan" always-on-top="true" no-cancel-on-outside-click="true">
@@ -710,7 +711,6 @@
             </h2>
 
             <div class="content">
-
                 <template is="dom-if" if="{{_isEqual(selectedTab,0)}}">
                     <div class="present">
                         <div class="table">
@@ -969,7 +969,7 @@
                                         <template is="dom-repeat" items="[[plan.meds]]" as="m">
                                             <div class="table-row">
                                                 <div class="col col--med"><span class="med--name">[[_getTimeOfDay(m.during)]] [[_serviceDescription(m.medication)]]</span></div>
-                                                <div class="col col--photo"></div>
+                                                <div class="col col--photo"><iron-icon class="medIcon" icon="medication-svg-icons:[[_getMedIcon(m)]]"></iron-icon></div>
                                                 <div class="col col--ed">[[_getMedicationClosingDate(m.medication)]]</div>
                                                 <div class="col col--freq">[[_serviceFrequency(m.medication)]]</div>
                                                     <template is="dom-repeat" items="[[plan.cols]]" as="col">
@@ -988,16 +988,16 @@
                         </template>
                     </div>
                 </template>
+                <template is="dom-if" if="{{_isEqual(selectedTab,2)}}">
+                    <ht-pat-mcn-chapteriv-agreement id="chapterivdialog" api="[[api]]" user="[[user]]" patient="[[patient]]" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" medications="[[medications]]" on-create-service="_createService" on-update-services="_updateServices"></ht-pat-mcn-chapteriv-agreement>
+                </template>
             </div>
 
-            <template is="dom-if" if="{{_isEqual(selectedTab,2)}}">
-                <ht-pat-mcn-chapteriv-agreement id="chapterivdialog" api="[[api]]" user="[[user]]" patient="[[patient]]" i18n="[[i18n]]" language="[[language]]" resources="[[resources]]" medications="[[medications]]" on-create-service="_createService" on-update-services="_updateServices"></ht-pat-mcn-chapteriv-agreement>
-            </template>
 
             <div class="buttons">
-                <paper-button dialog-confirm autofocus on-tap="cancel" class="modal-button modal-button--cancel">Close</paper-button>
+                <paper-button dialog-confirm autofocus on-tap="cancel" class="modal-button modal-button--cancel">[[localize('close','Close',language)]]</paper-button>
 
-                <paper-button dialog-confirm autofocus on-tap="" class="modal-button modal-button--save">Add medication</paper-button>
+                <!--<paper-button dialog-confirm autofocus on-tap="" class="modal-button modal-button--save">[[localize('add_medication','Add Medication',language)]]</paper-button>-->
 
             </div>
         </paper-dialog>
@@ -1150,8 +1150,12 @@
                                         colour: "ATC--J"
                                     }
                                 ]
-                            },
+                            }
                         ]
+                    },
+                    patient : {
+                        type : Object,
+                        value : {}
                     }
                 }
             }
@@ -1391,6 +1395,10 @@
 
             _serviceDescription(s) {
                 return this.api.contact().medication().medicationNameToString((this.api.contact().preferredContent(s, this.language) || {}).medicationValue, this.language)
+            }
+
+            _getMedIcon(s){
+                return "cap"
             }
 
             _servicePosology(s) {
@@ -1707,6 +1715,10 @@
 
             _getHeaderTitle(col){
                 return col && col.pc && !col.tod ? this.localize("ms_"+col.pc, col.pc, this.language): col && col.tod ? col.tod.toString().substr(0,2)+"h"+col.tod.toString().substr(2,2) : null
+            }
+
+            reset(){
+                this.$.chapterivdialog && this.$.chapterivdialog.reset()
             }
         }
 

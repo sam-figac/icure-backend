@@ -13,10 +13,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="./elements/ht-spinner/ht-spinner.html">
 
 
 <link rel="import" href="./shared-styles.html">
@@ -45,6 +45,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				height: calc(100% - 52px);
 				grid-template-columns: var(--grid-columns);
 				grid-template-rows: var(--grid-rows);
+
+				grid-template-areas: var(--grid-layout);
 				grid-column-gap: 24px;
   				grid-row-gap: 24px;
 			}
@@ -59,6 +61,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				border-radius: 2px;
 				@apply --shadow-elevation-2dp;
 				overflow:auto;
+				position: relative;
+				z-index:0;
+				transition: all .24s cubic-bezier(0.075, 0.82, 0.165, 1);
 			}
 
 			.card-title-container {
@@ -73,6 +78,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			.card-title {
+                display: flex;
+                flex-grow: 1;
 				padding: 0;
 				margin: 0;
 				font-size: 16px;
@@ -97,7 +104,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			.card-body {
 				display: block;
 				padding: 16px;
-				height: calc(100% - 96px);
+				height: calc(100% - 88px);
 				overflow: auto;
 				position: relative;
 			}
@@ -111,9 +118,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				width: 100%;
 				display: flex;
 				flex-direction: row;
-				justify-content: space-between;
+				justify-content: space-around;
 				align-items: center;
-				flex-wrap: wrap;
+				flex-wrap: nowrap;
 				margin-bottom: 24px;
 			}
 
@@ -182,7 +189,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			.card-table-header div, .card-table-cell {
-				width: 40%;
+				width: 50%;
 			}
 
 			.card-header-cell--date, .card-table-cell--date {
@@ -198,24 +205,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				padding: 0;
 			}
 
-			.card-table-cell:first-child {
-				text-align: center;
+            .card-table-cell {
+                font-size: 14px;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                text-align: left;
+                padding-right: 8px;
+            }
+
+            .card-table-header div.lab-name, .card-table-cell.lab-name {
+                padding-left: 8px;
+                box-sizing: border-box;
+                width: 35%;
+            }
+            .card-table-header div.main-cell, .card-table-cell.main-cell {
+                width: 55%;
+            }
+
+			.card-table-cell.main-cell, div.card-table-cell.unread {
 				display: flex;
 				flex-direction: row;
-				justify-content: center;
 				flex-wrap: nowrap;
 				align-items: center;
 				font-size: 14px;
 				font-weight:600;
-			}
-
-			.card-table-cell {
-				font-size: 14px;
-				white-space: nowrap;
-				text-overflow: ellipsis;
-				overflow: hidden;
-				text-align: left;
-				padding-right: 8px;
 			}
 
 			.card-table-cell:first-child {
@@ -227,7 +241,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				flex-wrap: nowrap;
 				height:48px;
 				margin:0;
+                border-bottom: 1px solid var(--app-background-color-dark);
 			}
+            .card-table-row:hover {
+                background-color: var(--app-background-color-dark);
+            }
 
 
 
@@ -253,10 +271,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				font-style:italic;
 			}
 
-			#latestPatientsWidget, .latest-patients-card, .todays-consultations, .latest-lab-result, .todo-card {
-				--columns: 1;
+			.patient-age {
+				color:var(--app-text-color-disabled);
+				font-weight:400;
+				font-size:14px;
+				font-style:italic;
+				text-transform: lowercase;
+			}
+
+			#latestPatientsWidget, #todaysConsultationsWidget, #latestLabResultsWidget, #todoWidget {
+				/* --columns: 1;
 				--rows: 1;
-				grid-area: span var(--rows) / span var(--columns);
+				--row: 0;
+				--col: 0; */
+				/* grid-area: var(--row) / var(--col) / span var(--rows) / span var(--columns); */
+				grid-area: var(--area);
 			}
 
 			a {
@@ -282,44 +311,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				background: var(--app-background-color);
 			}
 
-			.new-notif::after {
-				content: '';
+			h1 span.notif {
 				display: inline-block;
-				width: 7px;
-				height: 7px;
 				margin-left: 6px;
 				margin-bottom: 8px;
-				border-radius: 3.5px;
+				border-radius: 4px;
+                padding: 0 4px;
+                color: white;
 				background-color: var(--app-secondary-color);
 			}
 
 
 			@media (max-width: 1024px) {
 				.grid-container {
-					display:grid;
-					width:100%;
-					height:100%;
-					grid-template-columns: 1fr 1fr 1fr 1fr;
-					grid-template-rows: 1fr 1fr;
-					grid-column-gap: 24px;
-					grid-row-gap: 24px;
+					/* display:grid; */
+					/* width:100%;
+					height:100%; */
+					/* grid-template-columns: 1fr 1fr 1fr 1fr;
+					grid-template-rows: 1fr 1fr; */
+					grid-column-gap: 12px;
+					grid-row-gap: 12px;
 				}
+
 				.card {
 					overflow:hidden;
 				}
-				.latest-patients-card {
-					grid-area: 1 / 1 / span 1 / span 3;
-				}
-				.todays-consultations {
-					grid-area: 1 / 4 / span 1 / span 1;
-				}
-				.latest-lab-result {
-					grid-area: 2 / 1 / span 1 / span 2;
-				}
 
-				.todo-card {
-					grid-area: 2 / 3 / span 1 / span 2;
-				}
 				.card-body {
 					overflow-x: hidden;
 					overflow-y: scroll;
@@ -345,59 +362,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			}
 
-			@media (max-width: 768px) {
+			@media (max-width: 950px) {
 				.grid-container {
-					grid-template-columns: 1fr 1fr 1fr 1fr;
-					grid-template-rows: 1fr 1fr 1fr;
-					grid-column-gap: 24px;
-					grid-row-gap: 24px;
-				}
-				.latest-patients-card {
-					grid-area: 1 / 1 / span 1 / span 4;
-				}
-				.todays-consultations {
-					grid-area: 2 / 1 / span 1 / span 2;
-				}
-				.latest-lab-result {
-					grid-area: 2 / 3 / span 1 / span 2 ;
+					height: calc(3 * 50%);
+					padding-bottom: 24px;
 				}
 
-				.todo-card {
-					grid-area: 3  / 1 / span 1 / span 4;
+				.layout-buttons paper-icon-button{
+					display: none;
 				}
 			}
 
-			@media (max-width: 420px) {
+			@media (max-width: 600px) {
 				.grid-container {
-					grid-template-columns: 1fr;
-					grid-template-rows: 1fr 1fr 1fr 1fr;
-					grid-column-gap: 24px;
-					grid-row-gap: 24px;
-				}
-				.latest-patients-card {
-					grid-column-start:1;
-					grid-column-end: span 1;
-					grid-row-start: 1;
-					grid-row-end: span 1;
-				}
-				.todays-consultations {
-					grid-column-start:1;
-					grid-column-end: span 1;
-					grid-row-start: 2;
-					grid-row-end: span 1;
-				}
-				.latest-lab-result {
-					grid-column-start:1;
-					grid-column-end: span 1;
-					grid-row-start: 3;
-					grid-row-end: span 1;
-				}
-
-				.todo-card {
-					grid-column-start:1;
-					grid-column-end: span 1;
-					grid-row-start: 4;
-					grid-row-end: span 1;
+					height: calc( 6 * 50% );
 				}
 			}
 
@@ -426,6 +404,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					background-color: var(--app-background-color-dark);
 				}
 			}
+
 
 			#layoutDialog, #widgetSettingsDialog{
 				height: 30%;
@@ -551,68 +530,87 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				--paper-input-container-focus-color: var(--app-secondary-color);
 			}
 
-			.grid-container.dragging{
-				background: red;
+			.card.dragging{
+				opacity: 0.4;
+				transform-origin: center center;
+				transform: scale(.9);
 			}
+
+			.card.over{
+				border: 3px dashed var(--app-text-color-disabled);
+			}
+
+			ht-spinner{
+				height: 42px;
+				width: 42px;
+			}
+
+            @media (max-width: 880px) {
+                span.nomobile {
+                    display: none;
+                }
+            }
 
 		</style>
 
 		<div class="layout-buttons">
-			<paper-icon-button id="addWidgetButton" icon="add-box"></paper-icon-button>
+			<!-- <paper-icon-button id="addWidgetButton" icon="add-box"></paper-icon-button> -->
 			<paper-icon-button id="changeLayoutButton" icon="dashboard" on-tap="_layoutDialog"></paper-icon-button>
-			<paper-tooltip  offset="4" for="addWidgetButton">Add a widget</paper-tooltip>
-			<paper-tooltip  offset="4" for="changeLayoutButton">Edit layout</paper-tooltip>
+			<!-- <paper-tooltip  offset="4" for="addWidgetButton">Add a widget</paper-tooltip> -->
+			<paper-tooltip  offset="4" for="changeLayoutButton">[[localize('edit_layout','Edit layout',language)]]</paper-tooltip>
 		</div>
 		<div id="gridContainer" class="grid-container ">
-			<template is="dom-repeat" items="[[widgets]]" as="widget">
+			<template is="dom-repeat" items="{{widgets}}" as="widget">
 				<template is="dom-if" if="[[_isEqual(widget.id,'latestPatientsWidget')]]">
-					<div id="[[widget.id]]" class="card latest-patients-card" draggable="true" ondragstart="_dragWidget" ondrop="drop(event)">
+					<div id="[[widget.id]]" class="card latest-patients-card" style="--area:latestPatientsWidget;" draggable="true" on-dragstart="_dragWidgetStart" on-dragover="_dragWidgetOver" on-dragenter="_dragWidgetEnter" on-dragleave="_dragWidgetLeave" on-dragEnd="_dragWidgetEnd" on-drop="_dropWidget">
 						<div class="card-title-container">
 							<h1 class="card-title">[[localize('lat_pat','Latest Patients',language)]]</h1>
 							<paper-menu-button class="widget-settings-menu" horizontal-align="right" close-on-activate no-overlap no-animations focused="false">
-								<paper-icon-button icon="settings" slot="dropdown-trigger" alt="widget settings menu" ></paper-icon-button>
+								<paper-icon-button id="settings-latestpat" icon="settings" slot="dropdown-trigger" alt="widget settings menu" ></paper-icon-button>
 								<div slot="dropdown-content">
-									<paper-input type="number" min="1" always-float-label label="Nr of columns" value="{{widget.nrCols}}"></paper-input>
-									<paper-input type="number" min="1" always-float-label label="Nr of rows"  value="{{widget.nrRows}}"></paper-input>
-									<paper-button on-tap="_applySettings" data-item$="[[widget]]" data-item$="[[widget]]">Apply settings</paper-button>
+									<paper-input type="number" min="1" always-float-label label="[[localize('nr_of_col','Nr of columns',language)]]" value="{{widget.nrCols}}"></paper-input>
+									<paper-input type="number" min="1" always-float-label label="[[localize('nr_of_row','Nr of rows',language)]]"  value="{{widget.nrRows}}"></paper-input>
+									<!-- <paper-button on-tap="_handleWidgetChange" data-item$="{{widget}}">Apply settings</paper-button> -->
 								</div>
 							</paper-menu-button>
+                            <paper-tooltip for="settings-latestpat">[[localize('settings','Settings',language)]]</paper-tooltip>
 						</div>
 						<div class="card-body">
 							<div class="card-table-header row">
-								<div class="card-header-cell">[[localize('pati','Patient',language)]]</div>
-								<div class="card-header-cell card-header-cell--date">[[localize('last_edi','last edit',language)]]</div>
+								<div class="card-header-cell" on-tap="_sortList" list="accessLogs" sort="patient.firstName">[[localize('pati','Patient',language)]]</div>
+								<div class="card-header-cell card-header-cell--date" on-tap="_sortList" list="accessLogs" sort="access.date">[[localize('last_edi','last edit',language)]]</div>
 							</div>
 							<template is="dom-repeat" items="[[accessLogs]]" as="access">
 								<div class="row latest-patients-row" data-id$="[[access.patient.id]]" on-tap="openPatient">
 									<div class="consultations-patient-photo"><img src$="[[picture(access.patient)]]"></div>
-									<div class="consultations-patient-name">[[access.patient.firstName]] [[access.patient.lastName]] <span class="patient-dateofbirth">°[[_timeFormat(access.patient.dateOfBirth)]]</span></div>
+									<div class="consultations-patient-name">[[access.patient.firstName]] [[access.patient.lastName]] <span class="patient-dateofbirth">°[[_timeFormat(access.patient.dateOfBirth)]]</span> <span class="patient-age">°[[_ageFormat(access.patient.dateOfBirth)]]</span></div>
 									<div class="divider"></div>
 									<div class="consultations-time">[[_timeFormat(access.access.date)]]</div>
 								</div>
 							</template>
-							<paper-spinner class="spinner" alt="Loading latest patients" active=[[_isLoadingLatestPatients]]></paper-spinner>
+							<ht-spinner class="spinner" active=[[_isLoadingLatestPatients]]></ht-spinner>
 						</div>
 					</div>
 				</template>
 				<template is="dom-if" if="[[_isEqual(widget.id,'todaysConsultationsWidget')]]">
-					<div id="[[widget.id]]" class="card todays-consultations" draggable="true" ondrop="drop(event)">
+					<div id="[[widget.id]]" class="card todays-consultations" style="--area:todaysConsultationsWidget;" draggable="true" on-dragstart="_dragWidgetStart" on-dragover="_dragWidgetOver" on-dragenter="_dragWidgetEnter" on-dragleave="_dragWidgetLeave" on-dragEnd="_dragWidgetEnd" on-drop="_dropWidget">
 						<div class="card-title-container">
 							<h1 class="card-title">[[localize('tod_app','Today‘s Appointment',language)]]</h1>
 							<paper-menu-button class="widget-settings-menu" horizontal-align="right" close-on-activate no-overlap no-animations focused="false">
-								<paper-icon-button icon="settings" slot="dropdown-trigger" alt="widget settings menu" ></paper-icon-button>
+								<paper-icon-button id="settings-todayconsult" icon="settings" slot="dropdown-trigger" alt="widget settings menu" ></paper-icon-button>
 								<div slot="dropdown-content">
-									<paper-input type="number" min="1" always-float-label label="Nr of columns" value="{{widget.nrCols}}"></paper-input>
-									<paper-input type="number" min="1" always-float-label label="Nr of rows" value="{{widget.nrRows}}"></paper-input>
-									<paper-button on-tap="_applySettings" data-item$="[[widget]]">Apply settings</paper-button>
+									<paper-input type="number" min="1" always-float-label label="[[localize('nr_of_col','Nr of columns',language)]]" value="{{widget.nrCols}}"></paper-input>
+									<paper-input type="number" min="1" always-float-label label="[[localize('nr_of_row','Nr of rows',language)]]" value="{{widget.nrRows}}"></paper-input>
+									<!-- <paper-button on-tap="_handleWidgetChange" data-item$="[[widget]]">Apply settings</paper-button> -->
 								</div>
 							</paper-menu-button>
+                            <paper-tooltip for="settings-todayconsult">[[localize('settings','Settings',language)]]</paper-tooltip>
 						</div>
 						<div class="card-body">
 							<div class="card-table-header row">
-								<div class="card-header-cell">[[localize('pati','Patient',language)]]</div>
-								<div class="card-header-cell">[[localize('type','Type',language)]]</div>
-								<div class="card-header-cell card-header-cell--date">[[localize('hour','Hour',language)]]</div>
+								<div class="card-header-cell" on-tap="_sortList" list="appointments" sort="patient.firstName">[[localize('pati','Patient',language)]]</div>
+								<div class="card-header-cell" on-tap="_sortList" list="appointments" sort="type">[[localize('type','Type',language)]]</div>
+								<div class="card-header-cell card-header-cell--date" on-tap="_sortList" list="appointments" sort="startTime">[[localize('hour','Hour',language)]]</div>
 							</div>
 							<div class="consultations-list">
 								<template is="dom-repeat" items="[[appointments]]" as="appointment">
@@ -625,65 +623,71 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 									</div>
 								</template>
 							</div>
-							<paper-spinner class="spinner" alt="Loading today's consultations" active=[[_isLoadingTodaysConsultations]]></paper-spinner>
-
+							<ht-spinner class="spinner" active=[[_isLoadingTodaysConsultations]]></ht-spinner>
 						</div>
 					</div>
 				</template>
 				<template is="dom-if" if="[[_isEqual(widget.id,'latestLabResultsWidget')]]">
-					<div id="[[widget.id]]" class="card latest-lab-result"  draggable="true" ondrop="drop(event)">
+					<div id="[[widget.id]]" class="card latest-lab-result" style="--area:latestLabResultsWidget;"  draggable="true" on-dragstart="_dragWidgetStart" on-dragover="_dragWidgetOver" on-dragenter="_dragWidgetEnter" on-dragleave="_dragWidgetLeave" on-dragEnd="_dragWidgetEnd" on-drop="_dropWidget">
 						<div class="card-title-container">
-							<h1 class="card-title new-notif">[[localize('lat_lab_res','Latest Lab Results',language)]]</h1>
+							<h1 class="card-title new-notif">[[localize('latest_lab_reports','Latest Lab and Reports',language)]]
+                                <template is="dom-if" if="[[!_isEqual(unreadCount,0)]]">
+                                    <span class="notif">[[unreadCount]]<span class="nomobile"> [[localize('are_not_read','unread',language)]]</span></span>
+                                </template>
+                            </h1>
+                            <paper-icon-button id="refresh-latestlabs" icon="refresh" on-tap="_updateLabResults"></paper-icon-button>
 							<paper-menu-button class="widget-settings-menu" horizontal-align="right" close-on-activate no-overlap no-animations focused="false">
-								<paper-icon-button icon="settings" slot="dropdown-trigger" alt="widget settings menu" ></paper-icon-button>
+								<paper-icon-button id="settings-latestlabs" icon="settings" slot="dropdown-trigger" alt="widget settings menu" ></paper-icon-button>
 								<div slot="dropdown-content">
-									<paper-input type="number" min="1" always-float-label label="Nr of columns" value="{{widget.nrCols}}"></paper-input>
-									<paper-input type="number" min="1" always-float-label label="Nr of rows" value="{{widget.nrRows}}"></paper-input>
-									<paper-button on-tap="_applySettings" data-item$="[[widget]]">Apply settings</paper-button>
+									<paper-input type="number" min="1" always-float-label label="[[localize('nr_of_col','Nr of columns',language)]]" value="{{widget.nrCols}}"></paper-input>
+									<paper-input type="number" min="1" always-float-label label="[[localize('nr_of_row','Nr of rows',language)]]" value="{{widget.nrRows}}"></paper-input>
 								</div>
 							</paper-menu-button>
+                            <paper-tooltip for="refresh-latestlabs">[[localize('refresh','Refresh',language)]]</paper-tooltip>
+                            <paper-tooltip for="settings-latestlabs">[[localize('settings','Settings',language)]]</paper-tooltip>
 						</div>
 						<div class="card-body">
 							<div class="card-table-header row">
-								<div class="card-header-cell">[[localize('sen','Sender',language)]]</div>
-								<div class="card-header-cell card-header-cell--date">[[localize('dat','Date',language)]]</div>
-								<div class="card-header-cell">[[localize('sub','Subject',language)]]</div>
+								<div class="card-header-cell card-header-cell--date" on-tap="_sortList" list="labResults" sort="created">[[localize('dat','Date',language)]]</div>
+								<div class="card-header-cell" on-tap="_sortList" list="labResults" sort="patient.name">[[localize('pat_ident','Patient',language)]]</div>
+								<div class="card-header-cell lab-name" on-tap="_sortList" list="labResults" sort="descr">[[localize('sender','sender',language)]]</div>
 							</div>
-							<template is="dom-repeat" items="[[messages]]" as="msg">
-								<div class="row card-table-row" data-id$="[[msg.formId]]" on-tap="openMessage">
-									<div class="card-table-cell">[[msg.fromAddress]]</div>
-									<div class="card-table-cell card-table-cell--date">[[_timeFormat(msg.received)]]</div>
-									<div class="card-table-cell">[[msg.subject]] </div>
+							<template is="dom-repeat" items="[[labResults]]" as="result">
+								<div class="row card-table-row" data-id$="[[result.patient.id]]" on-tap="openPatient">
+									<div class$="card-table-cell [[_isUnreadResult(result, isLoadingLabResults)]] card-table-cell--date">[[_timeFormat(result.created)]]</div>
+									<div class$="card-table-cell [[_isUnreadResult(result, isLoadingLabResults)]]">[[result.patientName]]</div>
+									<div class$="card-table-cell [[_isUnreadResult(result, isLoadingLabResults)]] lab-name">[[result.descr]]</div>
 								</div>
 							</template>
-							<paper-spinner class="spinner" alt="Loading latest lab results" active=[[_isLoadingLatestLabResults]]></paper-spinner>
+							<ht-spinner class="spinner" active=[[isLoadingLabResults]]></ht-spinner>
 						</div>
 					</div>
 				</template>
 				<template is="dom-if" if="[[_isEqual(widget.id,'todoWidget')]]">
-					<div id="[[widget.id]]" class="card todo-card" draggable="true" ondrop="drop(event)">
+					<div id="[[widget.id]]" class="card todo-card" style="--area:todoWidget;" draggable="true" on-dragstart="_dragWidgetStart" on-dragover="_dragWidgetOver" on-dragenter="_dragWidgetEnter" on-dragleave="_dragWidgetLeave" on-dragEnd="_dragWidgetEnd" on-drop="_dropWidget">
 						<div class="card-title-container">
 							<h1 class="card-title">[[localize('pla','Planning',language)]]</h1>
 							<paper-menu-button class="widget-settings-menu" horizontal-align="right" close-on-activate no-overlap no-animations focused="false">
-								<paper-icon-button icon="settings" slot="dropdown-trigger" alt="widget settings menu" ></paper-icon-button>
+								<paper-icon-button id="settings-todo" icon="settings" slot="dropdown-trigger" alt="widget settings menu" ></paper-icon-button>
 								<div slot="dropdown-content">
-									<paper-input type="number" min="1" always-float-label label="Nr of columns" value="{{widget.nrCols}}"></paper-input>
-									<paper-input type="number" min="1" always-float-label label="Nr of rows" value="{{widget.nrRows}}"></paper-input>
-									<paper-button on-tap="_applySettings" data-item$="[[widget]]">Apply settings</paper-button>
+									<paper-input type="number" min="1" always-float-label label="[[localize('nr_of_col','Nr of columns',language)]]" value="{{widget.nrCols}}"></paper-input>
+									<paper-input type="number" min="1" always-float-label label="[[localize('nr_of_row','Nr of rows',language)]]" value="{{widget.nrRows}}"></paper-input>
+									<!-- <paper-button on-tap="_handleWidgetChange" data-item$="[[widget]]">Apply settings</paper-button> -->
 								</div>
 							</paper-menu-button>
+                            <paper-tooltip for="settings-todo">[[localize('settings','Settings',language)]]</paper-tooltip>
 						</div>
 						<div class="card-body">
 							<div class="card-table-header row">
-								<div class="card-header-cell">[[localize('pati','Patient',language)]]</div>
-								<div class="card-header-cell card-header-cell--date">[[localize('due_dat','Due date',language)]]</div>
-								<div class="card-header-cell">[[localize('des','Description',language)]]</div>
+								<div class="card-header-cell" on-tap="_sortList" list="services" sort="patient.firstName">[[localize('pati','Patient',language)]]</div>
+								<div class="card-header-cell card-header-cell--date" on-tap="_sortList" list="services" sort="service.valueDate">[[localize('due_dat','Due date',language)]]</div>
+								<div class="card-header-cell" on-tap="_sortList" list="services" sort="service.content.language.stringValue">[[localize('des','Description',language)]]</div>
 							</div>
 							<template is="dom-repeat" items="[[services]]" as="service">
 								<paper-listbox>
 									<paper-item>
 										<div class="row card-table-row" data-id$="[[service.service.id]]">
-											<div class="card-table-cell">
+											<div class="card-table-cell main-cell">
 												<div class="consultations-patient-photo"><img src$="[[picture(service.patient)]]"></div>
 												<div class="consultations-patient-name">[[service.patient.firstName]] [[service.patient.lastName]]</div>
 											</div>
@@ -693,21 +697,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 									</paper-item>
 								</paper-listbox>
 							</template>
-							<paper-spinner class="spinner" alt="Loading to-do list" active=[[_isLoadingToDoList]]></paper-spinner>
+							<ht-spinner class="spinner" active=[[_isLoadingLatestPatients]]></ht-spinner>
 						</div>
+					</div>
+				</template>
+				<template is="dom-if" if="[[_contains(widget.id,'empty')]]">
+					<div id="[[widget.id]]" class="card empty-card" on-dragstart="_dragWidgetStart" on-dragover="_dragWidgetOver" on-dragenter="_dragWidgetEnter" on-dragleave="_dragWidgetLeave" on-dragEnd="_dragWidgetEnd" on-drop="_dropWidget" style="--area:[[widget.id]];">
 					</div>
 				</template>
 			</template>
 		</div>
 
 		<paper-dialog id="layoutDialog">
-			<h2 class="modal-title">Edit layout</h2>
+			<h2 class="modal-title">[[localize('edit_layout','Edit layout',language)]]</h2>
 			<div class="content">
 				<div id="layoutA" class$="layout-button layout-a [[_isSelected(selectedLayout, 'layoutA')]]" on-tap="setSelectedLayout">
-					<span></span>
-					<span></span>
-					<span></span>
-					<span></span>
+					<span style="--area:latestPatientsWidget;"></span>
+					<span style="--area:todaysConsultationsWidget;"></span>
+					<span style="--area:latestLabResultsWidget;"></span>
+					<span style="--area:todoWidget;"></span>
 				</div>
 				<div id="layoutB" class$="layout-button layout-b [[_isSelected(selectedLayout, 'layoutB')]]" on-tap="setSelectedLayout">
 					<span></span>
@@ -729,8 +737,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<slot name="suffix"></slot>
 			</div>
 			<div class="buttons">
-				<paper-button class="modal-button" dialog-dismiss>[[localize('clo','Close',language)]]</paper-button>
-				<paper-button class="modal-button modal-button--save" on-tap="applySelectedLayout">[[localize('apply','Apply',language)]]</paper-button>
+				<paper-button class="modal-button" on-tap="setFromSavedLayout" dialog-dismiss>[[localize('can','Cancel',language)]]</paper-button>
+				<paper-button class="modal-button modal-button--save" on-tap="saveSelectedLayout" dialog-dismiss>[[localize('save','Save',language)]]</paper-button>
 			</div>
 		</paper-dialog>
 
@@ -772,7 +780,7 @@ class HtMain extends Polymer.TkLocalizerMixin(Polymer.Element) {
 					return [];
 				}
 			},
-			messages: {
+            labResults: {
 				type: Array,
 				value: function () {
 					return [];
@@ -794,6 +802,14 @@ class HtMain extends Polymer.TkLocalizerMixin(Polymer.Element) {
 				type: String,
 				value: "layoutA"
 			},
+			layoutGrid: {
+				type: Object,
+				value: new GridLayout()
+			},
+			dragSrcEl: {
+				type: Object,
+				value: null
+			},
 			widgets: {
 				type: Array,
 				value: () => [
@@ -801,31 +817,47 @@ class HtMain extends Polymer.TkLocalizerMixin(Polymer.Element) {
 						id: "latestPatientsWidget",
 						nrRows: 3,
 						nrCols: 1,
+						posRow: 0,
+						posCol: 0
 					},
 					{
 						id: "todaysConsultationsWidget",
 						nrRows: 1,
 						nrCols: 1,
+						posRow: 0,
+						posCol: 1
 					},
 					{
 						id: "latestLabResultsWidget",
 						nrRows: 1,
 						nrCols: 1,
+						posRow: 1,
+						posCol: 1
 					},
 					{
 						id: "todoWidget",
 						nrRows: 1,
 						nrCols: 1,
+						posRow: 2,
+						posCol: 1
 					}
 				],
 				notify: true,
-				observers: this._applySettings
-			}
+				observers: this._applySettings,
+			},
+            isLoadingLabResults: {
+			    type: Boolean,
+                value: false
+            },
+            unreadCount: {
+			    type: Number,
+                value: 0
+            }
 		};
 	}
 
     static get observers() {
-        return ['apiReady(user,api)'];
+        return ['apiReady(user,api)', 'widgetsChanged(widgets.*)'];
     }
 
     constructor() {
@@ -838,15 +870,38 @@ class HtMain extends Polymer.TkLocalizerMixin(Polymer.Element) {
     }
 
     ready() {
+
 		super.ready();
-		this.addEventListener('dragstart', () => this._dragWidget())
+
+		window.addEventListener('resize', this.handleResize.bind(this))
+		this.setFromSavedLayout()
+
+    }
+
+    _sortList(e) {
+	    const list = e.target.getAttribute('list')
+        const sort = e.target.getAttribute('sort')
+        const target =
+            list == 'accessLogs' ? this.accessLogs :
+            list == 'appointments' ? this.appointments :
+            list == 'labResults' ? this.labResults :
+            list == 'services' ? this.services :
+            []
+        const dir = sort =='created' || sort =='startTime' || sort == 'service.valueDate' || sort == 'access.date' ?
+            'desc' : 'asc'
+        const ordered = _.orderBy(target,sort,dir)
+        this.set(list,ordered)
+    }
+
+    replaceAll(target,search, replacement) {
+        return target.split(search).join(replacement);
     }
 
     apiReady() {
-	    if (!this.user || !this.api) { return }
+		if (!this.user || !this.api) { return }
 
 		this._isLoadingLatestPatients = true;
-		this._isLoadingLatestLabResults = true;
+        this.set('isLoadingLabResults',true)
 		this._isLoadingTodaysConsultations = true;
 		this._isLoadingToDoList = true;
 		this.api.hcparty().getCurrentHealthcareParty().then(hcp => {
@@ -869,18 +924,7 @@ class HtMain extends Polymer.TkLocalizerMixin(Polymer.Element) {
 				});
 			}).then(accesses => this.set('accessLogs', _.sortBy(Object.values(accesses), a => -a.access.date)));
 
-			this.api.message().findMessagesByToAddress('INBOX', null, null, 1000).then(messages => {
-				messages.rows.forEach(function (m, index, messages) {
-					if (m.status && 1 << 1 == 0) {
-						messages.splice(index, 1);
-					}
-				}); //todo refaire reduce
-				messages.rows.sort(function (a, b) {
-					return a.status && (1 << 0) - b.status && 1 << 0;
-				});
-				this._isLoadingLatestLabResults = false;
-				return messages.rows;
-			}).then(messages => this.set('messages', messages || []));
+            this._updateLabResults()
 
 			this.api.bemikrono().appointments(parseInt(moment().format('YYYYMMDD'))).then(appointments => {
 				return appointments && this.api.patient().getPatientsWithUser(this.user, new models.ListOfIdsDto({ ids: appointments.map(a => a.patientId) })).then(patients => {
@@ -925,25 +969,116 @@ class HtMain extends Polymer.TkLocalizerMixin(Polymer.Element) {
 							'ids': _.uniqBy(_.compact(_.flatMap(arraysOfArraysOfPatIdsAsUa)))
 						}
 					});
-				}).then(patients => services.map(s => ({ service: s, patient: patients.rows.find(p => p.id === s.patId) })));
+				}).then(patients => {
+					return services.map(s => ({ service: s, patient: patients.rows.find(p => p.id === s.patId) }))
+				});
 			}).then(services => this.set('services', (services || []).filter(it => it.patient)));
 			this._isLoadingToDoList = false;
+
 		});
 	}
 
+    _updateLabResults() {
+        console.log('update Lab Results')
+        this.set('isLoadingLabResults', true)
+        const start = Number(moment().subtract(15, 'days').format('YYYYMMDDHHmmss'))
+        const labsFilter = {
+            '$type': 'UnionFilter',
+            'filters': [
+                {
+                    '$type': 'ServiceByHcPartyTagCodeDateFilter',
+                    healthcarePartyId: this.user.healthcarePartyId,
+                    tagCode: 'labresult',
+                    tagType: 'CD-TRANSACTION',
+                    startValueDate: start
+                },
+                {
+                    '$type': 'ServiceByHcPartyTagCodeDateFilter',
+                    healthcarePartyId: this.user.healthcarePartyId,
+                    tagCode: 'report',
+                    tagType: 'CD-TRANSACTION',
+                    startValueDate: start
+                },
+            ]
+        }
+        this.api.contact().filterServicesBy(null, null, 50, new models.FilterChain({filter: labsFilter}))
+            .then(services => {
+                return Promise.all(services.rows.map(s => this.api.crypto().extractKeysFromDelegationsForHcpHierarchy(this.user.healthcarePartyId, document.id, s.cryptedForeignKeys).then(({extractedKeys: cfks}) => [s, cfks])))
+                    .then(cfksLists => this.api.patient().filterByWithUser(this.user, null, null, 50, null, null, null, {
+                        filter: {
+                            '$type': 'PatientByIdsFilter',
+                            'ids': _.uniqBy(_.compact(_.flatMap(cfksLists.map(x => x[1]))))
+                        }
+                    }).then(pats =>
+                        cfksLists.map(x => {
+                            const pat = pats.rows.find(p => x[1].includes(p.id))
+                            return ({
+                                patient: pat,
+                                created: x[0].valueDate,
+                                patientName: pat.firstName + ' ' + pat.lastName,
+                                contactId: x[0].contactId,
+                                descr: (this.api.contact().preferredContent(x[0], this.language) || {}).stringValue
+                            })
+                        })
+                    ))
+            })
+            .then(results => {
+                this.set('labResults', _.orderBy(results, 'created', 'desc') || [])
+                return this.api.message().findMessagesByTransportGuid('INBOX:*', null, null, null, 1000)
+                    .then(messages => {
+                        this.set('unreadCount', _.filter(messages.rows, m => {
+                            return ((m.status & (1 << 1)) !== 0) && (
+								(m.assignedResults && Object.keys(m.assignedResults).length)
+								|| (m.unassignedResults && m.unassignedResults.length)
+							)
+                        }).length)
+                        this.messagesByContactId = {}
+                        messages.rows && messages.rows.forEach (mes => {
+                            mes.assignedResults && Object.keys(mes.assignedResults).forEach(conid => {
+                                this.messagesByContactId[conid] = mes
+							})
+                        })
+                    })
+            })
+            .finally(() => {
+                this.set('isLoadingLabResults', false)
+            })
+    }
+
+    _isUnreadResult(res) {
+	    return this.messagesByContactId && this.messagesByContactId[res.contactId] && ((this.messagesByContactId[res.contactId].status & 1 << 1) !== 0) ? 'unread' : ''
+    }
+
 	_timeFormat(date) {
 		return date && this.api.moment(date).format(date > 99991231 ? 'DD/MM/YYYY HH:mm' : 'DD/MM/YYYY') || '';
+	}
+
+	_ageFormat(date) {
+		if(this.language) {
+			return this.api.getCurrentAgeFromBirthDate(date, (id,placeholder) => this.localize(id,placeholder,this.language))
+		}
 	}
 
 	_shortTimeFormat(date) {
 		return date && this.api.moment(date).format(date > 99991231 ? 'HH:mm' : 'DD/MM/YYYY') || '';
 	}
 
+	_isSelected(a, b) {
+		return (a === b) ? 'selected' : ''
+	}
+
+	_isEqual(a, b) {
+		return (a === b)
+	}
+
+	_contains(a, b) {
+		return a.includes(b)
+	}
 	picture(pat) {
 		if (!pat) {
-			return require('../images/Male-128.jpg');
+			return require('../images/male-placeholder.png');
 		}
-		return pat.picture ? 'data:image/jpeg;base64,' + pat.picture : pat.gender === 'female' ? require('../images/Female-128.jpg') : require('../images/Male-128.jpg');
+		return pat.picture ? 'data:image/png;base64,' + pat.picture : pat.gender === 'female' ? require('../images/female-placeholder.png') : require('../images/male-placeholder.png');
 	}
 
 	openPatient(ev) {
@@ -951,15 +1086,7 @@ class HtMain extends Polymer.TkLocalizerMixin(Polymer.Element) {
 		while (target && !target.dataset.id) {
 			target = target.parentNode;
 		}
-		location.replace(location.href.replace(/(.+?)#.*/, `$1#/pat/${target.dataset.id}`));
-	}
-
-	openMessage(ev) {
-		let target = ev.target;
-		while (target && !target.dataset.id) {
-			target = target.parentNode;
-		}
-		location.replace(location.href.replace(/(.+?)#.*/, `$1#/msg/${target.dataset.id}`));
+		if (target.dataset.id != '0') location.replace(location.href.replace(/(.+?)#.*/, `$1#/pat/${target.dataset.id}`));
 	}
 
 	_layoutDialog(e){
@@ -968,57 +1095,646 @@ class HtMain extends Polymer.TkLocalizerMixin(Polymer.Element) {
 		this.$['layoutDialog'].open()
 	}
 
+	_dragWidgetStart(e) {
+		e.target.classList.add('dragging')
+		this.dragSrcEl = e.target.id
+	}
+
+	_dragWidgetOver(e){
+		e.preventDefault()
+		return false
+	}
+
+	_dragWidgetEnter(e){
+		e.target.closest(".card").classList.add('over')
+	}
+
+	_dragWidgetLeave(e){
+		e.target.parentNode.classList.remove('over')
+	}
+
+	_dragWidgetEnd() {
+		this.shadowRoot.querySelectorAll('.card').forEach(card => card.classList.remove('over') )
+		this.shadowRoot.querySelector('#'+this.dragSrcEl).classList.remove('dragging')
+	}
+
+	_dropWidget(e) {
+		e.stopPropagation();
+		this._swap(e.currentTarget.id)
+		this.shadowRoot.querySelector('#'+this.dragSrcEl).classList.remove('dragging')
+		return false;
+	}
+
 	setSelectedLayout(e) {
+
 		this.set('selectedLayout', e.currentTarget.id)
-	}
 
-	_isSelected(a, b){
-		return (a === b ) ? 'selected' : ''
-	}
-
-	applySelectedLayout(){
-		switch(this.selectedLayout){
+		switch (this.selectedLayout) {
 			case 'layoutA':
-				this.updateStyles({'--grid-columns': 'repeat(2, 1fr)'}, {'--grid-rows': 'repeat(3, 1fr)'})
+				this.widgets = WIDGETSA
 				break;
 			case 'layoutB':
-				this.updateStyles({'--grid-columns': 'repeat(3, 1fr)'}, {'--grid-rows': 'repeat(2, 1fr)'})
+				this.widgets = WIDGETSB
 				break;
 			case 'layoutC':
-				this.updateStyles({'--grid-columns': 'repeat(4, 1fr)'}, {'--grid-rows': 'repeat(2, 1fr)'})
+				this.widgets = WIDGETSC
+				break;
+			case 'layoutTab':
+				this.widgets = WIDGETSTAB
+				break;
+			case 'layoutMobile':
+				this.widgets = WIDGETSMOBILE
 				break;
 			default:
-				this.updateStyles({'--grid-columns': 'repeat(2, 1fr)'}, {'--grid-rows': 'repeat(3, 1fr)'})
+				this.widgets = WIDGETSA
 				break;
 		}
-	}
 
-	_applySettings(e){
-		const widget = JSON.parse(e.target.dataset.item)
-		const elem = this.shadowRoot.querySelector(`#${widget.id}`)
-		elem.style.setProperty('--rows', widget.nrRows)
-		elem.style.setProperty('--columns', widget.nrCols)
+		this.updateGrid(false)
 
 	}
 
-	_isEqual(a,b) {
-		console.log(a+' ?= '+b)
-		return (a === b)
-	}
+	saveSelectedLayout(e) {
 
-	_dragWidget(e) {
-		e.dataTransfer.setData("widget", e.target.id);
-		this.$.gridContainer.classList.add('dragging')
-		console.log('zbra')
-	}
-
-	drop(e) {
 		e.preventDefault();
-		var data = e.dataTransfer.getData("widget");
-		e.target.appendChild(this.$.data);
+
+		this.updateGrid()
+
+	}
+
+	handleResize(e) {
+
+		if (this.layoutGrid.setLayoutFromSize(e.target.innerWidth)) {
+
+			this.setSelectedLayout({currentTarget: { id: this.layoutGrid.layout } })
+
+			this.layoutGrid.save(this.user, this.widgets)
+		}
+
+	}
+
+	setFromSavedLayout() {
+
+		const storage = JSON.parse(localStorage.getItem(`org.taktik.icure.${this.user.id}.settings.main.grid`))
+
+		if (storage) {
+			this.set('selectedLayout', storage.layout)
+			this.set('widgets', storage.widgets)
+		}
+
+		this.layoutGrid.setFromStorage(this.user, this.widgets)
+
+		this.setStyles(this.layoutGrid.styleStrings)
+
+	}
+
+	updateGrid(save = true) {
+
+		this.sanitizeEmpties()
+
+		this.layoutGrid
+			.setGridSize(this.selectedLayout)
+			.init()
+			.fill(this.widgets)
+
+		const empties = this.layoutGrid.getEmptySpaces()
+		this.push('widgets', ...empties)
+
+		this.setStyles(this.layoutGrid.styleStrings)
+
+		if (save) this.layoutGrid.save(this.user, this.widgets)
+	}
+
+	sanitizeEmpties() {
+
+
+		this.set('widgets', this.widgets.filter(widget => {
+			if (widget && widget.id) {
+				return !widget.id.includes('empty')
+			}
+		}))
+	}
+
+	setStyles(styleStrings) {
+		this.updateStyles({ '--grid-columns': styleStrings.gridCol, '--grid-rows': styleStrings.gridRow })
+		this.updateStyles({ '--grid-layout': styleStrings.templateArea })
+	}
+
+	_swap(elToSwap) {
+
+		const idx1 = this.widgets.findIndex(k => k.id === this.dragSrcEl)
+		const idx2 = this.widgets.findIndex(k => k.id === elToSwap )
+
+		const temp = this.widgets[idx1]
+		this.widgets[idx1] = this.widgets[idx2]
+		this.widgets[idx2] = temp
+
+		this.widgets[idx1].id = this.dragSrcEl
+		this.widgets[idx2].id = elToSwap
+
+		this.updateGrid()
+	}
+
+	widgetsChanged(e){
+
+		const path = e.path
+
+		const index = parseInt(path.split('.')[1])
+
+		if((index + 1)) {
+
+			const newWidget = this.layoutGrid.computeCardSize(this.widgets[index])
+
+			const currentWidget = this.widgets[index];
+
+			if(
+				currentWidget.nrCols != newWidget.nrCols ||
+				currentWidget.nrRows != newWidget.nrRows ||
+				currentWidget.posCol != newWidget.posCol ||
+				currentWidget.posRow != newWidget.posRow
+			) {
+
+				this.set(['widgets', index], newWidget)
+
+			}else {
+				this.updateGrid()
+			}
+
+
+		}
+
 	}
 
 }
+
+
+class GridLayout {
+
+	constructor() {
+
+		this.grid = []
+		this.cols = 0;
+		this.rows = 0;
+		this.layout = 'layoutA';
+
+	}
+
+	init() {
+
+		const grid = []
+
+		for (let row = 0; row < this.rows; row++) {
+			grid.push([])
+			for (let col = 0; col < this.cols; col++) {
+				grid[row][col] = 'empty'
+			}
+		}
+
+		this.grid = grid
+
+		return this;
+
+	}
+
+	fill(widgets) {
+
+		const widgetsInOrder = widgets.sort( (a, b) => a.order - b.order )
+
+		widgetsInOrder.map( (widget, index) => {
+
+			for( let rowIndex = 0; rowIndex < widget.nrRows; rowIndex++ ){
+
+					for( let colIndex = 0; colIndex < widget.nrCols; colIndex++ ) {
+
+                        this.grid[widget.posRow + rowIndex] && (this.grid[widget.posRow + rowIndex][widget.posCol + colIndex] = widget.id)
+
+					}
+
+			}
+
+		})
+
+		return this;
+
+	}
+
+	computeCardSize(w) {
+
+		const widget = _.clone(w,true)
+
+		if(widget) {
+
+			// Calculate the available space around the card
+			let rowSpace = 0;
+			let spaceUnder = 0;
+			let rowIsPartOfCard = false;
+
+			let rowsData = [];
+
+			for( let rowIndex = 0; rowIndex < this.grid.length; rowIndex++) {
+
+				let colSpace = 0
+				let spaceRight = 0
+
+				let colIsPartOfCard = false
+
+
+				// COLUMNS
+				for (let colIndex = 0; colIndex < this.grid[widget.posRow].length; colIndex++) {
+
+					const widgetId = this.grid[rowIndex][colIndex]
+					if (widgetId.includes('empty') || widgetId == widget.id) {
+
+						if (colIsPartOfCard) {
+							spaceRight++
+						} else if (widget.posCol == colIndex) {
+							colIsPartOfCard = true
+						}
+
+						colSpace++
+
+					} else if (!colIsPartOfCard) {
+						colSpace = 0
+					} else {
+						break;
+					}
+
+				}
+
+
+				//We add column data for every row even if the row is not available
+				const colData = { space: colSpace, rightSide: spaceRight };
+				rowsData.push(colData)
+
+				//ROWS
+				if(colIsPartOfCard) {
+
+					if (rowIsPartOfCard) {
+						spaceUnder++
+					} else if (widget.posRow == rowIndex) {
+						rowIsPartOfCard = true
+					}
+
+					rowSpace++
+
+				}else if(!rowIsPartOfCard) {
+
+					rowSpace = 0
+
+				} else {
+
+					break;
+
+				}
+
+
+			}
+
+			// Now scale or move vertically, according to need or possibility
+			if(widget.nrRows > rowSpace) widget.nrRows = rowSpace
+			if( widget.nrRows > spaceUnder + 1) widget.posRow -= widget.nrRows - (spaceUnder + 1)
+
+
+			// calculate minimum available horizontal space for the above computed occupied rows
+			let minSpace = Infinity,
+				minRightSpace = Infinity
+
+			for( let rowIndex = widget.posRow; rowIndex < widget.posRow + parseInt(widget.nrRows); rowIndex++) {
+
+				minSpace = minSpace > rowsData[rowIndex].space ? rowsData[rowIndex].space : minSpace;
+				minRightSpace = minRightSpace > rowsData[rowIndex].rightSide ? rowsData[rowIndex].rightSide : minRightSpace;
+
+			}
+
+			// Now scale or move horizontally, according to need or possibility
+			if (widget.nrCols > minSpace) widget.nrCols = minSpace
+			if (widget.nrCols <= minRightSpace + 1) return widget
+
+			widget.posCol -= widget.nrCols - (minRightSpace + 1)
+
+			return widget
+
+
+		}
+
+
+	}
+
+	getEmptySpaces() {
+
+		const empties = []
+
+		for (let rowIndex in this.grid) {
+			for (let colIndex in this.grid[rowIndex]) {
+
+				if (this.grid[rowIndex][colIndex].includes('empty')) {
+
+					const idName = "empty" + empties.length
+					this.grid[rowIndex][colIndex] = idName;
+
+					empties.push({
+						id: idName,
+						nrRows: 1,
+						nrCols: 1,
+						posCol: parseInt(colIndex),
+						posRow: parseInt(rowIndex)
+					})
+
+				}
+
+
+
+			}
+		}
+
+		return empties
+
+	}
+
+	setFromStorage(user, widgets) {
+
+		const savedGridLayout = localStorage.getItem(`org.taktik.icure.${user.id}.settings.main.grid`)
+
+		if (savedGridLayout) {
+
+			this.clone( JSON.parse(savedGridLayout) )
+
+			if( this.setLayoutFromSize(window.innerWidth) ) {
+
+				this.init().fill(widgets).save(user,widgets)
+
+			}
+
+		}else if(widgets) {
+
+			this.setGridSize('layoutA').init().fill(widgets).save(user,widgets)
+
+		}
+
+		return this
+
+	}
+
+	clone(nGrid) {
+
+		this.grid = nGrid.grid;
+		this.cols = nGrid.cols;
+		this.rows = nGrid.rows;
+		this.layout = nGrid.layout;
+
+		return this
+
+	}
+
+	save(user, widgets) {
+
+		const data = {}
+
+		Object.assign(data, this)
+		data.widgets = widgets
+		data.size = window.innerWidth
+
+		localStorage.setItem(`org.taktik.icure.${user.id}.settings.main.grid`, JSON.stringify(data))
+
+		return this
+
+	}
+
+	setGridSize(layout = this.layout) {
+
+		switch (layout) {
+			case 'layoutA':
+				this.cols = 2;
+				this.rows = 3;
+				break;
+			case 'layoutB':
+				this.cols = 3;
+				this.rows = 2;
+				break;
+			case 'layoutC':
+				this.cols = 4;
+				this.rows = 2;
+				break;
+			case 'layoutTab':
+				this.cols = 2;
+				this.rows = 3;
+				break;
+			case 'layoutMobile':
+				this.cols = 1;
+				this.rows = 6;
+				break;
+			default:
+				this.cols = 2;
+				this.rows = 3;
+				break;
+		}
+
+		this.layout = layout
+
+		return this;
+	}
+
+	setLayoutFromSize(size) {
+
+		if( size >= 950 ){
+
+			if( this.layout == 'layoutTab' || this.layout == 'layoutMobile') {
+
+				this.setGridSize('layoutA')
+				return true
+
+			}
+
+			return false
+
+		}
+
+		if( size > 600 ) {
+
+			this.setGridSize('layoutTab')
+			return true
+		}
+
+		this.setGridSize('layoutMobile')
+		return true
+	}
+
+	get styleStrings() {
+
+		const layout = this.layout
+		const gridCol = `repeat(${this.cols}, 1fr)`
+		const gridRow = `repeat(${this.rows}, 1fr)`
+
+		let templateArea = "";
+
+		this.grid.map(row => {
+			templateArea += "\'"
+			row.forEach(area => {
+				templateArea += area ? area + " " : ". "
+			})
+			templateArea += "\' "
+		})
+
+		return { layout, gridCol, gridRow, templateArea }
+
+	}
+
+}
+
+const WIDGETSA = [
+		{
+			id: "latestPatientsWidget",
+			nrRows: 3,
+			nrCols: 1,
+			posRow: 0,
+			posCol: 0
+		},
+		{
+			id: "todaysConsultationsWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 0,
+			posCol: 1
+		},
+		{
+			id: "latestLabResultsWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 1,
+			posCol: 1
+		},
+		{
+			id: "todoWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 2,
+			posCol: 1
+		}
+	]
+
+const WIDGETSB = [
+		{
+			id: "latestPatientsWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 0,
+			posCol: 0
+		},
+		{
+			id: "todaysConsultationsWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 0,
+			posCol: 1
+		},
+		{
+			id: "latestLabResultsWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 1,
+			posCol: 0
+		},
+		{
+			id: "todoWidget",
+			nrRows: 2,
+			nrCols: 1,
+			posRow: 0,
+			posCol: 2
+		}
+	]
+
+const WIDGETSC = [
+		{
+			id: "latestPatientsWidget",
+			nrRows: 1,
+			nrCols: 4,
+			posRow: 0,
+			posCol: 0
+		},
+		{
+			id: "todaysConsultationsWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 1,
+			posCol: 2
+		},
+		{
+			id: "latestLabResultsWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 1,
+			posCol: 0
+		},
+		{
+			id: "todoWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 1,
+			posCol: 3
+		}
+	]
+
+const WIDGETSTAB = [
+		{
+			id: "latestPatientsWidget",
+			nrRows: 2,
+			nrCols: 1,
+			posRow: 0,
+			posCol: 0
+		},
+		{
+			id: "todaysConsultationsWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 0,
+			posCol: 1
+		},
+		{
+			id: "latestLabResultsWidget",
+			nrRows: 2,
+			nrCols: 1,
+			posRow: 1,
+			posCol: 1
+		},
+		{
+			id: "todoWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 2,
+			posCol: 0
+		}
+	]
+
+const WIDGETSMOBILE = [
+		{
+			id: "latestPatientsWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 0,
+			posCol: 0
+		},
+		{
+			id: "todaysConsultationsWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 1,
+			posCol: 0
+		},
+		{
+			id: "latestLabResultsWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 2,
+			posCol: 0
+		},
+		{
+			id: "todoWidget",
+			nrRows: 1,
+			nrCols: 1,
+			posRow: 3,
+			posCol: 0
+		}
+	]
 
 customElements.define(HtMain.is, HtMain);
 </script>

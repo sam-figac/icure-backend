@@ -83,6 +83,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 @Component
 @Path("/document")
 @Api(tags = { "document" })
@@ -153,21 +155,8 @@ public class DocumentFacade implements OpenApiFacade{
 		if (document == null) {
 			response = ResponseUtils.notFound("Document not found");
 		} else {
-			byte[] attachment = document.getAttachment();
+			byte[] attachment = document.decryptAttachment(isBlank(enckeys) ? null : Arrays.asList(enckeys.split(",")));
 			if (attachment != null) {
-				if (enckeys != null && enckeys.length()>0) {
-					for (String sfk : enckeys.split(",")) {
-						ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-						UUID uuid = UUID.fromString(sfk);
-						bb.putLong(uuid.getMostSignificantBits());
-						bb.putLong(uuid.getLeastSignificantBits());
-						try {
-							attachment = CryptoUtils.decryptAES(attachment, bb.array());
-							break;
-						} catch (NoSuchPaddingException | NoSuchAlgorithmException | IllegalArgumentException | BadPaddingException | InvalidKeyException | IllegalBlockSizeException | InvalidAlgorithmParameterException ignored) {
-						}
-					}
-				}
 				byte[] finalAttachment = attachment;
 				response = ResponseUtils.ok((StreamingOutput) output -> {
 					if (StringUtils.equals(document.getMainUti(),"org.taktik.icure.report")) {
@@ -306,7 +295,6 @@ public class DocumentFacade implements OpenApiFacade{
 		return response;
 	}
 
-
 	@ApiOperation(response = DocumentDto.class, value = "Updates a document")
 	@PUT
 	public Response modifyDocument(DocumentDto documentDto) {
@@ -335,6 +323,44 @@ public class DocumentFacade implements OpenApiFacade{
 		}
 
 		return response;
+	}
+
+	@ApiOperation(
+			value = "Updates a batch of documents",
+			response = DocumentDto.class,
+			responseContainer = "Array",
+			httpMethod = "PUT",
+			notes = "Returns the modified documents."
+	)
+	@PUT
+	@Path("/batch")
+	public Response modifyDocuments(List<DocumentDto> documentDtos) {
+		Response response;
+
+		if (documentDtos == null) {
+			return ResponseUtils.badRequest("Cannot modify non-existing document");
+		}
+
+		try {
+
+			List<Document> indocs = documentDtos.stream().map(f -> mapper.map(f, Document.class)).collect(Collectors.toList());
+			for(int i = 0; i < documentDtos.size(); i++) {
+				if (documentDtos.get(i).getAttachmentId()!=null) {
+					Document prevDoc = documentLogic.get(indocs.get(i).getId());
+					indocs.get(i).setAttachments(prevDoc.getAttachments());
+
+					if (documentDtos.get(i).getAttachmentId().equals(indocs.get(i).getAttachmentId())) {
+						indocs.get(i).setAttachment(prevDoc.getAttachment());
+					}
+				}
+			}
+
+			List<Document> docs = documentLogic.updateEntities(indocs);
+			return Response.ok().entity(docs.stream().map(f -> mapper.map(f, DocumentDto.class)).collect(Collectors.toList())).build();
+		} catch (Exception e) {
+			logger.warn(e.getMessage(), e);
+			return Response.status(400).type("text/plain").entity(e.getMessage()).build();
+		}
 	}
 
 	@ApiOperation(

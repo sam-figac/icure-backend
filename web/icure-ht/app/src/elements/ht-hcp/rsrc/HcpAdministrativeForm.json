@@ -20,7 +20,7 @@
 							"codeTypes" : [
 
 							],
-							"label" : "Gender",
+							"label" : "gender",
 							"type" : "TKString",
 							"subForm" : false,
 							"name" : "gender",
@@ -41,7 +41,7 @@
 							"codeTypes" : [
 
 							],
-							"label" : "Speciality",
+							"label" : "speciality",
 							"type" : "TKString",
 							"subForm" : false,
 							"name" : "speciality",
@@ -55,14 +55,14 @@
 								"width" : 498,
 								"multiline" : false,
 								"left" : 664,
-								"top" : 143,
+								"top" : 70,
 								"key" : "TokenFieldEditor"
 							},
 							"sortOrder" : 1463236407,
 							"codeTypes" : [
 								{"type":"ISO-639-1"}
 							],
-							"label" : "Languages",
+							"label" : "languages",
 							"subForm" : false,
 							"type" : "TKStringTable",
 							"name" : "languages"
@@ -82,31 +82,10 @@
 							"codeTypes" : [
 
 							],
-							"label" : "Name",
+							"label" : "name",
 							"type" : "TKString",
 							"subForm" : false,
 							"name" : "name",
-							"irrelevant" : true
-						},
-						{
-							"editor" : {
-								"readOnly" : false,
-								"height" : 22,
-								"labelPosition" : "Left",
-								"width" : 325,
-								"multiline" : false,
-								"left" : 834,
-								"top" : 61,
-								"key" : "StringEditor"
-							},
-							"sortOrder" : 1465341751,
-							"codeTypes" : [
-
-							],
-							"label" : "Contact person",
-							"type" : "TKString",
-							"subForm" : false,
-							"name" : "contactPerson",
 							"irrelevant" : true
 						},
 						{
@@ -124,7 +103,7 @@
 							"codeTypes" : [
 
 							],
-							"label" : "Last name",
+							"label" : "las_nam",
 							"type" : "TKString",
 							"subForm" : false,
 							"name" : "lastName",
@@ -145,7 +124,7 @@
 							"codeTypes" : [
 
 							],
-							"label" : "First Name",
+							"label" : "fir_nam",
 							"type" : "TKString",
 							"subForm" : false,
 							"name" : "firstName",
@@ -166,7 +145,7 @@
 							"codeTypes" : [
 
 							],
-							"label" : "SSIN",
+							"label" : "ssin",
 							"type" : "TKString",
 							"subForm" : false,
 							"name" : "ssin",
@@ -194,7 +173,7 @@
 							"codeTypes" : [
 
 							],
-							"label" : "Civility",
+							"label" : "civility",
 							"type" : "TKString",
 							"subForm" : false,
 							"name" : "civility",
@@ -215,7 +194,7 @@
 							"codeTypes" : [
 
 							],
-							"label" : "NIHII",
+							"label" : "inami",
 							"type" : "TKString",
 							"subForm" : false,
 							"name" : "nihii",
@@ -236,7 +215,7 @@
 							"codeTypes" : [
 
 							],
-							"label" : "Company Name",
+							"label" : "company_name",
 							"type" : "TKString",
 							"subForm" : false,
 							"name" : "companyName",
@@ -247,17 +226,61 @@
 								"readOnly" : false,
 								"height" : 22,
 								"labelPosition" : "Left",
-								"width" : 400,
+								"width" : 200,
+								"multiline" : false,
+								"left" : 57,
+								"top" : 90,
+								"key" : "PopupMenuEditor",
+                              "dataSource": {"source":"supervisors"}
+							},
+							"sortOrder" : 1465341751,
+							"codeTypes" : [
+
+							],
+							"label" : "supervisor",
+							"type" : "TKString",
+							"subForm" : false,
+							"name" : "supervisorId",
+							"irrelevant" : true
+						},
+                      {
+							"editor" : {
+								"readOnly" : false,
+								"height" : 22,
+								"labelPosition" : "Left",
+								"width" : 200,
+								"multiline" : false,
+								"left" : 597,
+								"top" : 90,
+								"key" : "PopupMenuEditor",
+                                "dataSource": {"source":"mh"}
+							},
+							"sortOrder" : 1465341751,
+							"codeTypes" : [
+
+							],
+							"label" : "med_house",
+							"type" : "TKString",
+							"subForm" : false,
+							"name" : "parentId",
+							"irrelevant" : true
+						},
+						{
+							"editor" : {
+								"readOnly" : false,
+								"height" : 22,
+								"labelPosition" : "Left",
+								"width" : 800,
 								"multiline" : true,
 								"left" : 597,
-								"top" : 75,
+								"top" : 120,
 								"key" : "StringEditor"
 							},
 							"sortOrder" : 1465341751,
 							"codeTypes" : [
 
 							],
-							"label" : "Notes",
+							"label" : "notes",
 							"type" : "TKString",
 							"subForm" : false,
 							"name" : "notes",
@@ -284,7 +307,7 @@
 							"codeTypes" : [
 
 							],
-							"label" : "Addresses",
+							"label" : "addresses",
 							"type" : "TKSubConsult",
 							"subForm" : true,
 							"name" : "addresses"

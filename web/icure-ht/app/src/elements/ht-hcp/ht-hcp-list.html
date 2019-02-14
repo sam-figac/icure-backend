@@ -14,21 +14,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../bower_components/vaadin-grid/vaadin-grid-column.html">
 <link rel="import" href="../../../bower_components/vaadin-grid/vaadin-grid-sorter.html">
 
-<link rel="import" href="../../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../ht-spinner/ht-spinner.html">
 
 <dom-module id="ht-hcp-list">
 	<template>
 		<custom-style>
 			<style is="custom-style">
 				:host {
-					display: block;
+					display: flex;
+                    flex-direction: column;
 					height: 100%;
 					@apply --padding-right-left-32;
 				}
 
 				:host #hcps-list {
-					height: calc(100% - 62px);
 					outline: none;
+                    flex-grow: 1;
 				}
 
 				vaadin-grid.material {
@@ -130,17 +131,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					min-width: 100px;
 					@apply --shadow-elevation-2dp;
 					padding: 10px 1.2em;
+					text-transform: capitalize;
 				}
 
 				.container {
-					height: calc(100vh - 164px);
+					height: 100%;
+                    display: flex;
+                    flex-direction: column;
 				}
 
 				.btn-container {
 					width: 80%;
 					left: 20%;
 					position: absolute;
-					bottom: 16px;
+					bottom: 8px;
 
 					display: flex;
 					flex-direction: row;
@@ -153,12 +157,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					width: 100%;
 					left: 0;
 				}
-                paper-spinner {
+                ht-spinner {
                     position: fixed;
-                    top: 210px;
+                    top: 50%;
                     left: 50%;
                     z-index: 9999;
-                    transform: translateX(-50%);
+                    transform: translate(-50%, -50%);
+					height: 42px;
+					width: 42px;
                 }
 				paper-dialog#newHcpDialog{
 					width: 50vw;
@@ -176,7 +182,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					color: var(--app-text-color-light);
 				}
 				#newHcpDialog .buttons * {
-					background: var(--app-secondary-color-dark);
+                    color: black;
+                }
+				#newHcpDialog .buttons .modal-button--save {
+					background: var(--app-secondary-color);
 				}
 
 				.formNewHcp {
@@ -211,6 +220,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					font-weight: 700;
 
 				}
+
+                #patients-list {
+                    flex-grow: 1;
+                }
 
 				.hcp-photo {
 					background: rgba(0, 0, 0, 0.1);
@@ -252,6 +265,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					margin: auto;
 				}
 
+				.labelFusion{
+					width: 200px;
+				}
+
+				paper-dialog#fusionDialog{
+					width:650px;
+					height: 200px;
+                    display: flex;
+                    flex-direction: column;
+                    padding: 8px;
+				}
+
+                paper-dialog#fusionDialog > * {
+                    width: 100%;
+                    box-sizing: border-box;
+                    margin: 0;
+                    padding: 0;
+                }
+
+                paper-dialog#fusionDialog .buttons {
+                    width: 100%;
+                    display: flex;
+                    justify-content: flex-end;
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+
+				#fusionHcpSelect{
+					border : 0px
+				}
+
 			</style>
 		</custom-style>
 
@@ -260,19 +305,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<div id="selectHcpOption">
 					<div id="selectHcpOption_back" on-tap="_switchMode">
 						<iron-icon icon="vaadin:arrow-left"></iron-icon>
-						<span>Back</span>
+						<span>[[localize('can','Cancel',language)]]</span>
 					</div>
 					<div id="selectHcpOption_text">
-						[[nbHcpSelected]] prestataire(s) selected
+						[[nbHcpSelected]] [[localize('hc_par','Prestataire',language)]] [[localize('multiple_selected','Selected',language)]]
 					</div>
 				</div>
 			</template>
 			<template is="dom-if" if="{{!modeGrid}}">
 				<paper-input id="filter" label="[[localize('fil','Filter',language)]]" value="{{filterValue}}" on-keydown="refresh"></paper-input>
 			</template>
-			<paper-spinner class="center" active="[[isLoadingHcp]]"></paper-spinner>
+			<ht-spinner class="center" active="[[isLoadingHcp]]"></ht-spinner>
 			<vaadin-grid id="hcps-list" class="material" multi-sort="[[multiSort]]" active-item="{{activeItem}}" on-tap="click">
 
+				<vaadin-grid-column width="50px">
+					<template class="header">
+						<vaadin-grid-sorter path="id">[[localize('','Id',language)]]</vaadin-grid-sorter>
+					</template>
+					<template>
+						<div class="cell frozen">[[item.id]]</div>
+					</template>
+				</vaadin-grid-column>
 
 				<vaadin-grid-column width="5%">
 					<template class="header">
@@ -289,7 +342,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					</template>
 				</vaadin-grid-column>
 
-
 				<vaadin-grid-column width="100px">
 					<template class="header">
 						<vaadin-grid-sorter path="lastName">[[localize('las_nam','Last name',language)]]</vaadin-grid-sorter>
@@ -300,7 +352,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				</vaadin-grid-column>
 				<vaadin-grid-column width="100px">
 					<template class="header">
-						<div path="firstName">[[localize('fir_nam','First name',language)]]</div>
+						<vaadin-grid-sorter path="firstName">[[localize('fir_nam','First name',language)]]</vaadin-grid-sorter>
 					</template>
 					<template>
 						<div class="cell frozen">[[item.firstName]]</div>
@@ -308,7 +360,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				</vaadin-grid-column>
 				<vaadin-grid-column width="100px">
 					<template class="header">
-						<div path="speciality">[[localize('spe','Speciality',language)]]</div>
+						<vaadin-grid-sorter path="speciality">[[localize('spe','Speciality',language)]]</vaadin-grid-sorter>
 					</template>
 					<template>
 						<div class="cell frozen">[[item.speciality]]</div>
@@ -347,6 +399,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					<paper-button class="exportcsv-btn" on-tap="_switchMode">[[localize('fusion_hcp','Fusionner HCP',language)]]</paper-button>
 				</template>
 				<template is="dom-if" if="{{modeGrid}}">
+                    <paper-button on-tap="_switchMode">[[localize('can','Cancel',language)]]</paper-button>
 					<paper-button class="exportcsv-btn" on-tap="_openFusionDialog">[[localize('fusion_hcp','Fusionner HCP',language)]]</paper-button>
 				</template>
 			</div>
@@ -413,25 +466,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			</paper-dialog>
 
 			<paper-dialog id="fusionDialog">
-				<label slot="label">[[localize('chose_hcp_will_stay','Choisissez le prestataire qui restera',language)]]</label>
+				<label>[[localize('chose_hcp_will_stay','Choisissez le prestataire qui restera',language)]]</label>
 				<paper-input-container>
 					<iron-input slot="input">
-						<input id="fusionHcpSelect" value="{{getNameHcp(idFusionHcp)}}" readonly on-tap="_openPopupMenu"></input>
+						<input id="fusionHcpSelect" value="{{_getNameHcp(idFusionHcp)}}" readonly on-tap="_openPopupMenu"></input>
 					</iron-input>
 					<paper-menu-button id="paper-menu-button" slot="suffix" horizontal-offset="[[listBoxOffsetWidth]]">
 						<iron-icon icon="paper-dropdown-menu:arrow-drop-down" slot="dropdown-trigger"></iron-icon>
 						<paper-listbox id="dropdown-listbox" slot="dropdown-content" selected="{{fusionSelected}}">
 							<template is="dom-repeat" items="{{hcpSelected}}">
-								<paper-item>{{item.name}}</paper-item>
+								<paper-item>{{item.hcp.name}}</paper-item>
 							</template>
 						</paper-listbox>
 					</paper-menu-button>
 				</paper-input-container>
 				<template is="dom-if" if="[[fusionSelected>=0]]">
-					<label slot="label">[[localize('hcp_selected','prestataire sélectionné',language)]]</label><br/>
-					<label>[[localize('name','Nom',language)]] : [[getNameHcp(idFusionHcp)]]</label>
-					<label>[[localize('special','Spécialité',language)]] : [[getSpeciality(idFusionHcp)]]</label>
+					<label>[[localize('hcp_selected','prestataire sélectionné',language)]]</label><br/>
+
+					<label class="labelFusion">[[localize('name','Nom',language)]] : [[_getNameHcp(idFusionHcp)]]</label>
+					<label class="labelFusion">[[localize('special','Spécialité',language)]] : [[_getSpeciality(idFusionHcp)]]</label>
+					<label class="labelFusion">[[localize('email','E-mail',language)]] : [[_getEmail(idFusionHcp)]]</label>
 				</template>
+				<div class="buttons">
+					<paper-button dialog-dismiss class="modal-button modal-button--cancel">[[localize('can','Cancel',language)]]</paper-button>
+					<paper-button dialog-confirm autofocus on-tap="confirmFusionHcp" class="modal-button modal-button--save">[[localize('fusion','Fusion',language)]]</paper-button>
+				</div>
 			</paper-dialog>
 		</div>
 	</template>
@@ -609,6 +668,7 @@ class HtHcpList extends Polymer.TkLocalizerMixin(Polymer.Element) {
 	}
 
 	click(e) {
+	    if(this.modeGrid)return;
 		const selected = this.activeItem;
 		console.log('selected ' + selected + ' - ' + this.latestSelected);
 		if (this.inDoubleClick && (this.latestSelected === selected || this.latestSelected && !selected || !this.latestSelected && selected)) {
@@ -848,7 +908,7 @@ class HtHcpList extends Polymer.TkLocalizerMixin(Polymer.Element) {
             const mark = this.hcpSelected.find(m => m.id === targetId)
             if (!mark) {
                 this.api.hcparty().getHealthcareParty(targetId).then(hcp =>{
-                    this.push('hcpSelected', {id: targetId, check: true, name:hcp.name})
+                    this.push('hcpSelected', {id: targetId, check: true, hcp:hcp})
                     this.set('nbHcpSelected', this.hcpSelected.filter(hcp => hcp.check).length)
                 })
 				} else {
@@ -862,9 +922,9 @@ class HtHcpList extends Polymer.TkLocalizerMixin(Polymer.Element) {
 
     picture(hcp) {
         if (!hcp) {
-            return require('../../../images/Male-128.jpg')
+            return require('../../../images/male-placeholder.png')
         }
-        return hcp.picture ? 'data:image/jpeg;base64,' + hcp.picture : hcp.gender === 'female' ? require('../../../images/Female-128.jpg') : require('../../../images/Male-128.jpg')
+        return hcp.picture ? 'data:image/png;base64,' + hcp.picture : hcp.gender === 'female' ? require('../../../images/female-placeholder.png') : require('../../../images/male-placeholder.png')
     }
 
     _fusionSelectedChanged(selected) {
@@ -874,8 +934,20 @@ class HtHcpList extends Polymer.TkLocalizerMixin(Polymer.Element) {
         this.set('idFusionHcp', this.hcpSelected[selected].id || null)
     }
 
-    getNameHcp(id){
-	    return this.hcpSelected.find(hcp => hcp.id===id).name;
+    _getNameHcp(id){
+	    return this.hcpSelected.find(hcp => hcp.id===id).hcp.name;
+	}
+
+    _getSpeciality(id){
+        return this.hcpSelected.find(hcp => hcp.id===id).hcp.speciality;
+    }
+
+    _getEmail(id){
+        return _.flatten(this.hcpSelected.find(hcp=>hcp.id === id).hcp.addresses.map(adr=>_.compact(adr.telecoms.map(tel=>tel.telecomType === "email" ? tel.telecomNumber : ""))))[0];
+    }
+
+    confirmFusionHcp(){
+	    //Todo fusionHcp
 	}
 
 }

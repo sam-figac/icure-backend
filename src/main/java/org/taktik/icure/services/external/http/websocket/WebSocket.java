@@ -57,12 +57,11 @@ public class WebSocket extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketText(String message) {
-		System.out.println("Received TEXT message: " + message);
 		if (operation == null) {
 			JsonParser parser = new JsonParser();
 			JsonObject parameters = parser.parse(message).getAsJsonObject().get("parameters").getAsJsonObject();
 
-			String path = getSession().getUpgradeRequest().getRequestURI().getPath().replaceFirst("^" + prefix, "");
+			String path = getSession().getUpgradeRequest().getRequestURI().getPath().replaceFirst("^" + prefix, "").replaceFirst(";jsessionid=.*", "");
 			WebSocketServlet.WebSocketInvocation invocation = operations.get(path);
 			try {
 				operation = invocation.getOperationClass().getConstructor(WebSocket.class, Gson.class).newInstance(this, gsonMapper);

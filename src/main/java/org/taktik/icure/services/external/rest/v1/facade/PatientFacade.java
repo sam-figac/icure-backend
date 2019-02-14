@@ -25,6 +25,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.metadata.TypeBuilder;
+import org.ektorp.ComplexKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -34,13 +35,16 @@ import org.taktik.icure.db.PaginationOffset;
 import org.taktik.icure.db.Sorting;
 import org.taktik.icure.dto.filter.predicate.Predicate;
 import org.taktik.icure.entities.AccessLog;
+import org.taktik.icure.entities.HealthcareParty;
 import org.taktik.icure.entities.Patient;
+import org.taktik.icure.entities.User;
 import org.taktik.icure.entities.embed.Delegation;
 import org.taktik.icure.exceptions.BulkUpdateConflictException;
 import org.taktik.icure.exceptions.DocumentNotFoundException;
 import org.taktik.icure.exceptions.MissingRequirementsException;
 import org.taktik.icure.exceptions.UpdateConflictException;
 import org.taktik.icure.logic.AccessLogLogic;
+import org.taktik.icure.logic.HealthcarePartyLogic;
 import org.taktik.icure.logic.ICureSessionLogic;
 import org.taktik.icure.logic.PatientLogic;
 import org.taktik.icure.logic.impl.filter.Filters;
@@ -97,6 +101,7 @@ public class PatientFacade implements OpenApiFacade{
 	private MapperFacade mapper;
 	private org.taktik.icure.logic.impl.filter.Filters filters;
 	private PatientLogic patientLogic;
+	private HealthcarePartyLogic healthcarePartyLogic;
 
     @ApiOperation(
             value = "Find patients for the current user (HcParty) ",
@@ -108,7 +113,7 @@ public class PatientFacade implements OpenApiFacade{
     @GET
     @Path("/byNameBirthSsinAuto")
     public Response findByNameBirthSsinAuto(
-    		@ApiParam(value = "Mendatory healthcareParty Id") @QueryParam("healthcarePartyId") String healthcarePartyId,
+    		@ApiParam(value = "HealthcareParty Id, if unset will user user's hcpId") @QueryParam("healthcarePartyId") String healthcarePartyId,
             @ApiParam(value = "Optional value for filtering results") @QueryParam("filterValue") String filterValue,
             @ApiParam(value = "The start key for pagination: a JSON representation of an array containing all the necessary " +
                     "components to form the Complex Key's startKey") @QueryParam("startKey") String startKey,
@@ -119,11 +124,15 @@ public class PatientFacade implements OpenApiFacade{
 
         Response response;
 
-        String[] startKeyElements = new Gson().fromJson(startKey, String[].class);
-        @SuppressWarnings("unchecked") PaginationOffset paginationOffset = new PaginationOffset(startKeyElements, startDocumentId, null,
-                limit == null ? null : limit);
+        if (healthcarePartyId==null) {
+	        healthcarePartyId = sessionLogic.getCurrentHealthcarePartyId();
+        }
 
-	    PaginatedList<Patient> patients = patientLogic.findByHcPartyAndSsinOrDateOfBirthOrNameContainsFuzzy(healthcarePartyId, paginationOffset, filterValue, new Sorting(null, sortDirection));
+        String[] startKeyElements = new Gson().fromJson(startKey, String[].class);
+        @SuppressWarnings("unchecked") PaginationOffset paginationOffset = new PaginationOffset(startKeyElements, startDocumentId, null, limit);
+
+	    HealthcareParty hcp = healthcarePartyLogic.getHealthcareParty(sessionLogic.getCurrentHealthcarePartyId());
+	    PaginatedList<Patient> patients = patientLogic.findByHcPartyAndSsinOrDateOfBirthOrNameContainsFuzzy(hcp.getParentId() != null ? hcp.getParentId() : hcp.getId(), paginationOffset, filterValue, new Sorting(null, sortDirection));
 
 	    if (patients != null) {
 		    response = buildPaginatedListResponse(patients);
@@ -239,7 +248,6 @@ public class PatientFacade implements OpenApiFacade{
 		return listPatients(hcPartyId, sortField, startKey, startDocumentId, limit, sortDirection);
 	}
 
-	@Path("/hcParty/{hcPartyId}/count")
 	@ApiOperation(
 			value = "Get count of patients for a specific HcParty or for the current HcParty ",
 			response = ContentDto.class,
@@ -247,6 +255,7 @@ public class PatientFacade implements OpenApiFacade{
 			notes = "Returns the count of patients"
 	)
 	@GET
+	@Path("/hcParty/{hcPartyId}/count")
 	public Response countOfPatients(@ApiParam(value = "Healthcare party id") @PathParam("hcPartyId") String hcPartyId) {
 		return ResponseUtils.ok(ContentDto.fromNumberValue(patientLogic.countByHcParty(hcPartyId)));
 	}
@@ -275,7 +284,8 @@ public class PatientFacade implements OpenApiFacade{
 		@SuppressWarnings("unchecked") PaginationOffset paginationOffset = new PaginationOffset(startKeyElements, startDocumentId, null,
 			limit);
 
-		PaginatedList<Patient> patients = patientLogic.findByHcPartyAndSsinOrDateOfBirthOrNameContainsFuzzy(hcPartyId, paginationOffset, null, new Sorting(sortField, sortDirection));
+		HealthcareParty hcp = healthcarePartyLogic.getHealthcareParty(sessionLogic.getCurrentHealthcarePartyId());
+		PaginatedList<Patient> patients = patientLogic.findByHcPartyAndSsinOrDateOfBirthOrNameContainsFuzzy(hcp.getParentId() != null ? hcp.getParentId() : hcp.getId(), paginationOffset, null, new Sorting(sortField, sortDirection));
 
 		if (patients != null) {
 			response = buildPaginatedListResponse(patients);
@@ -287,6 +297,36 @@ public class PatientFacade implements OpenApiFacade{
 		return response;
 	}
 
+	@ApiOperation(
+			value = "List patients by pages for a specific HcParty",
+			response = org.taktik.icure.services.external.rest.v1.dto.PatientPaginatedList.class,
+			httpMethod = "GET",
+			notes = "Returns a list of patients along with next start keys and Document ID. If the nextStartKey is " +
+					"Null it means that this is the last page."
+	)
+	@GET
+	@Path("/idsPages")
+	public Response listPatientsIds(@ApiParam(value = "Healthcare party id") @QueryParam("hcPartyId") String hcPartyId,
+	                             @ApiParam(value = "The page first id") @QueryParam("startKey") String startKey,
+	                             @ApiParam(value = "A patient document ID") @QueryParam("startDocumentId") String startDocumentId,
+	                             @ApiParam(value = "Page size") @QueryParam("limit") Integer limit) {
+
+		Response response;
+
+		ComplexKey startKeyElements = startKey == null ? null : ComplexKey.of((Object[]) new Gson().fromJson(startKey, String[].class));
+		@SuppressWarnings("unchecked") PaginationOffset paginationOffset = new PaginationOffset(startKeyElements, startDocumentId, null,
+				limit);
+
+		PaginatedList<String> patientIds = patientLogic.findByHcPartyIdsOnly(hcPartyId, paginationOffset);
+
+		if (patientIds != null) {
+			response = ResponseUtils.ok(patientIds);
+		} else {
+			response = ResponseUtils.internalServerError("Listing patients failed.");
+		}
+
+		return response;
+	}
 
 	@ApiOperation(
 			httpMethod = "GET",
@@ -335,7 +375,7 @@ public class PatientFacade implements OpenApiFacade{
 				pdto.setSsin(p.getSsin());
 				pdto.setExternalId(p.getExternalId());
 				pdto.setPatientHealthCareParties(p.getPatientHealthCareParties().stream().map(phcp->mapper.map(phcp, PatientHealthCarePartyDto.class)).collect(Collectors.toList()));
-				pdto.setAddresses(new TreeSet<>(p.getAddresses().stream().map(a->mapper.map(a, AddressDto.class)).collect(Collectors.toSet())));
+				pdto.setAddresses(p.getAddresses().stream().map(a->mapper.map(a, AddressDto.class)).collect(Collectors.toList()));
 
 				return pdto;
 			}).collect(Collectors.toList()));
@@ -413,17 +453,6 @@ public class PatientFacade implements OpenApiFacade{
 	@Path("/match")
 	public List<String> matchBy(Filter filter) throws LoginException {
 		return new ArrayList<>(filters.resolve(filter));
-	}
-
-	@ApiOperation(
-			value = "Force logging of all patieznts on the file system ",
-			httpMethod = "POST"
-	)
-	@POST
-	@Path("/forceLog")
-	public Response forceLog() {
-		patientLogic.logAllPatients(sessionLogic.getCurrentHealthcarePartyId());
-		return ResponseUtils.ok();
 	}
 
 	@ApiOperation(
@@ -792,6 +821,11 @@ public class PatientFacade implements OpenApiFacade{
 	@Context
 	public void setSessionLogic(ICureSessionLogic sessionLogic) {
 		this.sessionLogic = sessionLogic;
+	}
+
+	@Context
+	public void setHealthcarePartyLogic(HealthcarePartyLogic healthcarePartyLogic) {
+		this.healthcarePartyLogic = healthcarePartyLogic;
 	}
 
 	@ExceptionHandler(BulkUpdateConflictException.class)

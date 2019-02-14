@@ -15,6 +15,8 @@
 <link rel="import" href="../../../bower_components/vaadin-date-picker/vaadin-date-picker.html">
 <link rel="import" href="../../../bower_components/paper-tooltip/paper-tooltip.html">
 
+<link rel="import" href="../ht-spinner/ht-spinner.html">
+
 <link rel="import" href="../dynamic-form/ckmeans-grouping.html">
 
 <dom-module id="ht-msg-mycarenet">
@@ -84,6 +86,7 @@
                 }
 
                 .invoice-panel .btns-container{
+                    display: flex;
                     padding: 0;
                     flex-basis: 60px;
                     position: fixed;
@@ -139,15 +142,19 @@
                     width: 20px;
                 }
 
-                paper-spinner.center {
+                ht-spinner.center {
                     position: absolute;
                     top: 50%;
                     left: 50%;
                     z-index: 9999;
                     transform: translate(-50%, -50%);
+                    height: 42px;
+                    width: 42px;
                 }
-                paper-spinner.loading-req {
-                    transform: translateY(12px);
+                ht-spinner.loading-req {
+                    padding-top: 4px;
+                    height: 36px;
+                    width: 36px;
                 }
 
                 paper-button[disabled] {
@@ -159,32 +166,14 @@
             </style>
         </custom-style>
         <div class="invoice-panel">
-            <template is="dom-if" if="[[isLoadingDmg]]"><paper-spinner class="center" active="[[isLoadingDmg]]"></paper-spinner></template>
+            <template is="dom-if" if="[[isLoadingDmg]]"><ht-spinner class="center" active="[[isLoadingDmg]]"></ht-spinner></template>
             <div class="grid-panel">
                 <div id="messagesGrid" class$="[[detailPanelClass(tempoSubMessages)]]">
                     <paper-input id="filter" label="[[localize('fil','Filter',language)]]" value="{{leftFilterValue}}"
                                  on-keydown="refreshFilter">
                     </paper-input>
                     <vaadin-grid id="messages-vaadin-grid" active-item="{{activeItem}}" selected-items="{{selectedItems}}" data-provider="[[_messagesDataProvider()]]">
-                        <vaadin-grid-column class="icon-col" width="70px">
-                            <template class="header">
-                            </template>
-                            <template>
-                                <vaadin-grid-tree-toggle leaf="[[!item.children.length]]" expanded="{{expanded}}" level="[[level]]">
-                                    <div class="icon-container">
-                                    <template is="dom-if" if="[[_isList(item)]]">
-                                        <iron-icon class="icon type-icon list" icon="list"></iron-icon>
-                                    </template>
-                                    <template is="dom-if" if="[[_isClosure(item)]]">
-                                        <iron-icon class="icon type-icon closure" icon="vaadin:ban"></iron-icon>
-                                    </template>
-                                    <template is="dom-if" if="[[_isExtension(item)]]">
-                                        <iron-icon class="icon type-icon extension" icon="alarm-add"></iron-icon>
-                                    </template>
-                                    </div>
-                                </vaadin-grid-tree-toggle>
-                            </template>
-                        </vaadin-grid-column>
+                        <vaadin-grid-selection-column id="msg-list-selection-column"></vaadin-grid-selection-column>
                         <vaadin-grid-column class="received-col" width="120px">
                             <template class="header">
                                 <vaadin-grid-sorter path="sentreceived">[[localize("dat","Date",language)]]</vaadin-grid-sorter>
@@ -221,7 +210,7 @@
                                         <template is="dom-if" if="[[_tack(item.metas,io)]]">
                                             <iron-icon class="status" id="status_[[item.id]]_[[io]]" class="status" icon="done"></iron-icon>
                                             <paper-tooltip position="right" id="tt_status_[[item.id]]_[[io]]" for="status_[[item.id]]_[[io]]">
-                                                [[io]]: [[localize("req_rec","request received",language)]]
+                                                [[io]]: [[localize("req_rec","request received",language)]]e
                                             </paper-tooltip>
                                         </template>
                                         <template is="dom-if" if="[[!_tack(item.metas,io)]]">
@@ -234,7 +223,25 @@
                                 </template>
                             </template>
                         </vaadin-grid-column>
-                        <vaadin-grid-selection-column id="msg-list-selection-column"></vaadin-grid-selection-column>
+                        <vaadin-grid-column class="icon-col" width="70px">
+                            <template class="header">
+                            </template>
+                            <template>
+                                <vaadin-grid-tree-toggle leaf="[[!item.children.length]]" expanded="{{expanded}}" level="[[level]]">
+                                    <div class="icon-container">
+                                        <template is="dom-if" if="[[_isList(item)]]">
+                                            <iron-icon class="icon type-icon list" icon="list"></iron-icon>
+                                        </template>
+                                        <template is="dom-if" if="[[_isClosure(item)]]">
+                                            <iron-icon class="icon type-icon closure" icon="vaadin:ban"></iron-icon>
+                                        </template>
+                                        <template is="dom-if" if="[[_isExtension(item)]]">
+                                            <iron-icon class="icon type-icon extension" icon="alarm-add"></iron-icon>
+                                        </template>
+                                    </div>
+                                </vaadin-grid-tree-toggle>
+                            </template>
+                        </vaadin-grid-column>
                     </vaadin-grid>
                 </div>
                 <div id="detailGrid" class$="[[detailPanelClass(tempoSubMessages)]]">
@@ -265,7 +272,7 @@
                 </div>
             </div>
             <div class="btns-container">
-                <paper-spinner class="loading-req" active="[[isLoadingReq]]"></paper-spinner>
+                <ht-spinner class="loading-req" active="[[isLoadingReq]]"></ht-spinner>
                 <paper-button class="bottom-btn" id="requestMessagesBtn" on-tap="requestMessages" disabled="[[isLoadingReq]]">[[localize('req_msg_lists','Request Messages Lists',language)]]
                 </paper-button>
                 <paper-button class="bottom-btn" id="getMessagesBtn" on-tap="getMessages" disabled="[[isLoadingDmg]]">[[localize('get_msg','Get Messages',language)]]

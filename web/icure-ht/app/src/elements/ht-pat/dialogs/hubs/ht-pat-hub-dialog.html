@@ -11,10 +11,10 @@
 <link rel="import" href="../../../../../bower_components/vaadin-checkbox/vaadin-checkbox.html">
 <link rel="import" href="../../../../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../../../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../../../../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../../../../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../../dynamic-form/dynamic-link.html">
 <link rel="import" href="../../../dynamic-form/dynamic-pills.html">
+<link rel="import" href="../../../ht-spinner/ht-spinner.html">
 
 <dom-module id="ht-pat-hub-dialog">
     <template>
@@ -63,8 +63,12 @@
             }
 
             #dialog{
+                position: fixed;
                 min-height: 800px;
                 min-width: 1024px;
+                left: 50vw !important;
+                top: 50vh !important;
+                transform: translate(-50%,-50%);
             }
 
             .links {
@@ -145,11 +149,10 @@
             }
 
             .end-buttons {
+                display: flex;
                 position: absolute;
-                right: 15px;
-                bottom: 15px;
-                margin: 0;
-                padding: 0;
+                right: 0;
+                bottom: 0;
             }
             .modal-button {
                 --paper-button-ink-color: var(--app-secondary-color-dark);
@@ -161,7 +164,11 @@
                 padding: 10px 1.2em;
                 text-transform: capitalize;
             }
-
+            .modal-button--cancel {
+                background: transparent;
+                color: black;
+                border: 1px solid var(--app-background-color-dark);
+            }
             .modal-button--save {
                 box-shadow: var(--shadow-elevation-2dp_-_box-shadow);
                 background: var(--app-secondary-color);
@@ -169,9 +176,10 @@
                 font-weight: 700;
             }
 
-            paper-spinner {
+            ht-spinner {
                 position: relative;
-                top: 10px;
+                height: 42px;
+                width: 42px;
             }
 
             #kmehr_slot{
@@ -181,7 +189,7 @@
         </style>
 
         <paper-dialog id="dialog" opened="{{opened}}">
-            <h2 class="modal-title">[[localize('hub','Hubs',language)]]<paper-spinner active="[[isLoading]]"></paper-spinner></h2>
+            <h2 class="modal-title">[[localize('hub','Hubs',language)]]</h2>
             <div>
                 <paper-dropdown-menu id="preferredHub" label="[[localize('cur_hub','Current hub',language)]]">
                     <paper-listbox slot="dropdown-content" attr-for-selected="name" selected="{{curHub}}">
@@ -263,6 +271,8 @@
                     <paper-button on-tap="_getTSfromFileAndPut">Put TSet</paper-button>
                     <!--<paper-button on-tap="_runRevokeHubTransaction">Revoke transaction</paper-button>-->
                     <paper-button on-tap="_generateSumehr">Generate sumehr</paper-button>
+                    <paper-button on-tap="_runGenerateMedicationScheme">Generate medicationscheme</paper-button>
+                    <paper-button on-tap="_runPutMedicationScheme">Put medicationscheme</paper-button>
                 </template>
                 <template is="dom-if" if="[[_enableRegisterConsent(patientHubConsent, hubSupportsConsent)]]">
                     <paper-input id="idCardNo" label="[[localize('eid_no','eID Card Number',language)]]" value="{{eidCardNumber}}"></paper-input>
@@ -283,8 +293,9 @@
                     <!--</template>-->
                 </div>
             </template>
-            <div class="buttons">
-                <paper-button class="modal-button--save" dialog-dismiss autofocus >[[localize('can','Cancel',language)]]</paper-button>
+            <div class="end-buttons">
+                <ht-spinner active="[[isLoading]]"></ht-spinner>
+                <paper-button class="modal-button--cancel" dialog-dismiss autofocus >[[localize('can','Cancel',language)]]</paper-button>
             </div>
 
         </paper-dialog>
@@ -653,6 +664,83 @@
 
                                             document.body.removeChild(a);
                                         }).catch( error=> console.log(error))
+                                    })
+                            ))
+                }
+            }
+
+            _runGenerateMedicationScheme(){
+                this._generateMedicationScheme(1)
+            }
+
+            //generateMedicationSchemeExport(patientId: string,language?: string,version?: number,body?: models.MedicationSchemeExportInfoDto
+            _generateMedicationScheme(versionNumber){
+                if (this.patient) {
+                    this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId).then(hcp =>
+                        this.api.patient().getPatientWithUser(this.user,this.patient.id)
+                            .then(patientDto =>
+                                this.api.crypto()
+                                    .extractDelegationsSFKs(patientDto, this.user.healthcarePartyId)
+                                    .then(secretForeignKeys => {
+                                        return this.api.bekmehr().generateMedicationSchemeWithEncryptionSupport(patientDto.id, this.user.healthcarePartyId, "fr", versionNumber, {
+                                            secretForeignKeys: secretForeignKeys.extractedKeys,
+                                            recipient: hcp,
+                                            comment: "mycomment"
+                                        }).then(output => {
+                                            //creation of the xml file
+                                            let file = typeof output === "string" ? new Blob([output] ,{type: "application/xml"}) : output
+
+                                            //creation the downloading link
+                                            let a = document.createElement("a");
+                                            document.body.appendChild(a);
+                                            a.style = "display: none";
+
+                                            //download the new file
+                                            let url = window.URL.createObjectURL(file);
+                                            a.href = url;
+                                            a.download = (patientDto.lastName || "Doe").replace(" ","_") + "_" + (patientDto.firstName || "John").replace(" ","_") + "_" + (moment().format("x"))+"medicationscheme.xml";
+                                            a.click();
+                                            window.URL.revokeObjectURL(url);
+
+                                            document.body.removeChild(a);
+                                        }).catch( error=> console.log(error))
+                                    })
+                            ))
+                }
+            }
+
+            _runPutMedicationScheme(){
+                const versionNumber = 23;
+                this.generateAndPutMedicationScheme(versionNumber).then(putResp => {
+                    this.set('putTransactionSetResponse', putResp);
+                    //this._getHubTransactionList().then(tranResp => this.set('hubTransactionList', tranResp));
+                }).catch(error => {
+                    console.log(error);
+                });
+            }
+
+            generateAndPutMedicationScheme(versionNumber){
+                if (this.patient) {
+                    return this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId).then(hcp =>
+                        this.api.patient().getPatientWithUser(this.user,this.patient.id)
+                            .then(patientDto =>
+                                this.api.crypto()
+                                    .extractDelegationsSFKs(patientDto, this.user.healthcarePartyId)
+                                    .then(secretForeignKeys => {
+                                        return this.api.bekmehr().generateMedicationSchemeWithEncryptionSupport(patientDto.id, this.user.healthcarePartyId, "fr", versionNumber, {
+                                            secretForeignKeys: secretForeignKeys.extractedKeys,
+                                            recipient: hcp,
+                                            comment: "mycomment"
+                                        }).then(output =>{
+                                            return this.api.fhc().Hubcontroller().putTransactionSetUsingPOST(this.hubEndPoint,
+                                                    this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword,
+                                                    hcp.lastName, hcp.firstName, hcp.nihii, hcp.ssin, this.hcpZip,
+                                                    this.hubId,
+                                                    this.patient.ssin,
+                                                    output,
+                                                    this.hubPackageId, this.hubApplication
+                                                )}
+                                        )
                                     })
                             ))
                 }
@@ -1033,11 +1121,19 @@
                 }
             }
 
-            _openTransactionViewer(e){
+            _openTransactionViewer_old(e){
                 e.stopPropagation();
                 if(e && e.target && e.target.item) {
                     this.set("selectedTransaction", e.target.item)
                     this.$.transactionViewDialog.open( e.target.item, this._getHubTransaction( e.target.item));
+                }
+            }
+
+            _openTransactionViewer(e){
+                e.stopPropagation();
+                if(e && e.target && e.target.item) {
+                    this.set("selectedTransaction", e.target.item)
+                    this.$.transactionViewDialog.open( e.target.item, this._getHubTransactionMessage( e.target.item));
                 }
             }
 
@@ -1064,6 +1160,40 @@
                         return this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId)
                             .then(hcp =>
                                 this.api.fhc().Hubcontroller().getTransactionUsingGET(this.hubEndPoint, this.api.keystoreId,
+                                    this.api.tokenId, this.api.credentials.ehpassword,
+                                    hcp.lastName, hcp.firstName, hcp.nihii, hcp.ssin, this.hcpZip,
+                                    this.patient.ssin,
+                                    transaction.ids.find(id => id.s === 'LOCAL').sv, transaction.ids.find(id => id.s === 'LOCAL').sl, transaction.ids.find(id => id.s === 'LOCAL').value,
+                                    this.hubPackageId, this.breakTheGlassReason
+                                )
+                            ).then(tranResp => {
+                                    if (tranResp) {
+                                        return tranResp;
+                                    } else {
+                                        return null;
+                                    }
+                                }
+                            )
+                    } else {
+                        return Promise.resolve(null)
+                    }
+                }
+            }
+
+            _getHubTransactionMessage(transaction){
+                //getTransactionUsingGET(
+                // endpoint: string,
+                // xFHCKeystoreId: string, xFHCTokenId: string, xFHCPassPhrase: string,
+                // hcpLastName: string, hcpFirstName: string, hcpNihii: string, hcpSsin: string, hcpZip: string,
+                // ssin: string, sv: string, sl: string, id: string,
+                // hubPackageId?: string, breakTheGlassReason?: string): Promise<string | any>;
+                if(transaction && this._isTransactionSet(transaction)) {
+                    return this._getHubTransactionSetMessage(transaction);
+                } else {
+                    if (this.patient.ssin && this.api.tokenId && transaction) {
+                        return this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId)
+                            .then(hcp =>
+                                this.api.fhc().Hubcontroller().getTransactionMessageUsingGET(this.hubEndPoint, this.api.keystoreId,
                                     this.api.tokenId, this.api.credentials.ehpassword,
                                     hcp.lastName, hcp.firstName, hcp.nihii, hcp.ssin, this.hcpZip,
                                     this.patient.ssin,
@@ -1136,6 +1266,36 @@
                     return this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId)
                         .then(hcp =>
                             this.api.fhc().Hubcontroller().getTransactionSetUsingGET(this.hubEndPoint, this.api.keystoreId,
+                                this.api.tokenId, this.api.credentials.ehpassword,
+                                hcp.lastName, hcp.firstName, hcp.nihii, hcp.ssin, this.hcpZip,
+                                this.patient.ssin,
+                                transaction.ids.find(id => id.s==='LOCAL').sv, transaction.ids.find(id => id.s==='LOCAL').sl, transaction.ids.find(id => id.s==='LOCAL').value,
+                                this.hubPackageId, this.breakTheGlassReason
+                            )
+                        ).then(tranResp => {
+                                if (tranResp) {
+                                    return tranResp;
+                                } else {
+                                    return null;
+                                }
+                            }
+                        )
+                } else {
+                    return Promise.resolve(null)
+                }
+            }
+
+            _getHubTransactionSetMessage(transaction){
+                //getTransactionSetUsingGET(
+                // endpoint: string,
+                // xFHCKeystoreId: string, xFHCTokenId: string, xFHCPassPhrase: string,
+                // hcpLastName: string, hcpFirstName: string, hcpNihii: string, hcpSsin: string, hcpZip: string,
+                // ssin: string, sv: string, sl: string, id: string,
+                // hubPackageId?: string, breakTheGlassReason?: string): Promise<string | any>;
+                if (this.patient.ssin && this.api.tokenId && transaction) {
+                    return this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId)
+                        .then(hcp =>
+                            this.api.fhc().Hubcontroller().getTransactionSetMessageUsingGET(this.hubEndPoint, this.api.keystoreId,
                                 this.api.tokenId, this.api.credentials.ehpassword,
                                 hcp.lastName, hcp.firstName, hcp.nihii, hcp.ssin, this.hcpZip,
                                 this.patient.ssin,

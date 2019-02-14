@@ -35,8 +35,11 @@ public class MedicationDto implements Serializable {
 
 	String instructionForPatient;
 	String commentForDelivery;
+	String drugRoute; //CD-DRUG-ROUTE
+	String temporality; //CD-TEMPORALITY : chronic, acute, oneshot
 
 	DurationDto duration;
+	RenewalDto renewal;
 
 	Long beginMoment;
 	Long endMoment;
@@ -44,12 +47,33 @@ public class MedicationDto implements Serializable {
 	Boolean knownUsage;
 
 	CodeDto frequency;
+	CodeDto reimbursementReason;
+	Boolean substitutionAllowed;
+
 
 	List<RegimenItemDto> regimen;
 	String posology;
 
 	Map<String, ContentDto> options;
 	Map<String, ParagraphAgreementDto> agreements;
+
+	String medicationSchemeIdOnSafe;
+	Integer medicationSchemeSafeVersion;
+	Long medicationSchemeTimeStampOnSafe;
+	String medicationSchemeDocumentId;
+	String safeIdName; //can be: vitalinkuri, RSWID, RSBID
+	String idOnSafes; //medicationschemeelement : value of vitalinkuri, RSBID, RSWID
+	Long timestampOnSafe; //transaction date+time
+	Boolean changeValidated; //accept change on safe
+	Boolean newSafeMedication; //new medication on safe
+	String medicationUse; //free text
+	String beginCondition; //free text
+	String endCondition; //free text
+	String origin; // regularprocess, recorded
+	Boolean medicationChanged;
+	Boolean posologyChanged;
+
+	String prescriptionRID;
 
 	public Map<String, ContentDto> getOptions() {
 		return options;
@@ -139,14 +163,6 @@ public class MedicationDto implements Serializable {
 		this.endMoment = endMoment;
 	}
 
-	public CodeDto getFrequency() {
-		return frequency;
-	}
-
-	public void setFrequency(CodeDto frequency) {
-		this.frequency = frequency;
-	}
-
 	public List<RegimenItemDto> getRegimen() {
 		return regimen;
 	}
@@ -174,4 +190,92 @@ public class MedicationDto implements Serializable {
 	public void setAgreements(Map<String, ParagraphAgreementDto> agreements) {
 		this.agreements = agreements;
 	}
+
+	public CodeDto getFrequency() { return frequency; }
+
+	public void setFrequency(CodeDto frequency) { this.frequency = frequency; }
+
+	public CodeDto getReimbursementReason() { return reimbursementReason; }
+
+	public void setReimbursementReason(CodeDto reimbursementReason) { this.reimbursementReason = reimbursementReason; }
+
+	public Boolean getSubstitutionAllowed() { return substitutionAllowed; }
+
+	public void setSubstitutionAllowed(Boolean substitutionAllowed) { this.substitutionAllowed = substitutionAllowed; }
+
+	public RenewalDto getRenewal() { return renewal; }
+
+	public void setRenewal(RenewalDto renewal) { this.renewal = renewal; }
+
+	public String getDrugRoute() { return drugRoute; }
+
+	public void setDrugRoute(String drugRoute) { this.drugRoute = drugRoute; }
+
+	public String getTemporality() { return temporality; }
+
+	public void setTemporality(String temporality) { this.temporality = temporality; }
+
+	public String getMedicationSchemeIdOnSafe() { return medicationSchemeIdOnSafe; }
+
+	public void setMedicationSchemeIdOnSafe(String medicationSchemeIdOnSafe) { this.medicationSchemeIdOnSafe = medicationSchemeIdOnSafe; }
+
+	public Integer getMedicationSchemeSafeVersion() { return medicationSchemeSafeVersion; }
+
+	public void setMedicationSchemeSafeVersion(Integer medicationSchemeSafeVersion) { this.medicationSchemeSafeVersion = medicationSchemeSafeVersion; }
+
+	public Long getMedicationSchemeTimeStampOnSafe() { return medicationSchemeTimeStampOnSafe; }
+
+	public void setMedicationSchemeTimeStampOnSafe(Long medicationSchemeTimeStampOnSafe) { this.medicationSchemeTimeStampOnSafe = medicationSchemeTimeStampOnSafe; }
+
+	public String getMedicationSchemeDocumentId() { return medicationSchemeDocumentId; }
+
+	public void setMedicationSchemeDocumentId(String medicationSchemeDocumentId) { this.medicationSchemeDocumentId = medicationSchemeDocumentId; }
+
+	public String getSafeIdName() { return safeIdName; }
+
+	public void setSafeIdName(String safeIdName) { this.safeIdName = safeIdName; }
+
+	public String getIdOnSafes() { return idOnSafes; }
+
+	public void setIdOnSafes(String idOnSafes) { this.idOnSafes = idOnSafes; }
+
+	public Long getTimestampOnSafe() { return timestampOnSafe; }
+
+	public void setTimestampOnSafe(Long timestampOnSafe) { this.timestampOnSafe = timestampOnSafe; }
+
+	public Boolean getChangeValidated() { return changeValidated; }
+
+	public void setChangeValidated(Boolean changeValidated) { this.changeValidated = changeValidated; }
+
+	public Boolean getNewSafeMedication() { return newSafeMedication; }
+
+	public void setNewSafeMedication(Boolean newSafeMedication) { this.newSafeMedication = newSafeMedication; }
+
+	public String getMedicationUse() { return medicationUse; }
+
+	public void setMedicationUse(String medicationUse) { this.medicationUse = medicationUse; }
+
+	public String getBeginCondition() { return beginCondition; }
+
+	public void setBeginCondition(String beginCondition) { this.beginCondition = beginCondition; }
+
+	public String getEndCondition() { return endCondition; }
+
+	public void setEndCondition(String endCondition) { this.endCondition = endCondition; }
+
+	public String getOrigin() { return origin; }
+
+	public void setOrigin(String origin) { this.origin = origin; }
+
+	public Boolean getMedicationChanged() { return medicationChanged; }
+
+	public void setMedicationChanged(Boolean medicationChanged) { this.medicationChanged = medicationChanged; }
+
+	public Boolean getPosologyChanged() { return posologyChanged; }
+
+	public void setPosologyChanged(Boolean posologyChanged) { this.posologyChanged = posologyChanged; }
+
+	public String getPrescriptionRID() { return prescriptionRID; }
+
+	public void setPrescriptionRID(String prescriptionRID) { this.prescriptionRID = prescriptionRID; }
 }

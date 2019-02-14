@@ -1,8 +1,10 @@
 <link rel="import" href="../../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
 
 <link rel="import" href="../../../bower_components/iron-meta/iron-meta.html">
 <link rel="import" href="../../../bower_components/iron-flex-layout/iron-flex-layout.html">
@@ -20,13 +22,16 @@
 <link rel="import" href="../../../bower_components/vaadin-icons/vaadin-icons.html">
 <link rel="import" href="../../../bower_components/vaadin-upload/vaadin-upload.html">
 <link rel="import" href="../../../bower_components/vaadin-checkbox/vaadin-checkbox.html">
+<!--<link rel="import" href="../../../bower_components/vaadin-radio-button/vaadin-radio-button.html">-->
 
 <link rel="import" href="../../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../../bower_components/paper-input/paper-input-container.html">
 <link rel="import" href="../../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../bower_components/paper-listbox/paper-listbox.html">
 
 <link rel="import" href="../../../bower_components/paper-tooltip/paper-tooltip.html">
-<link rel="import" href="../../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../ht-spinner/ht-spinner.html">
 
 <link rel="import" href="../../../bower_components/paper-dialog/paper-dialog.html">
 
@@ -131,15 +136,11 @@
 
 			.msg-detail-card {
 				width: 100%;
-                padding: 0 0 0 12px;
-                height: calc(80vh - 20%);
-				display: flex;
-				flex-flow: column nowrap;
-				justify-content: flex-start;
-				align-items: stretch;
+                padding: 0 16px;
+				display: block;
 				background: transparent;
 				box-shadow: none;
-                flex-grow: 1;
+                flex-grow: 0;
 			}
 
 			.horizontal {
@@ -395,11 +396,12 @@
                 overflow-x: hidden;
                 overflow-y: auto;
                 margin-top: 16px;
+                word-break: break-all;
+                hyphens: auto;
             }
 
 			.annexe-card{
-				padding: 4px;
-                width: 50%;
+                width: 100%;
                 box-sizing: border-box;
 				background: var(--app-background-color)
 			}
@@ -450,7 +452,6 @@
 			}
 
 			.img-container img{
-				width: 100%;
 				max-width: 100%;
 				height: auto;
 			}
@@ -459,7 +460,10 @@
                 width: 100%;
                 padding: 0;
 				border-bottom: 1px solid var(--app-background-color-dark);
-				height: 40px;
+				height: 56px;
+                z-index: 10;
+                padding: 8px;
+                box-sizing: border-box;
             }
             .action-buttons > .buttons {
                 float: left;
@@ -512,11 +516,24 @@
 				align-items: flex-start;
             }
             .attached paper-button {
-                margin-bottom: 4px;
+                margin: 0;
+            }
+
+            paper-button.close {
+                border: 1px solid var(--app-background-color-darker);
+                transition: .5s ease;
+                box-sizing: border-box;
+            }
+            paper-button.close:hover {
+                border: 1px solid var(--app-secondary-color);
             }
 
 			.attached h3{
 				width: 100%;
+				margin: 0;
+				color: var(--app-text-color);
+				font-size: 1em;
+				padding-left:4px;
 			}
 
 			.msg-detail-btn{
@@ -553,6 +570,10 @@
 				flex-flow: row nowrap;
 			}
 
+            .justify-content {
+                justify-content: space-between;
+                flex-flow: initial;
+            }
 			.space-between{
 				justify-content: space-between;
                 height: 80px;
@@ -636,12 +657,20 @@
 				color: var(--app-text-color);
 			}
 
-			paper-spinner {
+			ht-spinner {
                 position: absolute;
                 top: 50%;
                 left: 50%;
                 z-index: 150;
                 transform: translate(-50%,-50%);
+				height: 42px;
+				width: 42px;
+            }
+			paper-spinner.patlist-spinner {
+                position: relative;
+                top: 12px;
+                left: 8px;
+                transform: none;
             }
 
             .close-panel {
@@ -662,8 +691,17 @@
                 width: 100%;
             }
 
+            div.subject {
+                flex-grow: 1;
+                overflow: hidden;
+                max-height: 88px;
+            }
+
             h2.subject {
-                margin-bottom: 0;
+                margin: 24px 0;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
             }
 
             .message-box {
@@ -679,12 +717,199 @@
                 max-width: 50%;
             }
 
+            .confirmPats {
+                background: var(--app-secondary-color);
+                position: relative;
+                padding: 4px 8px;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+                border-radius: 4px;
+                font-size: .8em;
+                text-align: center;
+                width: auto;
+                box-shadow: var(--app-shadow-elevation-1);
+                cursor: pointer;
+            }
+
+            #import-suggest {
+                position: fixed;
+                display: flex;
+                top: calc(50vh + 97px);
+                left: calc(16% + 20px);
+                width: calc(80vw - 12px);
+                height: auto;
+                max-height: calc(100vh - 97px);
+                transform: translateY(calc(-50% - 64px));
+                justify-content: flex-end;
+                background: #fff;
+                padding: 8px;
+                border: 1px solid var(--app-background-color-dark);
+                box-shadow: var(--app-shadow-elevation-2);
+                border-radius: 4px;
+                z-index: 999;
+                flex-direction: column;
+                margin: 0 auto;
+            }
+
+            #import-suggest .twocol {
+                display: grid;
+                grid-template-columns: 50% 50%;
+            }
+
+            #import-suggest .twocol > div > h5 {
+                margin: 0 auto 4px auto;
+                text-align: center;
+            }
+
+            #import-suggest .lab-details {
+                flex-grow: 1;
+                flex-direction: column !important;
+                margin-bottom: 8px;
+            }
+            #import-suggest .lab-details .sheet {
+                overflow-y: auto;
+                background: var(--app-background-color-dark);
+                border-radius: 4px;
+                flex-grow: 1;
+            }
+
+            #import-suggest .scrollbox {
+                height: 40vh; /* TODO : when labresult is done, "128px" */
+                overflow-y: auto;
+                background: var(--app-background-color-dark);
+                border-radius: 4px;
+                padding: 4px;
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 8px;
+                box-sizing: border-box;
+            }
+            .scrollbox.labolist {
+                margin-right: 8px; /* TODO : 8px when labresult done*/
+                padding: 0 !important;
+            }
+            .scrollbox.patlist .checkbox-item {
+                border-bottom: 1px solid var(--app-background-color-darker);
+                padding: 4px;
+            }
+            .scrollbox.patlist .checkbox-item * div#checkbox.checked {
+                background-color: var(--app-secondary-color-dark);
+                border-color: var(--app-secondary-color-dark);
+            }
+
+            #import-suggest .line {
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-start;
+                width: 100%;
+            }
+            #import-suggest .line > div.icon {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+                width: 32px;
+            }
+            #import-suggest .line > div.grow {
+                flex-grow: 1;
+            }
+            #import-suggest .save-line {
+                justify-content: flex-end;
+                min-height: 48px;
+            }
+
+            paper-listbox {
+                background: transparent !important;
+                padding: 0;
+            }
+
+            dynamic-doc {
+                width: 100%;
+            }
+
+            .labolist .unassigned {
+                line-height: 100%;
+                display: flex;
+                flex-direction: column;
+                border-top: 1px solid var(--app-background-color-darker);
+                text-align: left;
+                padding: 8px;
+            }
+            .labolist .unassigned:first-child {
+                border: none;
+            }
+
+            .labolist .unassigned .pat-name {
+                font-weight: bold;
+            }
+            .labolist .unassigned iron-icon {
+                width: 18px;
+                margin-left: 4px;
+            }
+            .labolist .unassigned small {
+                width: 100%;
+                display: block;
+            }
+            .labolist .unassigned .labo-info {
+                margin: 4px 0;
+            }
+            .labo-info .labo-name {}
+            .labolist .unassigned .demand-date {
+                text-align: right;
+                font-size: .75em;
+            }
+
+            .pointer:hover,
+            .pointer:focus,
+            .pointer.iron-selected {
+                background: var(--app-secondary-color);
+                cursor: pointer;
+                color: white;
+                font-weight: initial;
+            }
+            .pointer.iron-selected {
+                background: var(--app-secondary-color-dark);
+            }
+
+            paper-button.search-patients{
+                background: var(--app-background-color-darker);
+                margin: 4px;
+            }
+            paper-input.search-patients {
+                flex-grow: 1;
+            }
+            iron-icon.search-patients {
+                padding-top: 16px;
+            }
+
+            .wide-only {
+                display: none;
+            }
+            
+            @media screen and (max-width: 1328px) {
+                .nomobile-wide {
+                    display: none;
+                }
+                .wide-only {
+                    display: block;
+                }
+                .msg-detail-btn {
+                    min-width: 0;
+                }
+            }
+
             @media screen and (max-width: 1025px) {
                 .mobileOnly {display: block;}
                 .attached {
                     max-height: 25vh;
                     width: 100%;
                     overflow-y: auto;
+                }
+
+                #import-suggest {
+                    left: 50vw;
+                    transform: translateY(calc(-50% - 64px)) translateX(-50%);
+                    width: 90vw;
                 }
 
                 .read-txt {
@@ -694,28 +919,83 @@
                 }
             }
 
+            @media screen and (max-width: 650px) {
+                .noPortable {display: none !important;}
+                #import-suggest {
+                    max-height: 50vh;
+                }
+
+                #import-suggest .twocol {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                #import-suggest .scrollbox {
+                    height: 128px;
+                }
+
+                #import-suggest .labolist {margin-right: 0;}
+            }
+
 		</style>
-		<paper-spinner class="center spinner" active="[[isLoadingMessage]]"></paper-spinner>
+		<ht-spinner class="center spinner" active="[[isLoadingMessage]]"></ht-spinner>
 		<template is="dom-if" if="[[messages]]">
 			<div id="main-details-panel" class="details-panel" on-dragover="_onDrag">
                 <div class="action-buttons">
                     <div class="buttons">
-						<!--<paper-button class="msg-detail-btn"  msgId$='[[msg.id]]'><iron-icon icon="check-box-outline-blank"></iron-icon>[[localize('markread','Mark as read',language)]]</paper-button>-->
-                        <paper-button class="msg-detail-btn" on-tap="_forwardMsgs"  msgId$='[[msg.id]]'><iron-icon icon="forward"></iron-icon>[[localize('fw','Forward',language)]]</paper-button>
-                        <paper-button class="msg-detail-btn" on-tap="_replyMsgs" msgId$='[[msg.id]]'><iron-icon icon="reply"></iron-icon>[[localize('reply','Reply',language)]]</paper-button>
-                        <template is="dom-if" if="[[isDeleted]]">
-                            <paper-button class="msg-detail-btn" on-tap="_restoreMsgs"><iron-icon icon="icons:undo"></iron-icon>[[localize('restore','Restore',language)]]</paper-button>
+                        <paper-button class="msg-detail-btn" on-tap="_replyMsgs" msgId$='[[msg.id]]'><iron-icon id="reply-msg" icon="reply"></iron-icon>
+                            <span class="nomobile-wide">[[localize('reply','Reply',language)]]</span>
+                            <paper-tooltip class="wide-only" for="reply-msg">[[localize('reply','Reply',language)]]</paper-tooltip>
+                        </paper-button>
+                        <paper-button class="msg-detail-btn" on-tap="_forwardMsgs"  msgId$='[[msg.id]]'><iron-icon id="forward-msg" icon="forward"></iron-icon>
+                            <span class="nomobile-wide">[[localize('fw','Forward',language)]]</span>
+                            <paper-tooltip class="wide-only" for="forward-msg">[[localize('fw','Forward',language)]]</paper-tooltip>
+                        </paper-button>
+                        <template is="dom-if" if="[[isHidden]]">
+                            <paper-button class="msg-detail-btn" on-tap="_restoreMsgs"><iron-icon id="visibility-msg" icon="visibility"></iron-icon>
+                                <span class="nomobile-wide">[[localize('restore','Restore',language)]]</span>
+                                <paper-tooltip class="wide-only" for="visibility-msg">[[localize('restore','Restore',language)]]</paper-tooltip>
+                            </paper-button>
+                        </template>
+                        <template is="dom-if" if="[[!isHidden]]">
+                            <template is="dom-if" if="[[!isDeleted]]">
+                                <paper-button class="msg-detail-btn" on-tap="_hideMsg"><iron-icon id="visibility-off-msg" icon="visibility-off"></iron-icon>
+                                    <span class="nomobile-wide">[[localize('hid_msg','Hide message',language)]]</span>
+                                    <paper-tooltip class="wide-only" for="visibility-off-msg">[[localize('hid_msg','Hide message',language)]]</paper-tooltip>
+                                </paper-button>
+                            </template>
                         </template>
                     </div>
-                    <template is="dom-if" if="[[!isDeleted]]">
-                        <div class="del-button">
-                            <paper-button class="msg-detail-btn" on-tap="_removeMsg"  msgId$='[[msg.id]]' ><iron-icon icon="delete-forever"></iron-icon>[[localize('del','Delete',language)]]</paper-button>
-                        </div>
-                    </template>
+                    <div class="del-button">
+                        <template is="dom-if" if="[[isDeleted]]">
+                            <paper-button class="msg-detail-btn" on-tap="_restoreMsgs"><iron-icon id="undo-msg" icon="undo"></iron-icon>
+                                <span class="nomobile-wide">[[localize('restore','Restore',language)]]</span>
+                                <paper-tooltip class="wide-only" for="undo-msg">[[localize('restore','Restore',language)]]</paper-tooltip>
+                            </paper-button>
+                            <!--<paper-button class="msg-detail-btn" on-tap="_deleteMsgForever"  msgId$='[[msg.id]]' ><iron-icon icon="delete-forever"></iron-icon>[[localize('del','Delete',language)]]</paper-button>-->
+                        </template>
+                        <template is="dom-if" if="[[!isDeleted]]">
+                                <!--<paper-button class="msg-detail-btn" on-tap="_hideMsg"  msgId$='[[msg.id]]' ><iron-icon icon="visibility-off"></iron-icon>[[localize('del','Delete',language)]]</paper-button>-->
+                            <paper-button class="msg-detail-btn" on-tap="_msgToBin"  msgId$='[[msg.id]]' ><iron-icon id="delete-msg" icon="delete"></iron-icon>
+                                <span class="nomobile-wide">[[localize('del','Delete',language)]]</span>
+                                <paper-tooltip class="wide-only" for="delete-msg">[[localize('del','Delete',language)]]</paper-tooltip>
+                            </paper-button>
+                        </template>
+                    </div>
                 </div>
+
                 <template is="dom-repeat" items="[[messages]]" as="msg">
                     <paper-card class="msg-detail-card" >
-                        <h2 class="subject">[[msg.subject]]</h2>
+                        <div class="layout-horizontal justify-content">
+                            <div class="subject">
+                                <h2 class="subject">[[msg.subject]]</h2>
+                            </div>
+                            <div class="layout-horizontal layout-horizontal--flex-end">
+                                <paper-button class="close pointer" on-tap="close">
+                                    <iron-icon icon="clear"></iron-icon> [[localize('clo','Close',language)]]
+                                </paper-button>
+                            </div>
+                        </div>
                         <div class="layout-horizontal space-between">
                             <div class="msg-header-grid">
                                 <div class="initials-avatar"><span>[[_getInitials(msg.fromAddress)]]</span></div>
@@ -724,34 +1004,104 @@
                             </div>
                             <div class="layout-horizontal layout-horizontal--flex-end">
                                 <div class="date">[[_timeFormat(msg.received)]]</div>
-                                <!--<paper-icon-button icon="print" id="print-btn" msgId$='[[msg.id]]'></paper-icon-button>-->
-                                <!--<paper-tooltip for="print-btn" position="bottom" offset="4">[[localize('pri','Print',language)]]</paper-tooltip>-->
                             </div>
                         </div>
                         <template is="dom-if" if="[[msg.patientInss]]">
-                            <div class="patient">[[localize('inv_pat','Patient',language)]] : [[_getPatientDataByInss('displayName',msg.patientInss)]]</div>
+                            <div class="patient">[[localize('inv_pat','Patient',language)]] : [[_getPatientDataByInss(msg.patientInss)]]</div>
                         </template>
-                        <template is="dom-if" if="[[bodyDocument.id]]">
-                            <!--<div class="read-txt"><p>[[_displayLengthOrEmpty(msg.body)]]</p></div>-->
-                            <dynamic-doc api="[[api]]" user="[[user]]" patient="[[patient]]" document-id="[[bodyDocument.id]]" i18n="[[i18n]]" language="[[language]]"
-                                         resources="[[resources]]" title="[[item.label]]"></dynamic-doc>
-                        </template>
-
-
-
                     </paper-card>
                 </template>
-            </div>
 
-            <div class="attached">
-                <h3>[[localize('attachments','Attachments',language)]] ([[attachmentQuantity]])</h3>
-                <template is="dom-repeat" items="[[selectedDocuments]]">
-                    <template is="dom-if" if="[[!_isEqualTo(item.documentLocation,'body')]]">
-                            <div class="layout-vertical annexe-card">
-                                <dynamic-doc api="[[api]]" user="[[user]]" patient="[[patient]]" document-id="[[item.id]]" i18n="[[i18n]]" language="[[language]]"
-                                             resources="[[resources]]" title="[[item.label]]" downloadable="true"></dynamic-doc>
-                            </div>
+                <template is="dom-repeat" items="[[_sorted(selectedDocuments)]]">
+                    <template is="dom-if" if="[[_isEqualTo(item.documentLocation,'body')]]">
+                        <div class="layout-vertical annexe-card">
+                        <dynamic-doc api="[[api]]" user="[[user]]" patient="[[patient]]" preview="true" document-id="[[item.id]]" i18n="[[i18n]]" language="[[language]]"
+                                     resources="[[resources]]" title="[[localize('doc_body','Message Body')]]" mailbody="true" downloadable="false"></dynamic-doc>
+                        </div>
                     </template>
+                    <template is="dom-if" if="[[!_isEqualTo(item.documentLocation,'body')]]">
+                        <div class="layout-vertical annexe-card">
+                            <dynamic-doc id="[[item.id]]" api="[[api]]" user="[[user]]" patient="[[patient]]" document-id="[[item.id]]" i18n="[[i18n]]" language="[[language]]"
+                                         resources="[[resources]]" title="[[item.label]]" downloadable="true" on-open-suggestions="openSuggestions" unassigned="[[item.unimportedPats]]"></dynamic-doc>
+                        </div>
+                    </template>
+                </template>
+
+                <template is="dom-if" if="[[assignModal]]">
+                    <div id="import-suggest">
+                        <div class="line">
+                            <h4>[[localize('set_attach','Set attachment',language)]]</h4> <ht-spinner class="patlist-spinner" active="[[isLoadingPatsSuggest]]"></ht-spinner>
+                        </div>
+                        <div class="twocol">
+                            <div>
+                                <h5>[[localize('un_attachs','Unassigned results',language)]]</h5>
+                                <div class="scrollbox labolist">
+                                    <paper-listbox selected="{{selectedProtocol}}">
+                                        <template is="dom-repeat" items="[[documentBeingAssigned.unimportedPats]]">
+                                            <paper-item class="unassigned pointer">
+                                                <div class="line">
+                                                    <div class="icon">
+                                                        <iron-icon icon="assignment" width="18px"></iron-icon>
+                                                    </div>
+                                                    <div class="grow">
+                                                        <div class="pat-name">[[item.lastName]] [[item.firstName]] [[item.dateOfBirtth]]</div>
+                                                        <small class="labo-info labo-name"><b>[[item.labo]]</b></small>
+                                                        <small>[[localize('prot','Protocol',language)]]: [[item.protocol]]</small>
+                                                        <small>[[localize('date','Date',language)]] : [[item.formatedDemandDate]]</small>
+                                                    </div>
+                                                </div>
+                                            </paper-item>
+                                        </template>
+                                    </paper-listbox>
+                                </div>
+                            </div>
+                            <div>
+                                <h5>[[patsLng]] [[localize('poss_matches','Possible matches',language)]] [[selectName]]</h5>
+                                <div class="scrollbox patlist">
+                                    <template is="dom-if" if="[[!manualAssign]]">
+                                        <paper-button class="search-patients" on-tap="toggleManualAssign"><iron-icon icon="perm-identity"></iron-icon> [[localize('sch_pats','Search patients',language)]]</paper-button>
+                                    </template>
+                                    <template is="dom-if" if="[[manualAssign]]">
+                                        <div class="line">
+                                            <paper-input class="search-patients" value="{{searchPatValue}}" label="[[localize('pati','Patient',language)]]"></paper-input><iron-icon class="search-patients"  icon="close" on-tap="toggleManualAssign"></iron-icon>
+                                        </div>
+                                    </template>
+                                    <template is="dom-repeat" items="[[toImportPatsSuggestions]]">
+                                        <paper-checkbox class="checkbox-item" on-iron-change="_getPatsFromCheckbox" data-item$="[[item]]"><b>[[item.lastName]] [[item.firstName]]</b><br/>[[localize('dat_of_bir','Date of birth',language)]]: [[item.dateOfBirth]]<br/>SSIN: [[item.ssin]]</paper-checkbox>
+                                    </template>
+                                    <template is="dom-if" if="[[toImportPatsSearch.length]]">
+                                        <template is="dom-repeat" items="[[toImportPatsSearch]]">
+                                            <paper-checkbox class="checkbox-item" on-iron-change="_getPatsFromCheckbox" data-item$="[[item]]"><b>[[item.lastName]] [[item.firstName]]</b><br/>[[localize('dat_of_bir','Date of birth',language)]]: [[item.dateOfBirth]]<br/>SSIN: [[item.ssin]]</paper-checkbox>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <!--TODO : Get lab result -->
+                        <!--<template is="dom-if" if="[[toImportPatsSuggestions.length]]">-->
+                        <!--<div class="line lab-details noPortable">-->
+                        <!--<h4>Lab result</h4>-->
+                        <!--<div class="sheet">-->
+                        <!--<h5>[[docInfo.labo]]</h5>-->
+                        <!--<p><b>[[docInfo.lastName]] [[docInfo.firstName]] [[docInfo.sex]]</b></p>-->
+                        <!--<p>[[docInfo.documentId]] - [[docInfo.formatedDemandDate]] - [[docInfo.protocol]]</p>-->
+                        <!--<p><small>[[docInfo.engine]]</small></p>-->
+                        <!--<p>[[docInfo]]</p>-->
+                        <!--<p>[[thisDocument]]</p>-->
+                        <!--</div>-->
+                        <!--</div>-->
+                        <!--</template>-->
+                        <div class="line save-line">
+                            <paper-button on-tap="closeSuggestions">
+                                [[localize('can','Cancel',language)]]
+                            </paper-button>
+                            <template is="dom-if" if="[[canAssign]]">
+                                <paper-button id="patients-importBtn" class="confirmPats" on-tap="_assignResultToSelected">
+                                    [[localize('set','Assign',language)]] <iron-icon id="patients-icon" icon="check"></iron-icon>
+                                </paper-button>
+                            </template>
+                        </div>
+                    </div>
                 </template>
             </div>
 
@@ -759,9 +1109,7 @@
 	</template>
 	<script>
 
-import jsPDF from 'jspdf/dist/jspdf.min';
 import _ from 'lodash/lodash';
-import JsBarcode from 'JsBarcode';
 import moment from 'moment/src/moment';
 import XML from 'parse-xml/dist/parse-xml';
 
@@ -791,7 +1139,7 @@ class HtMsgDetail extends Polymer.TkLocalizerMixin(Polymer.Element) {
 				type: Object,
 				value: null
 			},
-            selectMessage: {
+            selectedMessage: {
 			    type: Object
 			},
 			messages: {
@@ -817,15 +1165,97 @@ class HtMsgDetail extends Polymer.TkLocalizerMixin(Polymer.Element) {
 			    type: Boolean,
                 value: false
             },
+            isHidden: {
+			    type: Boolean,
+                value: false
+            },
             attachmentQuantity: {
 			    type: Number,
                 value: 0
+            },
+            hasUnassignedResults: {
+			    type: Boolean,
+                value: false
+            },
+            unassignedResults: {
+			    type: Array,
+                value: []
+            },
+            assignedResults: {
+			    type: Array,
+                value: []
+            },
+            unimportedPats: {
+			    type: Array,
+                value: []
+            },
+            thisDocument: {
+			    type: Object,
+                value: null
+            },
+            toImportPatsSuggestions: {
+			    type: Array,
+                value: []
+            },
+            selectedProtocol: {
+			    type: Number,
+                value: -1
+            },
+            assignModal: {
+			    type: Boolean,
+                value: false
+            },
+            selectedPats: {
+			    type: Array,
+                value: []
+            },
+            targetPats: {
+                type: Array,
+                value: []
+            },
+            isLoadingPatsSuggest: {
+			    type: Boolean,
+                value: false
+            },
+            selectName: {
+			    type: String,
+                value: ''
+            },
+            docInfo: {
+			    type: Object,
+                value: null
+            },
+            canAssign: {
+			    type: Boolean,
+                value: false
+            },
+            searchPatValue: {
+			    type: String,
+                value: ''
+            },
+            manualAssign: {
+			    type: Boolean,
+                value: false
+            },
+            toImportPatsSearch: {
+			    type: Array,
+                value: []
+            },
+            patsLng: {
+			    type: Number,
+                value: 0
+            },
+            hasLabResult: {
+			    type: Boolean
+            },
+            docTxt: {
+			    type: Object
             }
 		};
 	}
 
 	static get observers() {
-		return ['_focusChanged(selectMessage, selectMessage.*)'];
+		return ['_focusChanged(selectedMessage)','_hasLabResult(selectedMessage)','_updateSuggestions(selectedProtocol)','_updatePatSearch(searchPatValue)','_patsLngChanged(toImportPatsSuggestions,toImportPatsSearch)'];
 	}
 
 	constructor() {
@@ -834,11 +1264,19 @@ class HtMsgDetail extends Polymer.TkLocalizerMixin(Polymer.Element) {
 
 	ready(){
 		super.ready();
+
+        // this.shadowRoot.getElementById('import-suggest').onkeydown = (e) => {
+        this.onkeydown = (e) => {
+            if(e.key === "Escape") {this.closeSuggestions()}
+        }
 	}
 
 	close() {
-	    this.set('selectMessage.selection.item',null)
+	    this.set('selectedMessage',null)
         this._focusChanged()
+        this.classList.remove('selected')
+        this.parentElement.children[0].classList.remove('selected')
+        this.dispatchEvent(new CustomEvent('msg-detail-closed'))
     }
 
 	_getInitials(fromAddress){
@@ -852,153 +1290,301 @@ class HtMsgDetail extends Polymer.TkLocalizerMixin(Polymer.Element) {
         return msgBody.body != '' ? msgBody.body : this.localize('no_msg_content','No message',this.language)
 	}
 
-    _focusChanged(){
-	    if(this.selectMessage.selection.item){
-	        console.log('focusChanged, selectedDocuments',this.selectMessage)
-			this.set('isLoadingMessage',true)
-            this.set('isDeleted',this.selectMessage.selection.item.transportGuid.startsWith("BIN"))
-            // this.selectMessage.selection.item.body = [];
-	        let tempSelect = this.selectMessage.selection.item;
-        	this.api.document().findByMessage(this.user.healthcarePartyId, tempSelect)
-				.then(docs => { if(docs.length) {
-					return docs.filter(doc => doc.id && doc.attachmentId && doc.secretForeignKeys)
-						.map(doc => {
-                            return this.api.document().getAttachment(doc.id, doc.attachmentId, null)
-                                .then(a => {
-                                    doc.dataUrl = this.getDataUrls(doc)
-                                    if (this._isEqualTo(doc.documentLocation, 'body')) {
-                                        console.log('this doc is the body', doc)
-                                        this.set('bodyDocument',doc)
-                                        const url = doc && this.api.document().getAttachmentUrl(doc.id, doc.attachmentId)
-                                        fetch(url,{credentials:'include'})
-                                            .then(res=>res.text())
-                                            .then(res=>this.set('docTxt',res))
-                                    }
-                                    return doc
-                            });
-                        }
-					)
-				}
-
-	    	}).then(docs =>{
-	    		if(docs && docs.length){
-	    		    console.log('docs',docs)
-                    Promise.all(docs).then(docs=>{
-						this.set('isLoadingMessage',false)
-                        this.set('messages', [tempSelect]);
-                        this.set("selectedDocuments", docs);
-                        this.set('attachmentQuantity',this.selectedDocuments.length-1)
-                        this.getChildren(tempSelect.id)
-                    })
-				}
-				else{
-					this.set('isLoadingMessage',false)
-					this.set('messages', [tempSelect]);
-					this.set("selectedDocuments", []);
-                    this.set('attachmentQuantity',0)
-					this.getChildren(tempSelect.id)
-                }
-                console.log(this.messages)
-            })
-	    }else{
-			this.set('isLoadingMessage',false)
-			this.set('messages', null);
-		}
-	}
-
-	getChildren(item){
-	    console.log('getChildren',item)
-        this.api.message().getChildren(item).then(m=> { //TODO: check if api.message.getChildren actually returns m
-			if(m.length){
-                m.map(r => r.body = []);
-                this.api.document().findByMessage(this.user.healthcarePartyId, m).then(docs => {
-                    console.log('findByMessage',docs)
-                    docs.length?
-                    	docs.map(doc => this.api.document().getAttachment(doc.id,doc.attachmentId, doc.secretForeignKeys).then(a => {m.map(r => {r.body.push(a);this.messages.push(r)});}))
-						:m.map(r => this.push('messages',r));
-                    m.map(r => this.getChildren(r));
+    toggleManualAssign() {
+	    this.set('searchPatValue','')
+	    this.set('manualAssign',!this.manualAssign)
+        if(!this.manualAssign) this.set('toImportPatsSearch',[])
+    }
+    _updatePatSearch() {
+	    if (this.searchPatValue.length >= 2) {
+            this.set('isLoadingPatsSuggest',true)
+            console.log('updatePatSearch',this.searchPatValue)
+            setTimeout(() =>{
+                this.api.patient().findByNameBirthSsinAutoWithUser(this.user, this.user.healthcarePartyId, this.searchPatValue, null, null, 100, "asc").then(pats=>{
+                    console.log('pats',pats)
+                    this.set('toImportPatsSearch',pats.rows || [])
+                    this.set('isLoadingPatsSuggest',false)
                 })
-			}
-        })
-        // }.bind(this))
+            },2000)
+        } else {
+            this.set('toImportPatsSearch',[])
+            this.set('isLoadingPatsSuggest',false)
+        }
+    }
+    _patsLngChanged() {
+	    this.set('patsLng',this.toImportPatsSuggestions.length + this.toImportPatsSearch.length)
+    }
+
+    _hasLabResult() {
+	    if (this.selectedMessage) {
+            const m = this.selectedMessage
+            if (m && m.assignedResults && m.unassignedResults) {
+                this.set('hasLabResult', (Object.keys(m.assignedResults).length || m.unassignedResults.length) ? true : false)
+            } else {
+                this.set('hasLabResult', false)
+            }
+        } else {
+            this.set('hasLabResult', false)
+        }
+    }
+
+    _isDeleted() {
+	    return this.messages[0].transportGuid.startsWith("BIN")
+    }
+    _isHidden() {
+        return this.messages[0].transportGuid.startsWith("HIDDEN")
+    }
+
+    _sorted(docs) {
+	    return _.sortBy(docs, (d) => d.documentLocation === 'body' ? '' : d.id)
+    }
+
+    _focusChanged(){
+	    if(this.selectedMessage){
+	        let selMsg = this.selectedMessage;
+	        // needed vars
+            this.set('toImportPatsSuggestions', [])
+            this.set('selectedProtocol',-1)
+            this.set('selectedPats',[])
+            this.set('targetPats',[])
+			this.set('isLoadingMessage',true)
+			this.set('manualAssign',false)
+            this.set('selectName','')
+            this.set('toImportPatsSearch',[])
+            this.set('isDeleted',this.selectedMessage && this.selectedMessage.transportGuid.startsWith("BIN"))
+            this.set('isHidden',this.selectedMessage && this.selectedMessage.transportGuid.startsWith("HIDDEN"))
+            this.set('unassignedResults',selMsg.unassignedResults)
+            this.set('assignedResults',selMsg.assignedResults)
+			this.set('hasUnassignedResults',selMsg.unassignedResults ? selMsg.unassignedResults.length ? true : false : false)
+            this.set('thisDocument',selMsg)
+            this.set('bodyDocument',{})
+            this.set('svcToDisplay',[])
+            if (selMsg.status) { // mark as read
+                const tempBytes = selMsg.status.toString(2), len = selMsg.status.toString(2).length
+                const a = tempBytes.substring(0,len-2), b = tempBytes.substring(len-1,len)
+                if (this.isUnread(selMsg)) { // if message was not read, else do nothing
+                    selMsg.status = parseInt(a+'0'+b,2)
+                    this.api.message().modifyMessage(selMsg).then(msg=>_.assign(selMsg, msg))
+                }
+            }
+            // treatment
+	        console.log('this message',selMsg)
+        	this.api.document().findByMessage(this.user.healthcarePartyId, selMsg)
+				.then(docs => docs.filter(doc => doc.id && doc.attachmentId && doc.secretForeignKeys))
+                .then(docs => Promise.all(docs.map(d => this._getPatsFromDoc(d))))
+                .then(docs =>{
+                    if (docs && docs.length) {
+                        this.set('isLoadingMessage', false)
+                        this.set('messages', [selMsg])
+                        this.set("selectedDocuments", docs)
+                        this.set('attachmentQuantity', this.selectedDocuments.length - 1)
+                    } else {
+                        this.set('isLoadingMessage', false)
+                        this.set('messages', [selMsg])
+                        this.set("selectedDocuments", [])
+                        this.set('attachmentQuantity', 0)
+                        this.set('hasUnassignedResults', false)
+                    }
+                })
+        } else {
+            this.set('isLoadingMessage', false)
+            this.set('messages', null)
+            this.set('hasUnassignedResults', false)
+            this.set('thisDocument', null)
+        }
 	}
 
-    _getPatientDataByInss(wantedValue,inss){
+    openSuggestions(e) {
+        if(!this.assignModal) {
+            this.set('documentBeingAssigned', this.selectedDocuments.find(d => d.id === e.detail.documentId))
+            this.set('assignModal',true)
+            this.set('targetPats',[])
+            this.set('manualAssign',false)
+            this.set('searchPatValue','')
+            this.set('toImportPatsSearch',[])
+            this.set('isLoadingPatsSuggest',false)
+            this.set('selectedProtocol',0)
+        }
+    }
+
+	closeSuggestions() {
+        this.set('documentBeingAssigned', null)
+        this.set('toImportPatsSuggestions', [])
+        this.set('assignModal',false)
+        this.set('selectName','')
+        this.set('selectedProtocol',-1)
+    }
+
+    _getAssignedPats(m) {
+        if(m.assignedResults && m.assignedResults.length) {
+            Promise.all(Object.keys(m.assignedResults).forEach(key=>this.api.patient().getPatient(key)))
+                .then(pats=>{
+                    return pats
+                })
+        } else {
+            return []
+        }
+    }
+
+    _getPatsFromDoc(document) {
+	    if(document.documentLocation === "body") return document
+        console.log('_getPatsFromDoc')
+        const unassigned = this.unassignedResults || []
+        this.set('toImportPatsSuggestions', [])
+        return this.api.crypto()
+            .extractKeysFromDelegationsForHcpHierarchy(this.user.healthcarePartyId, document.id, _.size(document.encryptionKeys) ? document.encryptionKeys : document.delegations)
+            .then(({extractedKeys: enckeys}) =>
+                this.api.beresultimport().canHandle(document.id, enckeys.join(','))
+                .then(isResult => isResult && this.api.beresultimport().getInfos(document.id, false, null, enckeys.join(',')))
+            )
+            .then(resultInfo => {
+                if (resultInfo && resultInfo.length && unassigned.length) {
+                    resultInfo.forEach(res => {
+                        document.docInfo = res
+                        unassigned.forEach(u => {
+                            if (u === res.protocol) {
+                                //res.formatedDemandDate = this.api.moment(res.demandDate).format('DD/MM/YYYY')
+                                (document.unimportedPats || (document.unimportedPats = [])).push(res)
+                            }
+                        })
+                    })
+                    document.unimportedPats = _.orderBy(document.unimportedPats || [], 'demandDate', "desc")
+                }
+            })
+            .then(() => document)
+            .catch(() => document)
+    }
+
+    _updateSuggestions() {
+        console.log('_updateSuggestions')
+        if (this.selectedProtocol >= 0) {
+            this.set('isLoadingPatsSuggest',true)
+            const unimportedPats = this.documentBeingAssigned && this.documentBeingAssigned.unimportedPats || []
+            const index = this.selectedProtocol
+            this.set('selectName', unimportedPats[index] ? `(${unimportedPats[index].lastName})` : '')
+            this.set('docInfo', this.documentBeingAssigned && this.documentBeingAssigned.docInfo)
+            this.set('toImportPatsSuggestions',[])
+            this.set('selectedPats',[])
+            this.set('targetPats',[])
+            this.set('canAssign',false)
+            this.api.patient().findByNameBirthSsinAutoWithUser(this.user, this.user.healthcarePartyId, unimportedPats[index].lastName, null, null, 100, "asc")
+                .then(patients => {
+                    this.set('isLoadingPatsSuggest',false)
+                    if (patients && patients.rows.length) patients.rows.map(pat => {
+                        if (pat.lastName.toUpperCase() === unimportedPats[index].lastName.toUpperCase()) {
+                            pat.dateOfBirth = this.api.moment(pat.dateOfBirth).format('DD/MM/YYYY')
+                            this.push('toImportPatsSuggestions', pat)
+                        }
+                    })
+                })
+        }
+    }
+
+    _getPatsFromCheckbox(e) {
+        console.log('_getPatsFromCheckbox')
+        const elem = JSON.parse(e.target.dataset.item)
+        const checked = e.target.checked
+        let arr = this.targetPats ? this.targetPats : []
+        if (checked) {
+            arr.push(elem)
+        } else {
+            arr.splice(arr.indexOf(elem))
+        }
+        this.set('canAssign',this.targetPats.length)
+        this.set('targetPats',arr)
+    }
+
+    _assignResultToSelected() {
+        const selMsg = this.selectedMessage
+        const targets = this.targetPats || []
+        const docInfo = this.documentBeingAssigned.docInfo || null
+        const assigned = this.assignedResults || []
+        const unassigned = this.unassignedResults || []
+        const document = this.documentBeingAssigned
+        if (docInfo && docInfo.formatedDemandDate) delete docInfo.formatedDemandDate
+        if (selMsg && targets && docInfo && assigned && unassigned && document) {
+            targets.map(thisPat=>{
+                console.log('_assignResultToSelected',selMsg, targets, docInfo, assigned, unassigned, document,thisPat)
+                this.api.contact().newInstance(this.user, thisPat, {
+                    created: new Date().getTime() ,
+                    modified: new Date().getTime() ,
+                    author: this.user.id,
+                    responsible: this.user.healthcarePartyId,
+                    openingDate: moment().format('YYYYMMDDHHmmss') || '',
+                    closingDate: moment().format('YYYYMMDDHHmmss') || '',
+                    encounterType: {type: docInfo.codes.type, version: docInfo.codes.version, code: docInfo.codes.code},
+                    descr: docInfo.labo,
+                    subContacts: []
+                }).then(c => {
+                    c.services.push({
+                        id: this.api.crypto().randomUuid(),
+                        label: 'labResult',
+                        valueDate: parseInt(moment().format('YYYYMMDDHHmmss')),
+                        content: _.fromPairs([[this.language, {stringValue:docInfo.labo}]]),
+                        tags:[{type:'CD-TRANSACTION', code:'labresult'}]
+                    })
+                    return this.api.contact().createContactWithUser(this.user, c)
+                }).then(c => {
+                    return this.api.form().newInstance(this.user, thisPat, {
+                        contactId: c.id,
+                        // cryptedForeignKeys: thisPat.cryptedForeignKeys,
+                        descr: "Lab " + new Date().getTime(),
+                    }).then(f => {
+                        console.log('should do Import',f)
+                        return this.api.form().createForm(f).then(f =>
+                            this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId).then(hcp =>
+                                this.api.crypto()
+                                    .extractKeysFromDelegationsForHcpHierarchy(hcp.id, document.id, _.size(document.encryptionKeys) ? document.encryptionKeys : document.delegations)
+                                    .then(({extractedKeys: enckeys}) => this.api.beresultimport().doImport(document.id, hcp.id, hcp.languages.find(e => !!e) || "en", docInfo.protocol, f.id, null, enckeys.join(','), c))
+                            )
+                        )
+                    })
+                }).then(c => {
+                    const idx = (this.unassignedResults || []).indexOf(docInfo.protocol)
+                    this.splice('unassignedResults', idx)
+
+                    let tempAssign = _.clone(this.assignedResults)
+                    tempAssign[c.id] = docInfo.protocol
+                    this.set('assignedResults',tempAssign)
+
+                    selMsg.unassignedResults = this.unassignedResults
+                    selMsg.assignedResults = tempAssign
+
+                    return selMsg
+                }).then(selMsg=>{
+                    return this.api.message().modifyMessage(selMsg).then(msg => {
+                        _.assign(this.selectedMessage, msg)
+                        if (msg.unassignedResults.length === 0) {
+                            this.closeSuggestions()
+                        } else {
+                            this._focusChanged()
+                        }
+                        return Promise.resolve()
+                    });
+                })
+                .catch(err => {
+                    console.warn("error:" + err)
+                })
+            }) // map end
+        }
+    }
+
+    textType(uti, utis) {
+        return (uti && [uti] || []).concat(utis && utis.value || []).map(u => this.api.document().mimeType(u)).find(m => m === 'text/plain');
+    }
+
+    _getPatientDataByInss(inss){
         if(inss && inss.length > 1) {
             this.api.patient().findByNameBirthSsinAutoWithUser(this.user,this.user.healthcarePartyId, inss, null, null, 100, "asc")
                 .then(patients => {
                     console.log(patients);
-                    let filtredpatients = patients.rows.filter(pat => pat.ssin)
-                        .map(pat => {
-                            let newPat = {};
-                            newPat.firstName = pat.firstName ? pat.firstName : "";
-                            newPat.lastName = pat.lastName ? pat.lastName : "";
-                            newPat.fullName = pat.firstName + " " + newPat.lastName;
-                            newPat.ssin = pat.ssin ? pat.ssin : "";
-                            newPat.displayName = newPat.firstName + " " + newPat.lastName + " " + newPat.ssin;
-                            const res =
-                                wantedValue == 'firstName' ? newPat.firstName :
-                                wantedValue == 'lastName' ? newPat.lastName :
-                                wantedValue == 'fullName' ? newPat.fullName :
-                                wantedValue == 'ssin' ? newPat.ssin :
-                                wantedValue == 'displayName' ? newPat.displayName :
-                                newPat
-                            return res
-                        })
+                    const newPat = patients.rows[0]
+                    return `${newPat.firstName} ${newPat.lastName} (INSS:${newPat.ssin})`;
                 })
         }
         else{
             this.set("patientList", [])
         }
-    }
-
-	getDataUrls(doc) {
-	    // console.log('getDataUrls',doc)
-        if (Object.keys(doc.encryptionKeys).length) { // if encryption keys
-            console.log(this.user.healthcarePartyId,doc.encryptionKeys)
-            return this.api.crypto().decryptAndImportAesHcPartyKeysInDelegations(this.user.healthcarePartyId, doc.encryptionKeys && Object.keys(doc.encryptionKeys).length ? doc.encryptionKeys : doc.delegations)
-                .then(decryptedAndImportedAesHcPartyKeys => {
-                    let collatedAesKeys = {};
-                    decryptedAndImportedAesHcPartyKeys.map(k => collatedAesKeys[k.delegatorId] = k.key);
-
-                    return this.api.crypto().decryptDelegationsSFKs((doc.encryptionKeys && Object.keys(doc.encryptionKeys).length? doc.encryptionKeys: doc.delegations)[this.user.healthcarePartyId], collatedAesKeys, doc.id)
-                        .then(enckeys =>
-                            this._xmlMimeType(doc.mainUti, doc.otherUtis, this.dataUrl)?
-                                this.api.document().getAttachment(doc.id, doc.attachmentId, enckeys).then(att => {
-                                    let xml = XML.parseXml(att);
-                                    if(xml.kmehrmessage && xml.kmehrmessage.header && xml.kmehrmessage.header.standard &&
-                                        xml.kmehrmessage.header.standard.specialisation &&
-                                        xml.kmehrmessage.header.standard.specialisation.cd &&
-                                        xml.kmehrmessage.header.standard.specialisation.cd.S){
-                                        this.set("type",xml.kmehrmessage.header.standard.specialisation.cd.S);
-                                    }else{
-                                        this.set("type","Non Valid Type")
-                                    }
-                                })
-                                : (doc && this.api.document().getAttachmentUrl(doc.id, doc.attachmentId, enckeys))
-                        );
-                })
-        } else { // no encryption keys
-            console.log('no encryption keys',this.user.healthcarePartyId)
-            this.set('bodyDocument',{})
-            this.set("type","");
-            if (this._xmlMimeType(doc.mainUti, doc.otherUtis, this.dataUrl)){
-                return this.api.document().getAttachment(doc.id, doc.attachmentId, null).then(att => {
-                    let xml = XML.parseXml(att);
-                    if(xml.kmehrmessage && xml.kmehrmessage.header && xml.kmehrmessage.header.standard &&
-                        xml.kmehrmessage.header.standard.specialisation &&
-                        xml.kmehrmessage.header.standard.specialisation.cd &&
-                        xml.kmehrmessage.header.standard.specialisation.cd.S){
-                        this.set("type",xml.kmehrmessage.header.standard.specialisation.cd.S);
-                    }else{
-                        this.set("type","Non Valid Type")
-                    }
-                    return att
-                })
-            }else {
-                return (doc && this.api.document().getAttachmentUrl(doc.id, doc.attachmentId, null));
-            }
-        } // encrypt? end
     }
 
 	_forwardMsgs(e) {
@@ -1021,20 +1607,27 @@ class HtMsgDetail extends Polymer.TkLocalizerMixin(Polymer.Element) {
 
     _replyMsgs(e) {
 	    const origMsg = this.messages[0]
-        console.log('origMsg',origMsg)
-        let dest = [{
-            delegations: origMsg.delegations,
-            displayName: origMsg.fromAddress,
-            nihii: origMsg.senderId,
-            cbe: undefined,
-            ssin: origMsg.senderInss,
-            type: this.localize('replyto','In reply to',this.language)
-        }]
-        this.api.contact().getContactWithUser(this.user, origMsg.author).then(c=>dest=c)
+        console.log('origMsg',origMsg,origMsg.fromHealthcarePartyId.length)
+        let dest = []
+        if (origMsg.fromHealthcarePartyId.length == 11) {
+            const hcpId = this.api.hcparty().findBySsinOrNihii(origMsg.fromHealthcarePartyId).then(paginated=>{
+                let hcp = paginated.rows[0]
+                hcp.type = 'NIHII'
+                hcp.displayName = `${hcp.firstName} ${hcp.lastName} [${hcp.nihii}]`
+                dest.push(hcp)
+            })
+        } else {
+            this.api.hcparty().getHealthcareParty(origMsg.fromHealthcarePartyId).then(hcp=>{
+                hcp.type = 'NIHII'
+                hcp.displayName = `${hcp.firstName} ${hcp.lastName} [${hcp.nihii}]`
+                dest.push(hcp)
+            })
+        }
+        // this.api.contact().getContactWithUser(this.user, origMsg.author).then(c=>dest=c)
         const msgToRe = {
-	        delegations: origMsg.delegations,
+	        // delegations: origMsg.delegations,
             destinations: dest,
-            patientInss: origMsg.patientINSS,
+            patientInss: origMsg.patientInss,
             annex: undefined,
             document: {
                 title: 'Re: '+origMsg.subject,
@@ -1047,206 +1640,71 @@ class HtMsgDetail extends Polymer.TkLocalizerMixin(Polymer.Element) {
         target.dispatchEvent(new CustomEvent('re-msg', {detail: {bubbles: true, composed: true, params:msgToRe}}))
     }
 
-    _removeMsg(){
+    _hideMsg() {
         let msg = this.messages[0]
         if (msg) {
-            const thisBox = msg.transportGuid.substring(0,msg.transportGuid.indexOf(':'))
-            const delBox = thisBox == 'INBOX' ? 'BININBOX' : thisBox =='SENTBOX' ? 'BINSENTBOX' : 'BININBOX'
-            if (!msg.transportGuid.startsWith("BIN")) {
-                const idOfMsg = msg.transportGuid.substring(msg.transportGuid.indexOf(':')+1)
-                this.api.fhc().Ehboxcontroller().moveMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, [idOfMsg], thisBox, delBox)
-                    .then(this.api.fhc().Ehboxcontroller().deleteMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, [idOfMsg], delBox))
-                    .finally(()=>{
-                        msg.transportGuid = delBox + msg.transportGuid.substring(msg.transportGuid.indexOf(':'))
-                        this.api.message().modifyMessage(msg).then(()=>this.dispatchEvent(new CustomEvent('item-delete', { detail: { selection: { item: "Refresh" } } })))
-                    })
-            } else {console.log(msg.id+' is already in bin !')}
-            const target = this.parentElement.parentNode.children[1]
-            target.dispatchEvent(new CustomEvent('selection-messages-change', { detail: { selection: { item: null } } }));
+            const id = msg.transportGuid.substring(msg.transportGuid.indexOf(':')+1)
+            if (!msg.transportGuid.startsWith('HIDDEN')){
+                msg.transportGuid = 'HIDDEN'+msg.transportGuid
+            } else {
+                if (msg.transportGuid.includes('INBOX')) msg.transportGuid = 'INBOX:'+id
+                if (msg.transportGuid.includes('SENTBOX')) msg.transportGuid = 'SENTBOX:'+id
+            }
+            this.api.message().modifyMessage(msg).then((m)=>{_.assign(msg,m);this.dispatchEvent(new CustomEvent('item-delete', { detail: { selection: { item: "Refresh" } } }))})
+        }
+    }
+
+    _msgToBin(param){
+        let msg = param ? param : this.messages[0]
+        if (msg) {
+            const id = msg.transportGuid.substring(msg.transportGuid.indexOf(':') + 1)
+            if (msg.transportGuid.includes('INBOX')) msg.transportGuid = 'BININBOX:'+id
+            if (msg.transportGuid.includes('SENTBOX')) msg.transportGuid = 'BINSENTBOX:'+id
+            this.api.message().modifyMessage(msg).then((m)=>{_.assign(msg,m);this.dispatchEvent(new CustomEvent('item-delete', { detail: { selection: { item: "Refresh" } } }))})
         }
     }
 
     _restoreMsgs(){
         let msg = this.messages[0]
         if (msg) {
-            const idOfMsg = msg.transportGuid.substring(msg.transportGuid.indexOf(':')+1)
-            const thisBox = msg.transportGuid.substring(0,msg.transportGuid.indexOf(':'))
-            const restoreBox = thisBox == 'BININBOX' ? 'INBOX' : thisBox == 'BINSENTBOX' ? 'SENTBOX' : 'INBOX'
-            this.api.fhc().Ehboxcontroller().moveMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, [idOfMsg], thisBox, restoreBox)
-                .then(this.api.fhc().Ehboxcontroller().deleteMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, [idOfMsg], restoreBox))
-                .finally(()=>{
-                    msg.transportGuid = restoreBox + msg.transportGuid.substring(msg.transportGuid.indexOf(':'))
-                    this.api.message().modifyMessage(msg).then(()=>this.dispatchEvent(new CustomEvent('item-delete', { detail: { selection: { item: "Refresh" } } })))
-                })
+            const id = msg.transportGuid.substring(msg.transportGuid.indexOf(':') + 1)
+            if (msg.transportGuid.includes('INBOX')) msg.transportGuid = 'INBOX:'+id
+            if (msg.transportGuid.includes('SENTBOX')) msg.transportGuid = 'SENTBOX:'+id
+            this.api.message().modifyMessage(msg).then((m)=>{_.assign(msg,m);this.dispatchEvent(new CustomEvent('item-delete', { detail: { selection: { item: "Refresh" } } }))})
         }
-        const target = this.parentElement.parentNode.children[1]
-        target.dispatchEvent(new CustomEvent('selection-messages-change', { detail: { selection: { item: null } } }));
     }
 
-	_imageMimeType(uti, utis, dataUrl) {
-		console.log(uti + " " + utis + " " + dataUrl);
-		return dataUrl && (uti && [uti] || []).concat(utis && utis.value || []).map(u => this.mimeType(u)).find(m => m && (m.startsWith('image/') || m === 'public/jpeg'));
-	}
+    _deleteMsgForever() {
+        let msg = this.messages[0]
+        if (msg) {
+            const id = msg.transportGuid.substring(msg.transportGuid.indexOf(':')+1)
 
-	_pdfMimeType(uti, utis, dataUrl) {
-		return dataUrl && (uti && [uti] || []).concat(utis && utis.value || []).map(u => this.mimeType(u)).find(m => m === 'application/pdf');
-	}
+            if (msg.transportGuid.includes('INBOX')) this.api.fhc().Ehboxcontroller().moveMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, [id], 'INBOX', 'BININBOX').then(()=>{
+                this.api.fhc().Ehboxcontroller().deleteMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, [id], 'BININBOX')
+                    .then(()=>this.dispatchEvent(new CustomEvent('item-delete', { detail: { selection: { item: "Refresh" } } })))
+            })
+            if (msg.transportGuid.includes('SENTBOX')) this.api.fhc().Ehboxcontroller().moveMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, [id], 'SENTBOX', 'BINSENTBOX').then(()=>{
+                this.api.fhc().Ehboxcontroller().deleteMessagesUsingPOST(this.api.keystoreId, this.api.tokenId, this.api.credentials.ehpassword, [id], 'BINSENTBOX')
+                    .then(()=>this.dispatchEvent(new CustomEvent('item-delete', { detail: { selection: { item: "Refresh" } } })))
+            })
 
-	_xmlMimeType(uti, utis) {
-		return (uti && [uti] || []).concat(utis && utis.value || []).map(u => this.mimeType(u)).find(m => m === 'text/xml' || m === 'application/xml');
-	}
-
-	_textType(uti, utis){
-		return (uti && [uti] || []).concat(utis && utis.value || []).map(u => this.mimeType(u)).find(m => m === 'text/plain');
-	}
-
-    _plainMimeType(uti, utis) {
-        return (uti && [uti] || []).concat(utis && utis.value || []).map(u => this.mimeType(u)).find(m => m === 'text/plain');
+        }
     }
 
 	_isEqualTo(title, string) {
 		return title == string;
 	}
 
-	mimeType(u){
-		return this.api.document().mimeType(u)
-	}
-
 	_timeFormat(date) {
 		return date && this.api.moment(date).format('DD/MM/YYYY') || '';
 	}
-
-    // _download(item) {
-    //     let file = new Blob([this.api.crypto().utils.ua2hex(item)] ,{type: "text/plain"})
-    //     let a = document.createElement("a");
-    //     document.body.appendChild(a);
-    //     a.style = "display: none";
-    //
-    //     let url = window.URL.createObjectURL(file);
-    //     a.href = url;
-    //     a.download = this.user.healthcarePartyId+".2048.key";
-    //     a.click();
-    //     window.URL.revokeObjectURL(url);
-    //
-    //     // const origin = window.location.origin
-    //     // window.location.href = origin
-    // }
 
     _base64(data) {
         return base64js.fromByteArray(data);
     }
 
-	_downloadAnnex(e){
-        const parent = this.parentNode
-        parent.dispatchEvent(new CustomEvent('file-dl', {detail: {bubbles: true, composed: true, url:this.dataUrl}}))
-	}
-
-	_getAttachment(e){
-		let id = e.target.getAttribute('id');
-		let attachmentId = e.target.getAttribute('attachmentId');
-		this.api.document().getAttachment(id, attachmentId, null).then(att => this.set("documentAttachment",att));
-		this.showDetail = !this.showDetail
-	}
-
-	importAnnexe(e){
-		let id = e.target.getAttribute('docId');
-		let mainUti = e.target.getAttribute('mainUti');
-		let otherUtis = e.target.getAttribute('otherUtis');
-		let dataUrl = e.target.getAttribute('dataUrl');
-		// this.api.document().getAttachment(document.id, document.attachmentId, null)
-		// 	.then(att => {
-		//
-		// 	});
-
-		// IMG
-		if(this._imageMimeType(mainUti, otherUtis, dataUrl)){
-
-		}
-		// PDF
-		else if (this._pdfMimeType(mainUti, otherUtis, dataUrl)) {
-
-		}
-		// XML
-		else if(this._xmlMimeType(mainUti, otherUtis)){
-			let xml = XML.parseXml(this.documentAttachment);
-			if (xml.kmehrmessage && xml.kmehrmessage.header && xml.kmehrmessage.header.standard &&
-				xml.kmehrmessage.header.standard.specialisation &&
-				xml.kmehrmessage.header.standard.specialisation.cd){
-				// SMF
-				if(xml.kmehrmessage.header.standard.specialisation.cd.value === "gpsoftwaremigration"){
-					this.api.bekmehr().importSmf(doc.id, "", this.patient.id, this.user.language,xml).then(
-						contacts => {
-							contacts.forEach(contact => {
-								contact.ctcs.forEach(ctc => {
-									this.api.contact().initDelegationsAndEncryptionKeys(this.user, this.patient, ctc).then(c => {
-										console.log(c);
-										return c
-									});
-								})
-							})
-						})
-
-				}
-				//	PMF
-				else if(xml.kmehrmessage.header.standard.specialisation.cd.value === "gppatientmigration"){
-					// this.api.bekmehr().importSmf(doc.id, "123245", this.patient.id, this.user.language,xml).then(
-					// 	contacts => {
-					// 		contacts.forEach(contact => {
-					// 			contact.ctcs.forEach(ctc => {
-					// 				this.api.contact().initDelegationsAndEncryptionKeys(this.user, this.patient, ctc).then(c => {
-					// 					console.log(c);
-					// 					return c
-					// 				});
-					// 			})
-					// 		})
-					// 	})
-				}
-			}
-
-
-		}
-		// TEXT
-		else if(this._textType(mainUti, otherUtis)){
-			// if(this._checkHealthone(mainUti)){
-			this.api.patient().getPatientWithUser(this.user,"1d6eee30-6c8f-4204-a3ea-56a01ed3132d").then(patient => {
-				this.api.contact().newInstance(this.user, patient, {
-					created: new Date().getTime() ,
-					modified: new Date().getTime() ,
-					author: this.user.id,
-					responsible: this.user.healthcarePartyId,
-					openingDate: moment().format('YYYYMMDD') || '',
-					closingDate: moment().format('YYYYMMDD') || '',
-					encounterType: {type: "CD-TRANSACTION", version: "1.13", code: "labresult"},
-					descr: "Lab" + new Date().getTime(),
-					subContacts: []
-				}).then(c=>{
-					this.api.contact().createContactWithUser(this.user, c).then(c => {
-						this.api.form().newInstance(this.user, patient, {
-							contactId: c.id,
-							descr: "Lab" + new Date().getTime(),
-						}).then(f => this.api.form().createForm(f)).then(f => {
-							this.api.hcparty().getHealthcareParty(this.user.healthcarePartyId).then(hcp => {
-								this.api.beresultimporticc.doImport(id, this.user.healthcarePartyId, hcp.languages.find(e => !!e) || "en", "***", f.id, null, c)
-									.then(c => console.log("Contact id" + c.id))
-							})
-						})
-
-					});
-				})
-			});
-			// }
-		}
-
-	}
-
-    _checkHealthone(file) {
-        const rawFile = new XMLHttpRequest();
-        rawFile.open("GET", file, true);
-        rawFile.onreadystatechange = () => {
-            if (rawFile.readyState === 4) {
-                return rawFile.responseText.startsWith('A1/')
-            }
-        }
+    isUnread(m) {
+        return (m.status & (1 << 1)) !== 0 ? true : false
     }
 }
 
